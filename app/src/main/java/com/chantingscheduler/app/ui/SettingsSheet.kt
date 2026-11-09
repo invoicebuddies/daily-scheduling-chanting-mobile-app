@@ -61,6 +61,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -137,6 +138,8 @@ fun SettingsSheet(
     onSnoozeMinutesChange: (Int) -> Unit,
     alarmVolumeEnabled: Boolean,
     onAlarmVolumeChange: (Boolean) -> Unit,
+    chantVolumePercent: Int,
+    onChantVolumeChange: (Int) -> Unit,
     onReplayIntroduction: () -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
@@ -369,6 +372,8 @@ fun SettingsSheet(
                 onSnoozeMinutesChange = onSnoozeMinutesChange,
                 alarmVolumeEnabled = alarmVolumeEnabled,
                 onAlarmVolumeChange = onAlarmVolumeChange,
+                chantVolumePercent = chantVolumePercent,
+                onChantVolumeChange = onChantVolumeChange,
             )
 
             Spacer(Modifier.height(24.dp))
@@ -920,6 +925,8 @@ private fun PlaybackSection(
     onSnoozeMinutesChange: (Int) -> Unit,
     alarmVolumeEnabled: Boolean,
     onAlarmVolumeChange: (Boolean) -> Unit,
+    chantVolumePercent: Int,
+    onChantVolumeChange: (Int) -> Unit,
 ) {
     Surface(
         shape = RoundedCornerShape(20.dp),
@@ -987,6 +994,33 @@ private fun PlaybackSection(
                 Switch(
                     checked = alarmVolumeEnabled,
                     onCheckedChange = onAlarmVolumeChange,
+                )
+            }
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            stringResource(R.string.chant_volume_title),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            stringResource(R.string.chant_volume_body),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Text(
+                        stringResource(R.string.chant_volume_percent, chantVolumePercent),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                Slider(
+                    value = chantVolumePercent.toFloat(),
+                    onValueChange = { onChantVolumeChange(it.toInt()) },
+                    valueRange = PlaybackSettingsStore.MIN_CHANT_VOLUME_PERCENT.toFloat()..
+                        PlaybackSettingsStore.MAX_CHANT_VOLUME_PERCENT.toFloat(),
                 )
             }
         }

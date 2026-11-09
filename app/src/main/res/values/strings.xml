@@ -197,6 +197,9 @@
     <string name="snooze_minutes">%1$d min</string>
     <string name="alarm_volume_title">Play scheduled chants on alarm volume</string>
     <string name="alarm_volume_body">Alarm sessions follow the alarm stream, so they sound even when media volume is low or Do Not Disturb is on. Manual play stays on media volume.</string>
+    <string name="chant_volume_title">Chant volume</string>
+    <string name="chant_volume_body">Caps how loud chants play. When alarm volume is on and fade-in is Off, alarm sessions gently fade in over 15 seconds.</string>
+    <string name="chant_volume_percent">%1$d%%</string>
     <string name="fade_minutes">%1$dm</string>
     <string name="fade_seconds">%1$ds</string>
     <string name="reliability_section">Alarms &amp; reliability</string>

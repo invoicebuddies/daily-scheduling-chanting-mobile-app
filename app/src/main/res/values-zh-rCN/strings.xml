@@ -197,6 +197,9 @@
     <string name="snooze_minutes">%1$d 分钟</string>
     <string name="alarm_volume_title">定时念诵使用闹钟音量</string>
     <string name="alarm_volume_body">闹钟触发的念诵走闹钟声道，即使媒体音量低或开启了勿扰模式也能听到。手动播放仍使用媒体音量。</string>
+    <string name="chant_volume_title">念诵音量</string>
+    <string name="chant_volume_body">限制念诵的最大音量。开启闹钟音量且淡入关闭时，闹钟念诵会在 15 秒内柔和淡入。</string>
+    <string name="chant_volume_percent">%1$d%%</string>
     <string name="fade_minutes">%1$d 分钟</string>
     <string name="fade_seconds">%1$d 秒</string>
     <string name="reliability_section">闹钟与可靠性</string>

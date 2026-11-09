@@ -48,6 +48,24 @@ class PlaybackSettingsStore private constructor(context: Context) {
         _alarmVolumeEnabled.value = enabled
     }
 
+    private val _chantVolumePercent = MutableStateFlow(readChantVolumePercent())
+
+    /**
+     * Chant loudness ceiling in percent (25–100). Scheduled chants play on the
+     * alarm stream by default, whose volume is often high — this caps playback
+     * volume to keep them gentle. Read synchronously by the service.
+     */
+    val chantVolumePercent: StateFlow<Int> = _chantVolumePercent.asStateFlow()
+
+    /** Current chant volume ceiling, readable synchronously from the service. */
+    val currentChantVolumePercent: Int get() = _chantVolumePercent.value
+
+    fun setChantVolumePercent(percent: Int) {
+        val clamped = percent.coerceIn(MIN_CHANT_VOLUME_PERCENT, MAX_CHANT_VOLUME_PERCENT)
+        prefs.edit().putInt(KEY_CHANT_VOLUME_PERCENT, clamped).apply()
+        _chantVolumePercent.value = clamped
+    }
+
     // Pending snoozes survive reboots / force-stops: the alarm itself never
     // does. Stored as individual "snooze_<scheduleId>" = triggerAt entries.
 
@@ -92,11 +110,16 @@ class PlaybackSettingsStore private constructor(context: Context) {
     private fun readAlarmVolumeEnabled(): Boolean =
         prefs.getBoolean(KEY_ALARM_VOLUME_ENABLED, DEFAULT_ALARM_VOLUME_ENABLED)
 
+    private fun readChantVolumePercent(): Int =
+        prefs.getInt(KEY_CHANT_VOLUME_PERCENT, DEFAULT_CHANT_VOLUME_PERCENT)
+            .coerceIn(MIN_CHANT_VOLUME_PERCENT, MAX_CHANT_VOLUME_PERCENT)
+
     companion object {
         private const val PREFS_NAME = "playback_settings"
         private const val KEY_FADE_IN_SECONDS = "fade_in_seconds"
         private const val KEY_SNOOZE_MINUTES = "snooze_minutes"
         private const val KEY_ALARM_VOLUME_ENABLED = "alarm_volume_enabled"
+        private const val KEY_CHANT_VOLUME_PERCENT = "chant_volume_percent"
         private const val SNOOZE_KEY_PREFIX = "snooze_"
 
         /** Selectable fade-in durations in seconds; 0 = Off. */
@@ -108,6 +131,11 @@ class PlaybackSettingsStore private constructor(context: Context) {
         const val DEFAULT_FADE_IN_SECONDS = 0
         const val DEFAULT_SNOOZE_MINUTES = 10
         const val DEFAULT_ALARM_VOLUME_ENABLED = true
+        const val DEFAULT_CHANT_VOLUME_PERCENT = 70
+
+        /** Chant volume slider bounds. */
+        const val MIN_CHANT_VOLUME_PERCENT = 25
+        const val MAX_CHANT_VOLUME_PERCENT = 100
 
         @Volatile
         private var instance: PlaybackSettingsStore? = null

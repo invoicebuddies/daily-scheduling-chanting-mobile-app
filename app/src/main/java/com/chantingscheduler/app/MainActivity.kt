@@ -113,6 +113,7 @@ class MainActivity : ComponentActivity() {
         val fadeInSeconds by viewModel.fadeInSeconds.collectAsStateWithLifecycle()
         val snoozeMinutes by viewModel.snoozeMinutes.collectAsStateWithLifecycle()
         val alarmVolumeEnabled by viewModel.alarmVolumeEnabled.collectAsStateWithLifecycle()
+        val chantVolumePercent by viewModel.chantVolumePercent.collectAsStateWithLifecycle()
         val lastDeleted by viewModel.lastDeleted.collectAsStateWithLifecycle()
         val missingSoundUris by viewModel.missingSoundUris.collectAsStateWithLifecycle()
 
@@ -307,6 +308,8 @@ class MainActivity : ComponentActivity() {
                 onSnoozeMinutesChange = viewModel::setSnoozeMinutes,
                 alarmVolumeEnabled = alarmVolumeEnabled,
                 onAlarmVolumeChange = viewModel::setAlarmVolumeEnabled,
+                chantVolumePercent = chantVolumePercent,
+                onChantVolumeChange = viewModel::setChantVolumePercent,
                 onReplayIntroduction = {
                     showSettings = false
                     replayOnboarding = true

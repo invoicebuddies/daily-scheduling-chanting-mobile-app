@@ -88,6 +88,10 @@ class PlaybackService : MediaSessionService() {
     // Uptime of the pending auto-stop deadline, so the fallback chime can keep
     // whichever end-of-session limit comes first. 0 = no auto-stop posted.
     private var autoStopDeadlineUptimeMs: Long = 0
+    // Chant loudness ceiling (0.25..1.0) read at session start; VolumeFade
+    // ramps up to this instead of 1.0. Alarm-stream chants are often much
+    // louder than media-stream ones, so playback is capped by default (70%).
+    private var chantVolumeCeiling: Float = 1f
     private var playingFallback: Boolean = false
     private var alarmMutedNotified: Boolean = false
     // True once the player has rendered audio this session; gates the
@@ -230,7 +234,7 @@ class PlaybackService : MediaSessionService() {
         override fun run() {
             val p = player ?: return
             val elapsed = SystemClock.uptimeMillis() - fadeStartUptimeMs
-            p.volume = VolumeFade.volumeAt(elapsed, fadeDurationMs)
+            p.volume = VolumeFade.volumeAt(elapsed, fadeDurationMs) * chantVolumeCeiling
             if (elapsed < fadeDurationMs) {
                 handler.postAtTime(this, FADE_TOKEN, SystemClock.uptimeMillis() + FADE_STEP_MS)
             }
@@ -241,9 +245,10 @@ class PlaybackService : MediaSessionService() {
         override fun run() {
             val p = player ?: return
             val elapsed = SystemClock.uptimeMillis() - fadeStartUptimeMs
-            // 1 -> 0 over AUTO_STOP_FADE_MS; the final stop happens via the
+            // ceiling -> 0 over AUTO_STOP_FADE_MS; the final stop happens via the
             // AUTO_STOP_TOKEN posted for fade end.
-            p.volume = 1f - VolumeFade.volumeAt(elapsed, AUTO_STOP_FADE_MS).coerceAtMost(1f)
+            p.volume = chantVolumeCeiling *
+                (1f - VolumeFade.volumeAt(elapsed, AUTO_STOP_FADE_MS).coerceAtMost(1f))
             if (elapsed < AUTO_STOP_FADE_MS) {
                 handler.postAtTime(this, FADE_OUT_TOKEN, SystemClock.uptimeMillis() + FADE_STEP_MS)
             }
@@ -352,12 +357,23 @@ class PlaybackService : MediaSessionService() {
         label = intent.getStringExtra(EXTRA_LABEL).orEmpty()
             .ifBlank { getString(R.string.app_name) }
         scheduleId = intent.getLongExtra(EXTRA_SCHEDULE_ID, -1L).takeIf { it >= 0 }
-        fadeDurationMs = intent.getIntExtra(EXTRA_FADE_IN_SECONDS, 0) * 1000L
-        val repeatCount = intent.getIntExtra(EXTRA_REPEAT_COUNT, 1).coerceAtLeast(1)
-        val maxDurationMinutes = intent.getIntExtra(EXTRA_MAX_DURATION_MINUTES, -1)
         sessionSource = intent.getStringExtra(EXTRA_SOURCE)
             ?.let { runCatching { SessionSource.valueOf(it) }.getOrNull() }
             ?: SessionSource.MANUAL
+        val playbackSettings = PlaybackSettingsStore.get(this)
+        chantVolumeCeiling = playbackSettings.currentChantVolumePercent / 100f
+        fadeDurationMs = intent.getIntExtra(EXTRA_FADE_IN_SECONDS, 0) * 1000L
+        // Alarm-stream chants startle at full alarm volume when fade-in is off;
+        // a short default fade softens the start (only for alarm sessions on
+        // the alarm stream — manual sessions respect the exact setting).
+        if (sessionSource == SessionSource.ALARM &&
+            playbackSettings.currentAlarmVolumeEnabled &&
+            fadeDurationMs == 0L
+        ) {
+            fadeDurationMs = DEFAULT_ALARM_FADE_IN_MS
+        }
+        val repeatCount = intent.getIntExtra(EXTRA_REPEAT_COUNT, 1).coerceAtLeast(1)
+        val maxDurationMinutes = intent.getIntExtra(EXTRA_MAX_DURATION_MINUTES, -1)
         sessionStartMs = System.currentTimeMillis()
         failurePolicy.reset()
         failedStepCount = 0
@@ -598,7 +614,7 @@ class PlaybackService : MediaSessionService() {
         handler.removeCallbacksAndMessages(FADE_TOKEN)
         val p = player ?: return
         if (fadeDurationMs <= 0L) {
-            p.volume = 1f
+            p.volume = chantVolumeCeiling
             return
         }
         fadeStartUptimeMs = SystemClock.uptimeMillis()
@@ -937,6 +953,7 @@ class PlaybackService : MediaSessionService() {
         private const val NOTIFICATION_ID_MISSED = 1005
         private const val FADE_STEP_MS = 50L
         private const val AUTO_STOP_FADE_MS = 5_000L
+        private const val DEFAULT_ALARM_FADE_IN_MS = 15_000L
         private const val SILENCE_WAKELOCK_EXTRA_MS = 60_000L
         private const val GAP_WAKELOCK_EXTRA_MS = 30_000L
         private const val FALLBACK_MAX_MS = 120_000L
