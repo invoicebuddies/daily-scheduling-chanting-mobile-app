@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chanting Buddy</string>
+    <string name="channel_playback">Chanting Buddy playback</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="close">Close</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="stop">Stop</string>
+    <string name="play">Play</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="fix">Fix</string>
+    <string name="undo">Undo</string>
+    <string name="today">Today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="min_short">min</string>
+    <string name="not_set">Not set</string>
+
+    <!-- Greeting / header -->
+    <string name="good_morning">Good morning</string>
+    <string name="good_afternoon">Good afternoon</string>
+    <string name="good_evening">Good evening</string>
+    <string name="header_subtitle">Your chanting schedule · %1$s</string>
+    <string name="content_desc_stats">Stats</string>
+    <string name="content_desc_settings">Settings</string>
+
+    <!-- List screen -->
+    <string name="next_session_overline">NEXT SESSION</string>
+    <string name="no_schedules_title">No schedules yet</string>
+    <string name="no_schedules_body">Schedule chants at dawn, at dusk, or at any hour.</string>
+    <string name="create_schedule">Create schedule</string>
+    <string name="add_schedule">Add schedule</string>
+    <string name="location_needed_title">Location needed</string>
+    <string name="location_needed_body">Sunrise/sunset schedules can\'t fire until you set a location. Tap to configure.</string>
+    <string name="sound_count">%1$d sound(s)</string>
+    <string name="gap_seconds">gap %1$ds</string>
+    <string name="play_now">Play now</string>
+    <string name="stop_playback">Stop playback</string>
+    <string name="track_status">Track %1$d of %2$d</string>
+    <string name="deleted_snackbar">Deleted “%1$s”</string>
+    <string name="default_schedule_name">Schedule</string>
+    <string name="default_session_name">Chanting session</string>
+
+    <!-- Trigger types -->
+    <string name="trigger_fixed">Fixed</string>
+    <string name="trigger_sunrise">Sunrise</string>
+    <string name="trigger_sunset">Sunset</string>
+    <string name="trigger_full_moon">Full moon</string>
+    <string name="trigger_new_moon">New moon</string>
+    <string name="trigger_fixed_time">Fixed time</string>
+
+    <!-- Edit screen -->
+    <string name="set_schedule_title">Set Schedule</string>
+    <string name="mode_playlist">Playlist</string>
+    <string name="mode_routine">Routine</string>
+    <string name="repeat_row">Repeat</string>
+    <string name="sounds_row">Sounds</string>
+    <string name="steps_row">Steps</string>
+    <string name="label_row">Label</string>
+    <string name="options_row">Options</string>
+    <string name="sound_count_summary">%1$d sound(s)</string>
+    <string name="step_count_summary">%1$d step(s)</string>
+    <string name="no_sounds_yet">No sounds added yet</string>
+    <string name="add_sounds">Add sounds</string>
+    <string name="add_sound_step">Add sound step</string>
+    <string name="add_silence_step">Add silence</string>
+    <string name="built_in_sounds">Built-in sounds</string>
+    <string name="pick_from_phone">Pick from phone…</string>
+    <string name="add_sound_dialog_title">Add a sound step</string>
+    <string name="need_sound_to_save">Add at least one sound to save this schedule.</string>
+    <string name="need_step_to_save">Add at least one step to save this routine.</string>
+    <string name="schedule_name_hint">Schedule name (optional)</string>
+    <string name="gap_label">Gap between sounds (seconds)</string>
+    <string name="options_no_gap">No gap</string>
+    <string name="options_gap">Gap %1$ds</string>
+    <string name="options_stops_at">Stops at %1$d min</string>
+    <string name="options_repeat">×%1$d</string>
+    <string name="auto_stop_after">Auto-stop after</string>
+    <string name="repeat_playlist">Repeat playlist</string>
+    <string name="remind_me_before">Remind me before</string>
+    <string name="silence_step">Silence</string>
+    <string name="duration_label">Duration</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="content_desc_preview">Preview</string>
+    <string name="content_desc_stop_preview">Stop preview</string>
+    <string name="content_desc_move_up">Move up</string>
+    <string name="content_desc_move_down">Move down</string>
+    <string name="content_desc_remove">Remove</string>
+    <string name="content_desc_schedule_options">Schedule options</string>
+    <string name="delete_schedule_menu">Delete schedule</string>
+    <string name="delete_schedule_title">Delete this schedule?</string>
+    <string name="delete_schedule_body">This cannot be undone.</string>
+    <string name="decrease_offset">Decrease offset</string>
+    <string name="increase_offset">Increase offset</string>
+    <string name="at_sun_time">At %1$s</string>
+    <string name="offset_before">%1$d minutes before %2$s</string>
+    <string name="offset_after">%1$d minutes after %2$s</string>
+    <string name="offset_negative">−%1$d min</string>
+    <string name="offset_positive">+%1$d min</string>
+    <string name="set_location_for_sun">Set a location to compute %1$s times</string>
+    <string name="today_at">Today: %1$s</string>
+
+    <!-- Repeat summaries -->
+    <string name="repeat_never">Never</string>
+    <string name="repeat_every_day">Every day</string>
+    <string name="repeat_mon_fri">Mon–Fri</string>
+    <string name="repeat_weekends">Weekends</string>
+
+    <!-- Ringing screen -->
+    <string name="ringing_default_label">Chanting time</string>
+    <string name="step_status">Step %1$d of %2$d</string>
+    <string name="snooze_button">SNOOZE %1$dM</string>
+    <string name="stop_button">STOP</string>
+    <string name="content_desc_alarm_ringing">alarm ringing</string>
+
+    <!-- Time picker -->
+    <string name="am">AM</string>
+    <string name="pm">PM</string>
+    <string name="hours_label">HOURS</string>
+    <string name="minutes_label">MINUTES</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">NEXT</string>
+    <string name="onboarding_get_started">GET STARTED</string>
+    <string name="onboarding_1_title">Welcome to Chanting Buddy</string>
+    <string name="onboarding_1_body">Schedule your chanting sounds to play at exactly the right time — no need to press play yourself.</string>
+    <string name="onboarding_2_title">Set it once</string>
+    <string name="onboarding_2_body">Choose times, weekdays, even sunrise or sunset. Your chants play automatically, every day.</string>
+    <string name="onboarding_3_title">Build your sessions</string>
+    <string name="onboarding_3_body">Pick sounds from your device, order them into playlists with gentle gaps, and preview before you save.</string>
+
+    <!-- Main activity dialogs / backup -->
+    <string name="exact_alarm_dialog_title">Exact alarms</string>
+    <string name="exact_alarm_dialog_body">To start chanting at exact times, allow \"Alarms &amp; reminders\" for this app in system settings.</string>
+    <string name="open_settings">Open settings</string>
+    <string name="later">Later</string>
+    <string name="backup_exported">Backup exported.</string>
+    <string name="backup_export_failed">Export failed.</string>
+    <string name="backup_imported">Backup imported.</string>
+    <string name="backup_import_failed">Import failed — not a valid backup file.</string>
+
+    <!-- Stats -->
+    <string name="stats_title">Your practice</string>
+    <string name="stats_empty_title">No sessions yet</string>
+    <string name="stats_empty_body">Finished chanting sessions will build your history here.</string>
+    <string name="stats_day_in_a_row">day in a row</string>
+    <string name="stats_days_in_a_row">days in a row</string>
+    <string name="stats_this_week">This week</string>
+    <string name="stats_all_time">All time</string>
+    <string name="stats_longest_streak">Longest streak</string>
+    <string name="stats_mindful_min">mindful min</string>
+    <string name="stats_history_title">History</string>
+    <string name="stats_history_date_format">d MMM</string>
+    <string name="stats_history_with_label">%1$s · %2$s · %3$d min · %4$s</string>
+    <string name="stats_history_no_label">%1$s · %2$d min · %3$s</string>
+    <string name="end_reason_completed">Completed</string>
+    <string name="end_reason_stopped">Stopped</string>
+    <string name="end_reason_snoozed">Snoozed</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="appearance_section">Appearance</string>
+    <string name="theme_auto">Auto</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="location_section">Location</string>
+    <string name="use_device_location">Use device location</string>
+    <string name="locating">Locating…</string>
+    <string name="location_set">Location set from device.</string>
+    <string name="location_failed">Couldn\'t get the device location — enter it manually below.</string>
+    <string name="location_denied">Location permission denied — enter it manually below.</string>
+    <string name="enter_manually">Enter manually</string>
+    <string name="search_for_place">Search for a place</string>
+    <string name="search_unavailable">Search unavailable — enter coordinates below.</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="save_location">Save location</string>
+    <string name="clear">Clear</string>
+    <string name="no_location_set">No location set</string>
+    <string name="no_location_body">Sunrise and sunset schedules need a location.</string>
+    <string name="sunrise_label">Sunrise</string>
+    <string name="sunset_label">Sunset</string>
+    <string name="playback_section">Playback</string>
+    <string name="volume_fade_in">Volume fade-in</string>
+    <string name="volume_fade_in_body">Gently ramps the volume up when an alarm starts.</string>
+    <string name="snooze_length">Snooze length</string>
+    <string name="snooze_length_body">How long snoozing waits before the chant rings again.</string>
+    <string name="snooze_minutes">%1$d min</string>
+    <string name="fade_minutes">%1$dm</string>
+    <string name="fade_seconds">%1$ds</string>
+    <string name="reliability_section">Alarms &amp; reliability</string>
+    <string name="exact_alarms_row">Exact alarms</string>
+    <string name="status_allowed">Allowed</string>
+    <string name="status_needed">Needed</string>
+    <string name="battery_row">Battery optimization</string>
+    <string name="status_unrestricted">Unrestricted</string>
+    <string name="status_restricted">Restricted</string>
+    <string name="full_screen_row">Full-screen alarms</string>
+    <string name="reliability_hint">Keeps chants ringing on time while the device sleeps — important for temple use.</string>
+    <string name="test_sound_row">Test sound</string>
+    <string name="test_sound_status">3s preview</string>
+    <string name="test_sound_playing">Playing…</string>
+    <string name="test_sound_stop">Stop</string>
+    <string name="test_sound_play">Play</string>
+    <string name="about_section">About</string>
+    <string name="replay_introduction">Replay introduction</string>
+    <string name="replay">Replay</string>
+    <string name="export_row">Export schedules &amp; history</string>
+    <string name="export_status">JSON</string>
+    <string name="export_action">Export</string>
+    <string name="import_row">Import backup</string>
+    <string name="import_status">Merges</string>
+    <string name="import_action">Import</string>
+    <string name="version_line">Chanting Buddy · v%1$s</string>
+    <string name="collapse">Collapse</string>
+    <string name="expand">Expand</string>
+
+    <!-- Widget / tile -->
+    <string name="widget_description">Next chanting session with a play/stop toggle</string>
+    <string name="widget_no_session">No upcoming session</string>
+    <string name="widget_chant_now">Chant now</string>
+    <string name="tile_chant_now">Chant now</string>
+    <string name="tile_stop_chanting">Stop chanting</string>
+
+    <!-- Accessibility / motion -->
+    <string name="type_time">Type time</string>
+    <string name="enter_time_title">Enter time</string>
+    <string name="ok">OK</string>
+    <string name="a11y_hour">Hour</string>
+    <string name="a11y_minute">Minute</string>
+    <string name="reduce_motion">Reduce motion</string>
+    <string name="reduce_motion_body">Stops breathing and pulsing animations.</string>
+    <string name="content_desc_day_template">%1$s (day of week)</string>
+    <string name="day_mon">Monday</string>
+    <string name="day_tue">Tuesday</string>
+    <string name="day_wed">Wednesday</string>
+    <string name="day_thu">Thursday</string>
+    <string name="day_fri">Friday</string>
+    <string name="day_sat">Saturday</string>
+    <string name="day_sun">Sunday</string>
+</resources>

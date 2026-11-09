@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- mascot.riv is loaded reflectively by name in RiveMascot.kt so the
+         build works with or without the asset present. -->
+    <issue id="UnusedResources">
+        <ignore path="**/res/raw/mascot.riv" />
+    </issue>
+</lint>

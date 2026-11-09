@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <receiver
+            android:name="com.chantingscheduler.app.scheduling.AlarmReceiver"
+            android:exported="false" />
+
+        <!-- Pre-session reminders; fired only by the app's own AlarmScheduler. -->
+        <receiver
+            android:name="com.chantingscheduler.app.scheduling.ReminderReceiver"
+            android:exported="false" />
+
+        <!--
+            Re-arms all alarms after reboot, app update, clock/timezone changes
+            and exact-permission changes. Protected system broadcasts reach a
+            non-exported receiver, so no other app can trigger a re-arm.
+        -->
+        <receiver
+            android:name="com.chantingscheduler.app.scheduling.RescheduleReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>

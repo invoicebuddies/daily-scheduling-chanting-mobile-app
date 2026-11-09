@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reminder_channel">Reminders</string>
+    <string name="reminder_title">Upcoming chanting session</string>
+    <string name="reminder_text">%1$s starts in %2$d minutes.</string>
+    <string name="reminder_default_label">Your chant</string>
+</resources>

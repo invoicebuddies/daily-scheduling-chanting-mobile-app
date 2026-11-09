@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reminder_channel">Peringatan</string>
+    <string name="reminder_title">Sesi lantunan akan datang</string>
+    <string name="reminder_text">%1$s bermula dalam %2$d minit.</string>
+    <string name="reminder_default_label">Lantunan anda</string>
+</resources>

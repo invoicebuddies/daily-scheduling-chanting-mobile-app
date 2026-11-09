@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chanting Buddy</string>
+    <string name="playing">Sedang main…</string>
+    <string name="stop">Berhenti</string>
+    <string name="snooze">Tunda</string>
+    <string name="channel_fallback">Penggera</string>
+    <string name="time_to_chant_title">Masa untuk lantunan</string>
+    <string name="time_to_chant_text">Ketik untuk memulakan sesi lantunan anda.</string>
+    <string name="sounds_broken_title">Sesetengah bunyi tidak dapat dimainkan</string>
+    <string name="sounds_broken_text">Fail mungkin telah dipadam atau kebenarannya ditarik balik — buka aplikasi untuk membaiki jadual.</string>
+    <string name="routine_step_status">Langkah %1$d daripada %2$d</string>
+    <string name="gap_pausing">Jeda antara lantunan…</string>
+</resources>

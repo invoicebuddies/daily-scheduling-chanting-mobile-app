@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reminder_channel">提醒</string>
+    <string name="reminder_title">即将开始的念诵</string>
+    <string name="reminder_text">%1$s将于 %2$d 分钟后开始。</string>
+    <string name="reminder_default_label">您的念诵</string>
+</resources>

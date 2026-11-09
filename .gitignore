@@ -1,0 +1,12 @@
+.gradle/
+build/
+**/build/
+local.properties
+*.iml
+.idea/
+.cxx/
+keystore.properties
+keystore/
+*.jks
+rive-docs-mcp/
+release/*.apk

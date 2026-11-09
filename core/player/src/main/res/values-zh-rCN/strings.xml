@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chanting Buddy</string>
+    <string name="playing">播放中…</string>
+    <string name="stop">停止</string>
+    <string name="snooze">稍后提醒</string>
+    <string name="channel_fallback">闹钟</string>
+    <string name="time_to_chant_title">念诵时间到</string>
+    <string name="time_to_chant_text">点按开始您的念诵时段。</string>
+    <string name="sounds_broken_title">部分音频无法播放</string>
+    <string name="sounds_broken_text">文件可能已被删除或权限被撤销——请打开应用修复日程。</string>
+    <string name="routine_step_status">第 %1$d 步，共 %2$d 步</string>
+    <string name="gap_pausing">念诵间隙暂停中…</string>
+</resources>

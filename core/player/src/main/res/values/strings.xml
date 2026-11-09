@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chanting Buddy</string>
+    <string name="playing">Playing…</string>
+    <string name="stop">Stop</string>
+    <string name="snooze">Snooze</string>
+    <string name="channel_fallback">Alarms</string>
+    <string name="time_to_chant_title">Time to chant</string>
+    <string name="time_to_chant_text">Tap to start your chanting session.</string>
+    <string name="routine_step_status">Step %1$d of %2$d</string>
+    <string name="gap_pausing">Pausing between chants…</string>
+    <string name="sounds_broken_title">Some sounds couldn’t be played</string>
+    <string name="sounds_broken_text">A file may have been deleted or its permission revoked — open the app to fix the schedule.</string>
+</resources>

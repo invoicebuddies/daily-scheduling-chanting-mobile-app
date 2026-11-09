@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chanting Buddy</string>
+    <string name="channel_playback">Mainan lantunan</string>
+
+    <!-- Common -->
+    <string name="back">Kembali</string>
+    <string name="close">Tutup</string>
+    <string name="cancel">Batal</string>
+    <string name="save">Simpan</string>
+    <string name="delete">Padam</string>
+    <string name="edit">Sunting</string>
+    <string name="stop">Berhenti</string>
+    <string name="play">Main</string>
+    <string name="on">Buka</string>
+    <string name="off">Tutup</string>
+    <string name="fix">Baiki</string>
+    <string name="undo">Buat asal</string>
+    <string name="today">Hari ini</string>
+    <string name="tomorrow">Esok</string>
+    <string name="min_short">min</string>
+    <string name="not_set">Tidak ditetapkan</string>
+
+    <!-- Greeting / header -->
+    <string name="good_morning">Selamat pagi</string>
+    <string name="good_afternoon">Selamat tengah hari</string>
+    <string name="good_evening">Selamat petang</string>
+    <string name="header_subtitle">Jadual lantunan anda · %1$s</string>
+    <string name="content_desc_stats">Perangkaan</string>
+    <string name="content_desc_settings">Tetapan</string>
+
+    <!-- List screen -->
+    <string name="next_session_overline">SESI SETERUSNYA</string>
+    <string name="no_schedules_title">Belum ada jadual</string>
+    <string name="no_schedules_body">Jadualkan lantunan pada waktu fajar, senja, atau bila-bila masa.</string>
+    <string name="create_schedule">Cipta jadual</string>
+    <string name="add_schedule">Tambah jadual</string>
+    <string name="location_needed_title">Lokasi diperlukan</string>
+    <string name="location_needed_body">Jadual matahari terbit/terbenam tidak dapat berbunyi sehingga anda menetapkan lokasi. Ketik untuk tetapkan.</string>
+    <string name="sound_count">%1$d bunyi</string>
+    <string name="gap_seconds">jeda %1$ds</string>
+    <string name="play_now">Main sekarang</string>
+    <string name="stop_playback">Hentikan mainan</string>
+    <string name="track_status">Lagu %1$d daripada %2$d</string>
+    <string name="deleted_snackbar">“%1$s” telah dipadam</string>
+    <string name="default_schedule_name">Jadual</string>
+    <string name="default_session_name">Sesi lantunan</string>
+
+    <!-- Trigger types -->
+    <string name="trigger_fixed">Tetap</string>
+    <string name="trigger_sunrise">Matahari terbit</string>
+    <string name="trigger_sunset">Matahari terbenam</string>
+    <string name="trigger_full_moon">Bulan purnama</string>
+    <string name="trigger_new_moon">Bulan baharu</string>
+    <string name="trigger_fixed_time">Masa tetap</string>
+
+    <!-- Edit screen -->
+    <string name="set_schedule_title">Tetapkan Jadual</string>
+    <string name="mode_playlist">Senarai main</string>
+    <string name="mode_routine">Rutin</string>
+    <string name="repeat_row">Ulangan</string>
+    <string name="sounds_row">Bunyi</string>
+    <string name="steps_row">Langkah</string>
+    <string name="label_row">Label</string>
+    <string name="options_row">Pilihan</string>
+    <string name="sound_count_summary">%1$d bunyi</string>
+    <string name="step_count_summary">%1$d langkah</string>
+    <string name="no_sounds_yet">Belum ada bunyi ditambah</string>
+    <string name="add_sounds">Tambah bunyi</string>
+    <string name="add_sound_step">Tambah langkah bunyi</string>
+    <string name="add_silence_step">Tambah kesunyian</string>
+    <string name="built_in_sounds">Bunyi terbina dalam</string>
+    <string name="pick_from_phone">Pilih daripada telefon…</string>
+    <string name="add_sound_dialog_title">Tambah langkah bunyi</string>
+    <string name="need_sound_to_save">Tambah sekurang-kurangnya satu bunyi untuk menyimpan jadual ini.</string>
+    <string name="need_step_to_save">Tambah sekurang-kurangnya satu langkah untuk menyimpan rutin ini.</string>
+    <string name="schedule_name_hint">Nama jadual (pilihan)</string>
+    <string name="gap_label">Jeda antara bunyi (saat)</string>
+    <string name="options_no_gap">Tiada jeda</string>
+    <string name="options_gap">Jeda %1$ds</string>
+    <string name="options_stops_at">Berhenti pada %1$d min</string>
+    <string name="options_repeat">×%1$d</string>
+    <string name="auto_stop_after">Berhenti automatik selepas</string>
+    <string name="repeat_playlist">Ulang senarai main</string>
+    <string name="remind_me_before">Ingatkan saya sebelum</string>
+    <string name="silence_step">Kesunyian</string>
+    <string name="duration_label">Tempoh</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="content_desc_preview">Prebiu</string>
+    <string name="content_desc_stop_preview">Hentikan prebiu</string>
+    <string name="content_desc_move_up">Alih ke atas</string>
+    <string name="content_desc_move_down">Alih ke bawah</string>
+    <string name="content_desc_remove">Buang</string>
+    <string name="content_desc_schedule_options">Pilihan jadual</string>
+    <string name="delete_schedule_menu">Padam jadual</string>
+    <string name="delete_schedule_title">Padam jadual ini?</string>
+    <string name="delete_schedule_body">Tindakan ini tidak boleh dibuat asal.</string>
+    <string name="decrease_offset">Kurangkan anjakan</string>
+    <string name="increase_offset">Tambahkan anjakan</string>
+    <string name="at_sun_time">Pada %1$s</string>
+    <string name="offset_before">%1$d minit sebelum %2$s</string>
+    <string name="offset_after">%1$d minit selepas %2$s</string>
+    <string name="offset_negative">−%1$d min</string>
+    <string name="offset_positive">+%1$d min</string>
+    <string name="set_location_for_sun">Tetapkan lokasi untuk mengira masa %1$s</string>
+    <string name="today_at">Hari ini: %1$s</string>
+
+    <!-- Repeat summaries -->
+    <string name="repeat_never">Tidak pernah</string>
+    <string name="repeat_every_day">Setiap hari</string>
+    <string name="repeat_mon_fri">Isnin–Jumaat</string>
+    <string name="repeat_weekends">Hujung minggu</string>
+
+    <!-- Ringing screen -->
+    <string name="ringing_default_label">Masa lantunan</string>
+    <string name="step_status">Langkah %1$d daripada %2$d</string>
+    <string name="snooze_button">TUNDA %1$dM</string>
+    <string name="stop_button">BERHENTI</string>
+    <string name="content_desc_alarm_ringing">penggera berbunyi</string>
+
+    <!-- Time picker -->
+    <string name="am">PG</string>
+    <string name="pm">PTG</string>
+    <string name="hours_label">JAM</string>
+    <string name="minutes_label">MINIT</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Langkau</string>
+    <string name="onboarding_next">SETERUSNYA</string>
+    <string name="onboarding_get_started">MULA SEKARANG</string>
+    <string name="onboarding_1_title">Selamat datang ke Chanting Buddy</string>
+    <string name="onboarding_1_body">Jadualkan bunyi lantunan anda berbunyi pada masa yang tepat — tanpa perlu menekan butang main.</string>
+    <string name="onboarding_2_title">Tetapkan sekali sahaja</string>
+    <string name="onboarding_2_body">Pilih masa, hari minggu, malah matahari terbit atau terbenam. Lantunan anda berbunyi secara automatik, setiap hari.</string>
+    <string name="onboarding_3_title">Bina sesi anda</string>
+    <string name="onboarding_3_body">Pilih bunyi daripada peranti anda, susun menjadi senarai main dengan jeda yang lembut, dan prebiu sebelum menyimpan.</string>
+
+    <!-- Main activity dialogs / backup -->
+    <string name="exact_alarm_dialog_title">Penggera tepat</string>
+    <string name="exact_alarm_dialog_body">Untuk memulakan lantunan pada masa yang tepat, benarkan “Penggera &amp; peringatan” untuk aplikasi ini dalam tetapan sistem.</string>
+    <string name="open_settings">Buka tetapan</string>
+    <string name="later">Kemudian</string>
+    <string name="backup_exported">Sandaran telah dieksport.</string>
+    <string name="backup_export_failed">Eksport gagal.</string>
+    <string name="backup_imported">Sandaran telah diimport.</string>
+    <string name="backup_import_failed">Import gagal — bukan fail sandaran yang sah.</string>
+
+    <!-- Stats -->
+    <string name="stats_title">Amalan anda</string>
+    <string name="stats_empty_title">Belum ada sesi</string>
+    <string name="stats_empty_body">Sesi lantunan yang selesai akan membina sejarah anda di sini.</string>
+    <string name="stats_day_in_a_row">hari berturut-turut</string>
+    <string name="stats_days_in_a_row">hari berturut-turut</string>
+    <string name="stats_this_week">Minggu ini</string>
+    <string name="stats_all_time">Sepanjang masa</string>
+    <string name="stats_longest_streak">Trek terpanjang</string>
+    <string name="stats_mindful_min">minit berfokus</string>
+    <string name="stats_history_title">Sejarah</string>
+    <string name="stats_history_date_format">d MMM</string>
+    <string name="stats_history_with_label">%1$s · %2$s · %3$d min · %4$s</string>
+    <string name="stats_history_no_label">%1$s · %2$d min · %3$s</string>
+    <string name="end_reason_completed">Selesai</string>
+    <string name="end_reason_stopped">Dihentikan</string>
+    <string name="end_reason_snoozed">Ditunda</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Tetapan</string>
+    <string name="appearance_section">Penampilan</string>
+    <string name="theme_auto">Auto</string>
+    <string name="theme_light">Cerah</string>
+    <string name="theme_dark">Gelap</string>
+    <string name="location_section">Lokasi</string>
+    <string name="use_device_location">Guna lokasi peranti</string>
+    <string name="locating">Mencari lokasi…</string>
+    <string name="location_set">Lokasi ditetapkan daripada peranti.</string>
+    <string name="location_failed">Tidak dapat mendapatkan lokasi peranti — masukkan secara manual di bawah.</string>
+    <string name="location_denied">Kebenaran lokasi ditolak — masukkan secara manual di bawah.</string>
+    <string name="enter_manually">Masukkan secara manual</string>
+    <string name="search_for_place">Cari tempat</string>
+    <string name="search_unavailable">Carian tidak tersedia — masukkan koordinat di bawah.</string>
+    <string name="latitude">Latitud</string>
+    <string name="longitude">Longitud</string>
+    <string name="save_location">Simpan lokasi</string>
+    <string name="clear">Kosongkan</string>
+    <string name="no_location_set">Lokasi tidak ditetapkan</string>
+    <string name="no_location_body">Jadual matahari terbit dan terbenam memerlukan lokasi.</string>
+    <string name="sunrise_label">Matahari terbit</string>
+    <string name="sunset_label">Matahari terbenam</string>
+    <string name="playback_section">Mainan</string>
+    <string name="volume_fade_in">Pekeliling bunyi masuk</string>
+    <string name="volume_fade_in_body">Menaikkan bunyi dengan lembut apabila penggera bermula.</string>
+    <string name="snooze_length">Tempoh tunda</string>
+    <string name="snooze_length_body">Berapa lama tunda sebelum lantunan berbunyi semula.</string>
+    <string name="snooze_minutes">%1$d min</string>
+    <string name="fade_minutes">%1$d min</string>
+    <string name="fade_seconds">%1$d s</string>
+    <string name="reliability_section">Penggera &amp; kebolehpercayaan</string>
+    <string name="exact_alarms_row">Penggera tepat</string>
+    <string name="status_allowed">Dibenarkan</string>
+    <string name="status_needed">Diperlukan</string>
+    <string name="battery_row">Pengoptimuman bateri</string>
+    <string name="status_unrestricted">Tidak terhad</string>
+    <string name="status_restricted">Terhad</string>
+    <string name="full_screen_row">Penggera skrin penuh</string>
+    <string name="reliability_hint">Mengekalkan lantunan berbunyi tepat pada masanya semasa peranti tidur — penting untuk kegunaan kuil.</string>
+    <string name="test_sound_row">Bunyi ujian</string>
+    <string name="test_sound_status">Prebiu 3s</string>
+    <string name="test_sound_playing">Sedang main…</string>
+    <string name="test_sound_stop">Berhenti</string>
+    <string name="test_sound_play">Main</string>
+    <string name="about_section">Perihal</string>
+    <string name="replay_introduction">Ulang pengenalan</string>
+    <string name="replay">Ulang</string>
+    <string name="export_row">Eksport jadual &amp; sejarah</string>
+    <string name="export_status">JSON</string>
+    <string name="export_action">Eksport</string>
+    <string name="import_row">Import sandaran</string>
+    <string name="import_status">Gabung</string>
+    <string name="import_action">Import</string>
+    <string name="version_line">Chanting Buddy · v%1$s</string>
+    <string name="collapse">Kuncup</string>
+    <string name="expand">Kembang</string>
+
+    <!-- Widget / tile -->
+    <string name="widget_description">Sesi lantunan seterusnya dengan butang main/berhenti</string>
+    <string name="widget_no_session">Tiada sesi akan datang</string>
+    <string name="widget_chant_now">Lantun sekarang</string>
+    <string name="tile_chant_now">Lantun sekarang</string>
+    <string name="tile_stop_chanting">Hentikan lantunan</string>
+    <string name="type_time">Taip masa</string>
+    <string name="enter_time_title">Masukkan masa</string>
+    <string name="ok">OK</string>
+    <string name="a11y_hour">Jam</string>
+    <string name="a11y_minute">Minit</string>
+    <string name="reduce_motion">Kurangkan gerakan</string>
+    <string name="reduce_motion_body">Menghentikan animasi pernafasan dan denyutan.</string>
+    <string name="content_desc_day_template">%1$s (hari minggu)</string>
+    <string name="day_mon">Isnin</string>
+    <string name="day_tue">Selasa</string>
+    <string name="day_wed">Rabu</string>
+    <string name="day_thu">Khamis</string>
+    <string name="day_fri">Jumaat</string>
+    <string name="day_sat">Sabtu</string>
+    <string name="day_sun">Ahad</string>
+</resources>
