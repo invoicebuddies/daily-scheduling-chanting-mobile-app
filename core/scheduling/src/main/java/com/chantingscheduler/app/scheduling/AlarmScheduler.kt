@@ -50,11 +50,13 @@ class AlarmScheduler @Inject constructor(@param:ApplicationContext private val c
         }
         arm(triggerAt, pendingIntent(schedule.id))
         // Pre-session reminder rides along on its own request-code range.
+        // It must NOT use setAlarmClock: the lock screen and other apps would
+        // show the reminder time as the device's "next alarm".
         val reminderMinutes = schedule.reminderMinutes
         if (reminderMinutes != null && reminderMinutes > 0) {
             val reminderAt = triggerAt - reminderMinutes * 60_000L
             if (reminderAt > System.currentTimeMillis()) {
-                arm(reminderAt, reminderPendingIntent(schedule.id, reminderMinutes))
+                armReminder(reminderAt, reminderPendingIntent(schedule.id, reminderMinutes))
             } else {
                 alarmManager.cancel(reminderPendingIntent(schedule.id, 0))
             }
@@ -95,6 +97,18 @@ class AlarmScheduler @Inject constructor(@param:ApplicationContext private val c
             )
         } else {
             // Exact-alarm permission not granted: fall back to inexact wake-up alarm.
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
+        }
+    }
+
+    /**
+     * Reminders fire a notification only — no alarm-chip semantics. Exact when
+     * permitted, inexact wake-up otherwise.
+     */
+    private fun armReminder(triggerAt: Long, pendingIntent: PendingIntent) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
+        } else {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
         }
     }
