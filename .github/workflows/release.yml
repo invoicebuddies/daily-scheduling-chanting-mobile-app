@@ -105,7 +105,7 @@ jobs:
           fi
           actual=$(keytool -list -v -keystore keystore/chanting-buddy-release.jks \
             -storepass "$KEYSTORE_PASSWORD" -alias "$KEY_ALIAS" 2>/dev/null \
-            | grep -i 'SHA256:' | head -1 | tr -d ' :' | tr 'A-F' 'a-f')
+            | grep -i 'SHA256:' | head -1 | sed 's/.*SHA256://' | tr -d ' \t\r:' | tr 'A-F' 'a-f')
           if [ "$actual" != "$(echo "$EXPECTED" | tr 'A-F' 'a-f' | tr -d ' \n')" ]; then
             echo "::error::Keystore certificate SHA-256 ($actual) does not match EXPECTED_CERT_SHA256. Refusing to ship an APK users can't install over previous releases."
             exit 1
