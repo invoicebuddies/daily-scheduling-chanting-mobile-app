@@ -46,6 +46,12 @@ jobs:
 
       - name: Verify tag matches versionName
         run: |
+          # Tags ending in -test exercise the pipeline without a version bump;
+          # they can only ever produce a draft, so skip the match check there.
+          if [[ "$GITHUB_REF_NAME" == *-test ]]; then
+            echo "Test tag $GITHUB_REF_NAME — skipping versionName match"
+            exit 0
+          fi
           VERSION=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
           TAG="${GITHUB_REF_NAME#v}"
           echo "tag=$GITHUB_REF_NAME versionName=$VERSION"
