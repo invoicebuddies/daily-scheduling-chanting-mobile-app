@@ -25,3 +25,31 @@ jobs:
 
       - name: Run tests, lint, and debug build
         run: ./gradlew test lintDebug assembleDebug
+
+  release:
+    # R8 / resource-shrinking regressions only show up in release builds;
+    # keystore.properties is absent here, so this builds unsigned APKs.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build release APKs
+        run: ./gradlew assembleRelease
+
+      - name: Upload user-facing APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: chanting-buddy-release-apks
+          path: app/build/outputs/release-named/*.apk
