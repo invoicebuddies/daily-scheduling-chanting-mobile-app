@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
@@ -108,6 +109,15 @@ class PlaybackService : MediaSessionService() {
     // a silence step — silence-first/silence-only routines must not be killed
     // by a window that started before any audio was expected.
     private var retryWindowStartMs: Long = 0
+    // Alarm-stream sessions manage audio focus manually (ExoPlayer only
+    // supports automatic focus for media/game usage, not USAGE_ALARM — see
+    // ef4c519). Audio starts only while [alarmFocusRequest] is held, so a
+    // chant can never blare over a phone call; a transient focus loss pauses
+    // playback until the matching gain. Media-stream sessions leave focus to
+    // ExoPlayer and always start.
+    private var useAlarmStream: Boolean = false
+    private var alarmFocusRequest: AudioFocusRequest? = null
+    private var focusLossPaused: Boolean = false
     // Original ACTION_PLAY intent, kept so the "missed chant" notification can re-deliver it.
     private var lastPlayIntent: Intent? = null
     private var gapActive: Boolean = false
@@ -281,7 +291,10 @@ class PlaybackService : MediaSessionService() {
                 ).action()
             ) {
                 AudioFocusRetryPolicy.Action.Retry -> {
-                    p.play()
+                    // Focus denied (e.g. during a call): re-request on every
+                    // retry so audio starts as soon as the call ends.
+                    if (useAlarmStream) requestAlarmAudioFocus()
+                    if (audibleStartPermitted() && !focusLossPaused) p.play()
                     handler.postAtTime(
                         this,
                         FOCUS_RETRY_TOKEN,
@@ -385,6 +398,10 @@ class PlaybackService : MediaSessionService() {
         userPaused = false
         retryWindowStartMs = sessionStartMs
         lastPlayIntent = intent
+        // A replaced session drops any focus the previous one held; the new
+        // session's attributes decide whether to request it again below.
+        abandonAlarmAudioFocus()
+        useAlarmStream = false
         // A real session takes over the audio focus; stop any edit-screen preview.
         SoundPreviewPlayer.stop()
         // A fresh session supersedes any pending snooze for this schedule.
@@ -442,7 +459,9 @@ class PlaybackService : MediaSessionService() {
         }
         startFadeIfNeeded()
         p.prepare()
-        p.play()
+        // Denied alarm-stream focus (e.g. a call in progress) means stay
+        // silent; the retry loop re-requests and starts once it is granted.
+        if (audibleStartPermitted()) p.play()
         publishState()
     }
 
@@ -455,17 +474,76 @@ class PlaybackService : MediaSessionService() {
     private fun applySessionAudioAttributes(p: ExoPlayer) {
         val useAlarmVolume = sessionSource == SessionSource.ALARM &&
             PlaybackSettingsStore.get(this).currentAlarmVolumeEnabled
+        useAlarmStream = useAlarmVolume
         // handleAudioFocus is only supported for USAGE_MEDIA/USAGE_GAME;
         // passing true with USAGE_ALARM throws asynchronously (surfaced as
         // ERROR_CODE_FAILED_RUNTIME_CHECK), which used to kill every
-        // alarm-sourced routine via the failure path. The alarm stream
-        // doesn't duck other audio, so no focus handling is needed there.
+        // alarm-sourced routine via the failure path. Alarm-stream sessions
+        // therefore hold focus manually (request + pause/resume listener);
+        // media-stream sessions keep ExoPlayer's automatic handling.
         p.setAudioAttributes(
             if (useAlarmVolume) ALARM_AUDIO_ATTRIBUTES else AudioAttributes.DEFAULT,
             /* handleAudioFocus= */ !useAlarmVolume,
         )
-        if (useAlarmVolume) maybeNotifyAlarmVolumeMuted()
+        if (useAlarmVolume) {
+            maybeNotifyAlarmVolumeMuted()
+            requestAlarmAudioFocus()
+        }
     }
+
+    private val alarmFocusListener = AudioManager.OnAudioFocusChangeListener { change ->
+        if (!sessionActive) return@OnAudioFocusChangeListener
+        when (AlarmAudioFocusPolicy.actionFor(change, focusLossPaused, userPaused)) {
+            AlarmAudioFocusPolicy.Action.Pause -> {
+                focusLossPaused = true
+                internalPause = true
+                player?.pause()
+                internalPause = false
+            }
+            AlarmAudioFocusPolicy.Action.Resume -> {
+                focusLossPaused = false
+                // Never resurrect audio a silence step or an inter-track gap
+                // deliberately holds; their own timers drive the next start.
+                val plan = routine
+                val inSilence = plan != null && plan.isSilence(stepIndex)
+                if (!inSilence && !gapActive && !userPaused) player?.play()
+            }
+            AlarmAudioFocusPolicy.Action.KeepPlaying -> Unit
+            null -> Unit
+        }
+    }
+
+    /**
+     * Requests the alarm-stream focus (idempotent). Denied while a call is
+     * active — the session stays silent and the existing focus-retry loop
+     * re-requests periodically, so audio starts as soon as the call ends.
+     */
+    private fun requestAlarmAudioFocus(): Boolean {
+        alarmFocusRequest?.let { return true }
+        val am = getSystemService(AudioManager::class.java) ?: return false
+        val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+            .setAudioAttributes(
+                android.media.AudioAttributes.Builder()
+                    .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build(),
+            )
+            .setOnAudioFocusChangeListener(alarmFocusListener, handler)
+            .build()
+        val granted = am.requestAudioFocus(request) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        if (granted) alarmFocusRequest = request
+        return granted
+    }
+
+    private fun abandonAlarmAudioFocus() {
+        val request = alarmFocusRequest ?: return
+        alarmFocusRequest = null
+        focusLossPaused = false
+        getSystemService(AudioManager::class.java)?.abandonAudioFocusRequest(request)
+    }
+
+    /** Alarm-stream audio must not start while focus is unheld (e.g. mid-call). */
+    private fun audibleStartPermitted(): Boolean = !useAlarmStream || alarmFocusRequest != null
 
     /** One-time heads-up when the alarm stream is muted, so a "silent alarm" is never a surprise. */
     @SuppressLint("MissingPermission") // areNotificationsEnabled() guards the post
@@ -568,7 +646,7 @@ class PlaybackService : MediaSessionService() {
             p.setMediaItems(listOf(MediaItem.fromUri(plan.soundUri(index)!!)))
             startFadeIfNeeded()
             p.prepare()
-            p.play()
+            if (audibleStartPermitted()) p.play()
             handler.postAtTime(
                 stepAdvance, STEP_TOKEN,
                 SystemClock.uptimeMillis() + plan.durationMillis(index),
@@ -661,7 +739,7 @@ class PlaybackService : MediaSessionService() {
             ),
         )
         p.prepare()
-        p.play()
+        if (audibleStartPermitted()) p.play()
         publishState()
     }
 
@@ -718,6 +796,7 @@ class PlaybackService : MediaSessionService() {
     private fun stopPlayback(endReason: SessionEndReason) {
         logSession(endReason)
         sessionActive = false
+        abandonAlarmAudioFocus()
         handler.removeCallbacksAndMessages(null)
         player?.let {
             it.volume = 1f
@@ -779,6 +858,7 @@ class PlaybackService : MediaSessionService() {
 
     override fun onDestroy() {
         sessionActive = false
+        abandonAlarmAudioFocus()
         handler.removeCallbacksAndMessages(null)
         releaseSilenceWakeLock()
         releaseGapWakeLock()
