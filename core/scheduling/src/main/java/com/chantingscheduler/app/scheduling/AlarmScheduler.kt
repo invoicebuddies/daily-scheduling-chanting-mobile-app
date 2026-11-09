@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.chantingscheduler.app.data.LocationStore
+import com.chantingscheduler.app.data.PlaybackSettingsStore
 import com.chantingscheduler.app.data.ScheduleEntity
 import com.chantingscheduler.app.data.TriggerType
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -74,19 +75,35 @@ class AlarmScheduler @Inject constructor(@param:ApplicationContext private val c
      * Arms a one-shot alarm for [scheduleId] at [triggerAtMillis],
      * independent of the schedule's regular alarm (separate PendingIntent
      * request code). When it fires, [AlarmReceiver] plays the schedule's
-     * playlist without touching the regular re-arming.
+     * playlist without touching the regular re-arming. The snooze is also
+     * persisted so it survives reboot / time change / force-stop (see
+     * [rearmAll]).
      */
     fun scheduleSnooze(scheduleId: Long, triggerAtMillis: Long) {
         arm(triggerAtMillis, snoozePendingIntent(scheduleId))
+        PlaybackSettingsStore.get(context).setPendingSnooze(scheduleId, triggerAtMillis)
     }
 
     fun cancelSnooze(scheduleId: Long) {
         alarmManager.cancel(snoozePendingIntent(scheduleId))
+        PlaybackSettingsStore.get(context).clearPendingSnooze(scheduleId)
     }
 
-    /** Re-arms every enabled schedule; idempotent, safe to call on any trigger. */
+    /**
+     * Re-arms every enabled schedule; idempotent, safe to call on any trigger.
+     * Also restores persisted snoozes that are still in the future and drops
+     * the stale ones — alarm PendingIntents never survive a reboot, but the
+     * user's snooze intent should.
+     */
     fun rearmAll(enabledSchedules: List<ScheduleEntity>) {
         enabledSchedules.forEach { schedule(it) }
+        val store = PlaybackSettingsStore.get(context)
+        val pending = store.pendingSnoozes()
+        val toRestore = SnoozeRestore.pendingToRestore(pending, System.currentTimeMillis())
+        pending.keys.minus(toRestore.keys).forEach(store::clearPendingSnooze)
+        toRestore.forEach { (scheduleId, triggerAt) ->
+            arm(triggerAt, snoozePendingIntent(scheduleId))
+        }
     }
 
     private fun arm(triggerAt: Long, pendingIntent: PendingIntent) {

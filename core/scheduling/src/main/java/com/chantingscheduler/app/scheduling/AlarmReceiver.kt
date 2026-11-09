@@ -3,6 +3,7 @@ package com.chantingscheduler.app.scheduling
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.chantingscheduler.app.data.PlaybackSettingsStore
 import com.chantingscheduler.app.data.ScheduleRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -34,6 +35,9 @@ class AlarmReceiver : BroadcastReceiver() {
             try {
                 val item = repository.getById(scheduleId)
                 if (item != null && item.schedule.enabled) {
+                    // Whether this was the regular alarm or a snooze, any
+                    // persisted snooze for this schedule has now fired.
+                    PlaybackSettingsStore.get(context).clearPendingSnooze(scheduleId)
                     if (item.sounds.isNotEmpty() || item.steps.isNotEmpty()) {
                         sessionStarter.start(item)
                     }

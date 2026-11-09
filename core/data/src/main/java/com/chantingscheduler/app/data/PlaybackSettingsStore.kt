@@ -48,6 +48,29 @@ class PlaybackSettingsStore private constructor(context: Context) {
         _alarmVolumeEnabled.value = enabled
     }
 
+    // Pending snoozes survive reboots / force-stops: the alarm itself never
+    // does. Stored as individual "snooze_<scheduleId>" = triggerAt entries.
+
+    /** Records a snooze so it can be re-armed after reboot or re-arm. */
+    fun setPendingSnooze(scheduleId: Long, triggerAtMillis: Long) {
+        prefs.edit().putLong(snoozeKey(scheduleId), triggerAtMillis).apply()
+    }
+
+    /** Drops the stored snooze (fired, cancelled, or superseded). */
+    fun clearPendingSnooze(scheduleId: Long) {
+        prefs.edit().remove(snoozeKey(scheduleId)).apply()
+    }
+
+    /** All stored snoozes: scheduleId → triggerAt epoch millis. */
+    fun pendingSnoozes(): Map<Long, Long> = prefs.all
+        .mapNotNull { (key, value) ->
+            val id = key.removePrefix(SNOOZE_KEY_PREFIX).toLongOrNull()
+            if (id != null && value is Long) id to value else null
+        }
+        .toMap()
+
+    private fun snoozeKey(scheduleId: Long) = "$SNOOZE_KEY_PREFIX$scheduleId"
+
     fun setFadeInSeconds(seconds: Int) {
         prefs.edit().putInt(KEY_FADE_IN_SECONDS, seconds).apply()
         _fadeInSeconds.value = seconds
@@ -74,6 +97,7 @@ class PlaybackSettingsStore private constructor(context: Context) {
         private const val KEY_FADE_IN_SECONDS = "fade_in_seconds"
         private const val KEY_SNOOZE_MINUTES = "snooze_minutes"
         private const val KEY_ALARM_VOLUME_ENABLED = "alarm_volume_enabled"
+        private const val SNOOZE_KEY_PREFIX = "snooze_"
 
         /** Selectable fade-in durations in seconds; 0 = Off. */
         val FADE_IN_OPTIONS = listOf(0, 30, 60, 120, 300)
