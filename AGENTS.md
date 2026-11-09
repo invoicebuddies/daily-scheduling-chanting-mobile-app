@@ -19,26 +19,29 @@
   - Start: `<ANDROID_SDK>/emulator/emulator.exe -avd chanting_test`
   - adb: `<ANDROID_SDK>/platform-tools/adb.exe`
 - Build: `./gradlew assembleDebug` → split APKs under `app/build/outputs/apk/debug/app-<abi>-debug.apk` (install the x86_64 or universal one on the emulator). CI runs `test lintDebug assembleDebug` on JDK 17 via `.github/workflows/android.yml`.
-- Tests: `./gradlew test` — 49 JVM tests (TriggerCalculator 14, StreakCalculator 11+6, RoutinePlan 5, SunTimes 4, VolumeFade 4, BackupCodec 3, Room migrations 2) · Lint: `./gradlew lintDebug` (0 errors).
+- Tests: `./gradlew test` — 70 JVM tests (TriggerCalculator 14, StreakCalculator 11+6, RoutinePlan 5, SunTimes 4, VolumeFade 4, BackupCodec 8, PlaylistFailurePolicy 6, AudioFocusRetryPolicy 6, SnoozeRestore 4, Room migrations 2) · Lint: `./gradlew lintDebug` (0 errors).
+- Release builds are minified + resource-shrunk (R8) and **verified working on the emulator** (v1.2 universal APK, API 36): launch + onboarding, schedule create/edit, alarm armed `window=0` + `Alarm clock:` in dumpsys, alarm fire → receiver → FGS → audio (`dumpsys audio` shows `usage=USAGE_ALARM`), **locked-screen full-screen ringing page auto-launch** (verified twice; a third fire didn't surface it — possibly the API 34+ FSI rate limit), **120 s gap pauses and resumes on time with the screen off** (`event:paused` → `event:started` exactly 120 s later), snooze arm at +10 min (setAlarmClock) + persisted `snooze_1` pref, stats screen, session logging (`session_logs` read back via root). NOT re-verified on release: widget/tile clicks and SAF backup picker (unchanged from last round's debug verification; their start path goes through the now-guarded `PlaybackService.tryStart`). Found & fixed during this pass: the inter-track gap never actually paused playback.
+- Release APKs are renamed post-packaging to `ChantingBuddy-v<version>-<abi|universal>.apk` (`VariantOutput.outputFileName` was removed in AGP 8).
+- CI (`.github/workflows/android.yml`): `test lintDebug assembleDebug` on JDK 17 for every push/PR; README badge reflects it.
 - **Windows quirk:** `classes.jar` file locks occasionally fail builds with "used by another process" — `taskkill //F //IM java.exe` then retry fixes it.
 
 ## Core features (all working & verified on emulator)
 
-1. **Timed playback** — alarms armed via `AlarmManager.setAlarmClock` (status-bar alarm chip whose tap opens MainActivity; most Doze/OEM-resistant API; allows bg FGS starts). `window=0 exactAllowReason=permission` verified in dumpsys. Inexact wake-up fallback only when exact permission is missing. Verified firing → receiver → service → audio under the minified release build.
-2. **Re-arm everywhere** — `RescheduleReceiver` (boot, package-replaced, time/timezone change, exact-permission change; LOCKED_BOOT_COMPLETED deliberately skipped — credential-protected storage isn't readable that early) + app-start re-arm in `ChantingApp` (self-heals force-stop). Verified: timezone switch to Asia/Tokyo re-armed to 06:00 local.
+1. **Timed playback** — alarms armed via `AlarmManager.setAlarmClock` (status-bar alarm chip whose tap opens MainActivity; most Doze/OEM-resistant API; allows bg FGS starts). `window=0 exactAllowReason=permission` verified in dumpsys. Inexact wake-up fallback only when exact permission is missing. **Alarm-sourced sessions** post their initial notification on `chant_alarm` (IMPORTANCE_HIGH, silent) with `setFullScreenIntent` + CATEGORY_ALARM, so the ringing page auto-opens on a locked screen (verified on emulator, API 36); every later re-post uses `setOnlyAlertOnce` and never re-attaches the FSI. Manual/tile sessions stay on the quiet `playback` channel, no FSI. Verified firing → receiver → service → audio under the minified release build.
+2. **Re-arm everywhere** — `RescheduleReceiver` (boot, package-replaced, time/timezone change, exact-permission change; LOCKED_BOOT_COMPLETED deliberately skipped — credential-protected storage isn't readable that early) + app-start re-arm in `ChantingApp` (self-heals force-stop). `rearmAll` also restores persisted snoozes still in the future (`SnoozeRestore`, unit-tested) and drops stale ones. Verified: timezone switch to Asia/Tokyo re-armed to 06:00 local.
 3. **Sunrise/sunset triggers** — per-schedule offset −60..+60 min. `SunTimesCalculator` pins the commons-suncalc timezone explicitly (JVM-default would break tests) and `TriggerCalculator` rejects sun instants that fall outside the queried day (suncalc returns the *next* event even months later, e.g. after polar night).
 4. **Lunar triggers (Uposatha)** — `TriggerType.FULL_MOON / NEW_MOON` fire at the schedule's hour:minute on the local full/new-moon date (commons-suncalc `MoonPhase`), ignore days-of-week, need no location. Unit-tested against 2026 moon dates.
-5. **Playlists** — ordered sound list per schedule (SAF picker with persisted grants, or built-in chimes), configurable gap seconds (notification shows "Pausing between chants…"; pressing play explicitly skips the gap), repeat count 1–108 (quick chips 1/3/7/21/108), optional auto-stop (5–60 min; playlist loops, 5 s fade-out at the deadline). Session logs record `audioSeconds` (actual audio time, gaps/silence excluded; per-row fallback to wall-clock for pre-v5 rows).
-6. **Routine mode** — ordered steps (sound looped with REPEAT_MODE_ONE, or silence holding a partial wake lock with timeout), handler-timer advance, "Step x of n" in notification/PlaybackState/ringing page. Edit screen has the Playlist/Routine switch and full step editor.
-7. **Built-in sounds** — three synthesized chimes (morning/temple bell, singing bowl; WAVs generated in code, see LICENSES.md) stored as `android.resource://` URIs; new schedules default to the morning bell so a fresh install rings with zero setup. If every user URI fails (revoked SAF grant), the service loops `fallback_chime` and posts a repair notification.
-8. **Snooze** — separate one-shot alarm (request code = scheduleId + 1_000_000_000) through the same AlarmReceiver path. Verified armed in dumpsys.
-9. **Pre-session reminders** — per-schedule 5/10 min before; `ReminderReceiver` posts a quiet notification on its own request-code range (+2_000_000_000). Room v6 added `reminderMinutes`.
+5. **Playlists** — ordered sound list per schedule (SAF picker with persisted grants, or built-in chimes), configurable gap seconds (notification shows "Pausing between chants…"; pressing play explicitly skips the gap; a partial wake lock is held through the gap so uptime-based timers can't stall in deep sleep), repeat count 1–108 (quick chips 1/3/7/21/108), optional auto-stop (5–60 min; playlist loops, 5 s fade-out at the deadline). Session logs record `audioSeconds` (actual audio time, gaps/silence excluded; per-row fallback to wall-clock for pre-v5 rows).
+6. **Routine mode** — ordered steps (sound looped with REPEAT_MODE_ONE, or silence holding a partial wake lock with timeout), handler-timer advance, "Step x of n" in notification/PlaybackState/ringing page. A broken step sound skips to the next step (its stale `STEP_TOKEN` is cleared in `startStep`); if every playable step fails, the session falls back to the bundled chime instead of running silently. Edit screen has the Playlist/Routine switch and full step editor.
+7. **Built-in sounds** — three synthesized chimes (morning/temple bell, singing bowl; WAVs generated in code, see LICENSES.md) stored as `android.resource://` URIs; new schedules default to the morning bell so a fresh install rings with zero setup. If every user URI fails (revoked SAF grant), the service loops `fallback_chime` — capped at 2 minutes (or the schedule's auto-stop deadline, whichever comes first) — and posts a repair notification.
+8. **Snooze** — separate one-shot alarm (request code = scheduleId + 1_000_000_000) through the same AlarmReceiver path. Pending snoozes are persisted in `PlaybackSettingsStore` (scheduleId → triggerAt) and restored by `rearmAll` via the pure `SnoozeRestore` (future ones re-armed, past ones dropped and cleared). Verified armed in dumpsys.
+9. **Pre-session reminders** — per-schedule 5/10 min before; `ReminderReceiver` posts a quiet notification on its own request-code range (+2_000_000_000). Reminders arm with `setExactAndAllowWhileIdle` (inexact fallback) — NOT `setAlarmClock`, so they never show up as the device's "next alarm". Room v6 added `reminderMinutes`.
 10. **Session history & stats** — Room v3→v6, no FK (survives schedule deletion). Stats: current + longest streak cards, this-week/all-time mindful minutes (audio-time based), month calendar, 20-row history list. `StreakCalculator` pure + unit-tested.
 11. **Undo delete** — 5 s snackbar; the deleted `ScheduleWithSounds` is held in memory and re-inserted (fresh ids) + re-armed on undo.
-12. **Backup/restore** — versioned JSON via `BackupCodec` (unit-tested): SAF export/import in Settings → About. Built-in URIs survive; phone-file URIs are marked "⚠ re-pick" on import. Auto-backup rules (`backup_rules.xml` / `data_extraction_rules.xml`) exclude the Room DB + location prefs so restores can't resurrect dead SAF grants.
+12. **Backup/restore** — versioned JSON via `BackupCodec` (unit-tested): SAF export/import in Settings → About. Built-in URIs survive; phone-file URIs are marked "⚠ re-pick" only when the app no longer holds the grant (`persistedUriPermissions` predicate, same-device imports re-attach cleanly). Importing a backup whose schedules already exist is skipped as duplicates ("Imported X, skipped Y duplicates"). Cloud backup + device transfer include the Room DB; dead SAF grants on a restored device are flagged at runtime with a "Re-pick" chip on the list screen.
 13. **Widget + QS tile** — Glance widget (next session + play/stop) refreshed via `WidgetBridge` (package-targeted APPWIDGET_UPDATE broadcast from core:player; the receiver lives in app and is referenced by name). `ChantTileService` QS tile chants the first enabled schedule / stops.
 14. **i18n** — all user-facing strings in resources, translated to Simplified Chinese (`zh-rCN`) and Malay (`ms`), including core module strings. Verified zh UI on emulator via per-app locales.
-15. **Reliability UX** — Settings → Alarms & reliability: exact-alarm status, battery optimization, full-screen-intent permission (Android 14+), test sound. FGS-start `ForegroundServiceStartNotAllowedException` is caught → high-priority "Time to chant" tap-to-start notification (channel `playback_fallback`).
+15. **Reliability UX** — Settings → Alarms & reliability: exact-alarm status, battery optimization, full-screen-intent permission (Android 14+), test sound. FGS-start refusals (tile/widget on Android 12+) route through `PlaybackService.tryStart`, which falls back to a high-priority "Time to chant" tap-to-start notification (channel `playback_fallback`, `getForegroundService` PendingIntent).
 
 ## UI/UX (current design system)
 
@@ -46,7 +49,7 @@
 - **List screen**: LivingHeader (dawn/dusk backdrop from computed sun times, breathing MonkArt — static when reduced motion is on); "Next Session" hero; schedule cards; undo snackbar; ringing card.
 - **Edit screen**: 5-way trigger selector (Fixed/Sunrise/Sunset/Full moon/New moon), TimeDialPicker (drag dials + AM/PM + **Type time** fallback dialog; dials are TalkBack-adjustable progress controls), Playlist/Routine mode switch, grouped rows (Repeat/Sounds|Steps/Label/Options), auto-stop & repeat & reminder chips.
 - **Stats screen**: streak cards, minutes cards, month calendar, history list.
-- **Settings sheet**: theme cards + **Reduce motion** toggle, location (device/manual/search), playback (fade-in, snooze), reliability rows, about (version, replay onboarding, export/import).
+- **Settings sheet**: theme cards + **Reduce motion** toggle, location (device/manual/search), playback (fade-in, snooze, **Play scheduled chants on alarm volume** — default ON; alarm sessions render on the alarm stream via `USAGE_ALARM` set before prepare, so they sound at media volume 0 / under DND, with a one-time heads-up if the alarm stream itself is muted), reliability rows, about (version, replay onboarding, export/import).
 - **Onboarding**: 3 pages, first launch only, replayable.
 - **Ringing page**: per-trigger animated backdrop, Track/Step status, SNOOZE + STOP; full-screen intent with Android 14 permission gate.
 
@@ -59,12 +62,17 @@ app            – activities, ui/, ui/widget/, tile/, di/, ChantingApp (channel
 core:data      – Room v6 + migrations + schemas, repositories, stores (Location/Theme/
                  Onboarding/PlaybackSettings/Motion), BackupCodec, StreakCalculator,
                  BuiltinSounds live in core:player
-core:scheduling– TriggerCalculator (pure), AlarmScheduler (setAlarmClock + snooze +
-                 reminder arms), AlarmReceiver, RescheduleReceiver, ReminderReceiver,
-                 SunTimesCalculator, SessionStarter seam
-core:player    – PlaybackService (playlist + routine + auto-stop + fade + fallback chime),
-                 PlaybackState, SoundPreviewPlayer, VolumeFade, WidgetBridge,
-                 BuiltinSounds, raw/ chime WAVs, notification strings/drawables
+core:scheduling– TriggerCalculator (pure), AlarmScheduler (setAlarmClock for alarms/snooze +
+                 setExactAndAllowWhileIdle for reminders + snooze persistence/restore),
+                 AlarmReceiver, RescheduleReceiver, ReminderReceiver, SnoozeRestore
+                 (pure, unit-tested), SunTimesCalculator, SessionStarter seam
+core:player    – PlaybackService (playlist + routine + auto-stop + fade + fallback chime +
+                 alarm-stream attributes + audio-focus retry + gap wake lock),
+                 PlaybackState, RoutinePlan, PlaylistFailurePolicy (per-URI failure
+                 decisions, unit-tested), AudioFocusRetryPolicy (60 s/30 s/5 min
+                 retry-then-give-up, unit-tested), SoundPreviewPlayer, VolumeFade,
+                 WidgetBridge, BuiltinSounds, raw/ chime WAVs, notification
+                 strings/drawables
 ```
 
 Dependency direction: `app → core:player → core:scheduling → core:data` (app also depends on the other two). Boundary seams:
@@ -97,6 +105,7 @@ core/player/.../playback/   – PlaybackService, PlaybackState, RoutinePlan, Bui
 
 ## Continuity notes for the next session
 
+- **Current release**: versionCode 3 / v1.2 — audit round 2 (alarm channel + FSI, gap wake lock, routine/fallback fixes, per-URI playlist failures, guarded FGS starts, alarm-volume stream, audio-focus retry, reminder/snooze scheduling, backup edge cases, CI). 16 commits, one per audit item.
 - **Quota**: the 5-hour usage limit has interrupted work repeatedly; commit early and often (this doc now reflects a fully committed state).
 - **Design verification loop**: install (`adb install -r .../app-x86_64-debug.apk`), screenshot (`adb exec-out screencap -p > x.png`), inspect, fix. Per-app locales: `adb shell cmd locale set-app-locales <pkg> --locales zh-Hans-CN`. Toggle dark/light: `adb shell cmd uimode night yes|no`.
 - **Alarm test recipe**: schedule ~2–3 min ahead of the EMULATOR clock (`adb shell date`), verify in `adb shell dumpsys alarm` (expect `window=0`, `Alarm clock:` block), wait, confirm FGS + notification; `adb shell am startservice -n .../.playback.PlaybackService -a ...action.SNOOZE` (as adb root) exercises snooze. Clean up test schedules afterwards.
@@ -109,9 +118,10 @@ core/player/.../playback/   – PlaybackService, PlaybackState, RoutinePlan, Bui
 - Built-in chime names are proper-noun product names — intentionally not translated.
 - Commons-suncalc polar-day/night returns the *next* event outside the queried day; `TriggerCalculator` guards with an on-date check, so polar schedules return -1 within the search window (documented, unit-tested).
 - Pre-session reminder notification depends on POST_NOTIFICATIONS being granted.
-- Imported phone-file URIs are marked "⚠ re-pick" and fall back to the bundled chime if the grant is dead.
+- Imported phone-file URIs are marked "⚠ re-pick" only when the grant is dead; the list screen shows a "Re-pick" chip for schedules with missing `content://` URIs, and playback falls back to the bundled chime meanwhile.
 - Widget updates rely on explicit `WidgetBridge` broadcasts + the 30-min system period (no content-observer).
 - Session-log `audioSeconds` counts rendered-audio time via `onIsPlayingChanged`; a crash mid-session can still drop one record (fire-and-forget insert).
+- Ringing-page quirks (pre-existing, cosmetic): the timer pill shows a nonsense value for playlist sessions (it formats a step-duration source that doesn't exist), and RingingActivity doesn't finish itself when the session ends on its own — it sits there with a stale timer until closed.
 - Snooze alarms skip playback if the schedule was disabled in the meantime; fresh playback cancels pending snoozes.
 - Geocoder address search needs network + a backend (google_apis image OK).
 - Variable-font weights may synthesize on API 26–27.
