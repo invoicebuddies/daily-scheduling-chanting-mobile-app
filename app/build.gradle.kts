@@ -63,19 +63,22 @@ android {
 
     // Release APKs carry the user-facing name the README's download table
     // references (ChantingBuddy-vX.X-<abi>.apk / -universal.apk).
-    androidComponents {
-        onVariants(selector().withBuildType("release")) { variant ->
-            variant.outputs.forEach { output ->
-                val abi = output.filters
-                    .find { it.filterType == com.android.build.api.variant.ABI }
-                    ?.identifier
-                output.outputFileName = if (abi != null) {
-                    "ChantingBuddy-v${variant.versionName.get()}-$abi.apk"
-                } else {
-                    "ChantingBuddy-v${variant.versionName.get()}-universal.apk"
+    // VariantOutput.outputFileName was removed in AGP 8, so rename after
+    // packaging instead.
+    afterEvaluate {
+        val appVersion = android.defaultConfig.versionName ?: "dev"
+        tasks.matching { it.name.startsWith("package") && it.name.endsWith("Release") }
+            .configureEach {
+                doLast {
+                    val outDir = layout.buildDirectory.dir("outputs/apk/release").get().asFile
+                    outDir.listFiles { f: File -> f.isFile && f.name.startsWith("app-") && f.extension == "apk" }
+                        ?.forEach { apk ->
+                            val abi = apk.name.removePrefix("app-").removeSuffix("-release.apk")
+                            val target = File(outDir, "ChantingBuddy-v$appVersion-$abi.apk")
+                            if (target != apk && !target.exists()) apk.renameTo(target)
+                        }
                 }
             }
-        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
