@@ -173,8 +173,8 @@ class PlayToggleCallback : ActionCallback {
             val first = repository.getEnabled()
                 .firstOrNull { it.sounds.isNotEmpty() || it.steps.isNotEmpty() }
             if (first != null) {
-                if (first.isRoutine) {
-                    PlaybackService.start(
+                val intent = if (first.isRoutine) {
+                    PlaybackService.playIntent(
                         context = context,
                         uris = emptyList(),
                         gapSeconds = 0,
@@ -184,7 +184,7 @@ class PlayToggleCallback : ActionCallback {
                         stepMinutes = first.sortedSteps.map { it.durationMinutes },
                     )
                 } else {
-                    PlaybackService.start(
+                    PlaybackService.playIntent(
                         context = context,
                         uris = first.sortedSounds.map { it.uri },
                         gapSeconds = first.schedule.gapSeconds,
@@ -194,6 +194,9 @@ class PlayToggleCallback : ActionCallback {
                         maxDurationMinutes = first.schedule.maxDurationMinutes ?: -1,
                     )
                 }
+                // Widget callbacks run in the background: a denied FGS start
+                // would crash the app, so route through the guarded helper.
+                PlaybackService.tryStart(context, intent)
             }
         }
         com.chantingscheduler.app.playback.WidgetBridge.requestUpdate(context)

@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -786,6 +787,30 @@ class PlaybackService : MediaSessionService() {
             .putExtra(EXTRA_STEP_MINUTES, stepMinutes.toIntArray())
             .putExtra(EXTRA_REPEAT_COUNT, repeatCount)
             .putExtra(EXTRA_MAX_DURATION_MINUTES, maxDurationMinutes)
+
+        /**
+         * Starts the service from contexts that may be in the background
+         * (QS tile, home-screen widget). Android 12+ can deny the foreground
+         * service start there, which would crash the caller with
+         * ForegroundServiceStartNotAllowedException; on denial, fall back to
+         * the tap-to-start notification so the session is never silently lost.
+         * Returns true when the service actually started.
+         */
+        fun tryStart(context: Context, playIntent: Intent): Boolean = try {
+            ContextCompat.startForegroundService(context, playIntent)
+            true
+        } catch (e: IllegalStateException) {
+            // ForegroundServiceStartNotAllowedException (API 31+) is the
+            // expected case; lint can't see through the version gate, so the
+            // API-31 superclass is caught and re-verified here.
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) throw e
+            notifyStartBlocked(
+                context,
+                playIntent,
+                playIntent.getStringExtra(EXTRA_LABEL).orEmpty(),
+            )
+            false
+        }
 
         /**
          * Last-resort path when the system refuses a background foreground-service

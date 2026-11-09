@@ -1,8 +1,10 @@
 package com.chantingscheduler.app.tile
 
+import android.app.PendingIntent
+import android.content.Intent
+import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import androidx.compose.ui.res.stringResource
 import com.chantingscheduler.app.R
 import com.chantingscheduler.app.data.AppDatabase
 import com.chantingscheduler.app.data.ScheduleRepository
@@ -35,8 +37,8 @@ class ChantTileService : TileService() {
                     .getEnabled()
                     .firstOrNull { it.sounds.isNotEmpty() || it.steps.isNotEmpty() }
                 if (first != null) {
-                    if (first.isRoutine) {
-                        PlaybackService.start(
+                    val intent = if (first.isRoutine) {
+                        PlaybackService.playIntent(
                             context = this@ChantTileService,
                             uris = emptyList(),
                             gapSeconds = 0,
@@ -46,7 +48,7 @@ class ChantTileService : TileService() {
                             stepMinutes = first.sortedSteps.map { it.durationMinutes },
                         )
                     } else {
-                        PlaybackService.start(
+                        PlaybackService.playIntent(
                             context = this@ChantTileService,
                             uris = first.sortedSounds.map { it.uri },
                             gapSeconds = first.schedule.gapSeconds,
@@ -56,12 +58,32 @@ class ChantTileService : TileService() {
                             maxDurationMinutes = first.schedule.maxDurationMinutes ?: -1,
                         )
                     }
+                    runOnMainThread {
+                        // Android 12+ can deny a background FGS start; route
+                        // through the guarded helper instead of crashing.
+                        val started = PlaybackService.tryStart(this@ChantTileService, intent)
+                        if (!started && Build.VERSION.SDK_INT >= 34) {
+                            // Refused: collapse the shade straight into the app.
+                            startActivityAndCollapse(openAppPendingIntent())
+                        }
+                        updateTile()
+                    }
+                } else {
+                    runOnMainThread { updateTile() }
                 }
-                runOnMainThread { updateTile() }
                 WidgetBridge.requestUpdate(this@ChantTileService)
             }
         }
     }
+
+    private fun openAppPendingIntent(): PendingIntent = PendingIntent.getActivity(
+        this,
+        0,
+        Intent()
+            .setClassName(packageName, "com.chantingscheduler.app.MainActivity")
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
 
     private fun updateTile() {
         val tile = qsTile ?: return
