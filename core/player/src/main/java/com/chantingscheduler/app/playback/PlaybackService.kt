@@ -90,6 +90,11 @@ class PlaybackService : MediaSessionService() {
     private var autoStopDeadlineUptimeMs: Long = 0
     private var playingFallback: Boolean = false
     private var alarmMutedNotified: Boolean = false
+    // True once the player has rendered audio this session; gates the
+    // audio-focus retry loop for alarm sessions.
+    private var audioRendered: Boolean = false
+    // Original ACTION_PLAY intent, kept so the "missed chant" notification can re-deliver it.
+    private var lastPlayIntent: Intent? = null
     private var gapActive: Boolean = false
     // Actual audio time, excluding inter-track gaps and silence (audioSeconds).
     private var audioAccumulatedMs: Long = 0
@@ -137,6 +142,7 @@ class PlaybackService : MediaSessionService() {
         override fun onIsPlayingChanged(isPlaying: Boolean) {
             // Accumulate wall-clock audio time while actually rendering audio.
             if (isPlaying) {
+                audioRendered = true
                 playingSinceUptimeMs = SystemClock.uptimeMillis()
             } else if (playingSinceUptimeMs > 0) {
                 audioAccumulatedMs += SystemClock.uptimeMillis() - playingSinceUptimeMs
@@ -218,6 +224,46 @@ class PlaybackService : MediaSessionService() {
         }
     }
 
+    /**
+     * Alarm sessions whose audio focus was denied (e.g. during a phone call)
+     * would otherwise hang silently while the session timers run. Re-issue
+     * play() per [AudioFocusRetryPolicy]; after the grace window, give up with
+     * a "missed chant" notification the user can tap to play.
+     */
+    private val audioFocusRetry = object : Runnable {
+        override fun run() {
+            val p = player ?: return
+            if (!sessionActive || audioRendered) return
+            val elapsed = System.currentTimeMillis() - sessionStartMs
+            when (
+                AudioFocusRetryPolicy(
+                    isAlarmSession = sessionSource == SessionSource.ALARM,
+                    startElapsedMs = elapsed,
+                    hasRenderedAudio = audioRendered,
+                ).action()
+            ) {
+                AudioFocusRetryPolicy.Action.Retry -> {
+                    p.play()
+                    handler.postAtTime(
+                        this,
+                        FOCUS_RETRY_TOKEN,
+                        SystemClock.uptimeMillis() + AudioFocusRetryPolicy.RETRY_INTERVAL_MS,
+                    )
+                }
+                AudioFocusRetryPolicy.Action.GiveUp -> {
+                    notifyMissedChant()
+                    stopPlayback(SessionEndReason.STOPPED)
+                }
+                AudioFocusRetryPolicy.Action.None ->
+                    handler.postAtTime(
+                        this,
+                        FOCUS_RETRY_TOKEN,
+                        SystemClock.uptimeMillis() + AudioFocusRetryPolicy.RETRY_INTERVAL_MS,
+                    )
+            }
+        }
+    }
+
     private val autoStop = Runnable {
         // 5s fade-out into a natural completion.
         handler.removeCallbacksAndMessages(FADE_OUT_TOKEN)
@@ -286,6 +332,8 @@ class PlaybackService : MediaSessionService() {
         audioAccumulatedMs = 0
         playingSinceUptimeMs = 0
         alarmMutedNotified = false
+        audioRendered = false
+        lastPlayIntent = intent
         // A real session takes over the audio focus; stop any edit-screen preview.
         SoundPreviewPlayer.stop()
         // A fresh session supersedes any pending snooze for this schedule.
@@ -295,6 +343,8 @@ class PlaybackService : MediaSessionService() {
         handler.removeCallbacksAndMessages(AUTO_STOP_TOKEN)
         handler.removeCallbacksAndMessages(FADE_OUT_TOKEN)
         handler.removeCallbacksAndMessages(FALLBACK_TOKEN)
+        handler.removeCallbacksAndMessages(FOCUS_RETRY_TOKEN)
+        runCatching { NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_MISSED) }
         gapActive = false
         releaseGapWakeLock()
         sessionActive = true
@@ -302,6 +352,13 @@ class PlaybackService : MediaSessionService() {
         WidgetBridge.requestUpdate(this)
         val p = player ?: return
         applySessionAudioAttributes(p)
+        if (sessionSource == SessionSource.ALARM) {
+            handler.postAtTime(
+                audioFocusRetry,
+                FOCUS_RETRY_TOKEN,
+                SystemClock.uptimeMillis() + AudioFocusRetryPolicy.FIRST_RETRY_MS,
+            )
+        }
         if (routine != null) {
             startStep(0)
             return
@@ -379,6 +436,46 @@ class PlaybackService : MediaSessionService() {
             .build()
         runCatching {
             NotificationManagerCompat.from(this).notify(NOTIFICATION_ID_MUTED, notification)
+        }
+    }
+
+    /**
+     * Posted when an alarm session gives up waiting for audio focus: tells the
+     * user which chant was missed and re-delivers the session on tap.
+     */
+    @SuppressLint("MissingPermission") // areNotificationsEnabled() guards the post
+    private fun notifyMissedChant() {
+        if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) return
+        val play = lastPlayIntent
+        val contentIntent = if (play != null) {
+            PendingIntent.getForegroundService(
+                this,
+                6,
+                play,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+        } else {
+            PendingIntent.getActivity(
+                this,
+                6,
+                Intent()
+                    .setClassName(packageName, "com.chantingscheduler.app.MainActivity")
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+        }
+        val time = android.text.format.DateFormat.getTimeFormat(this).format(java.util.Date(sessionStartMs))
+        val notification = NotificationCompat.Builder(this, CHANNEL_FALLBACK)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle(getString(R.string.missed_chant_title, time))
+            .setContentText(getString(R.string.missed_chant_text))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setAutoCancel(true)
+            .setContentIntent(contentIntent)
+            .build()
+        runCatching {
+            NotificationManagerCompat.from(this).notify(NOTIFICATION_ID_MISSED, notification)
         }
     }
 
@@ -563,6 +660,7 @@ class PlaybackService : MediaSessionService() {
         PlaybackState.clear()
         runCatching { NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_BROKEN) }
         runCatching { NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_MUTED) }
+        runCatching { NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_MISSED) }
         WidgetBridge.requestUpdate(this)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -625,6 +723,7 @@ class PlaybackService : MediaSessionService() {
             NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
             NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_BROKEN)
             NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_MUTED)
+            NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_MISSED)
         }
     }
 
@@ -785,6 +884,7 @@ class PlaybackService : MediaSessionService() {
         private const val NOTIFICATION_ID_BROKEN = 1002
         private const val NOTIFICATION_ID_BLOCKED = 1003
         private const val NOTIFICATION_ID_MUTED = 1004
+        private const val NOTIFICATION_ID_MISSED = 1005
         private const val FADE_STEP_MS = 50L
         private const val AUTO_STOP_FADE_MS = 5_000L
         private const val SILENCE_WAKELOCK_EXTRA_MS = 60_000L
@@ -796,6 +896,7 @@ class PlaybackService : MediaSessionService() {
         private val STEP_TOKEN = Any()
         private val AUTO_STOP_TOKEN = Any()
         private val FALLBACK_TOKEN = Any()
+        private val FOCUS_RETRY_TOKEN = Any()
 
         fun start(
             context: Context,
