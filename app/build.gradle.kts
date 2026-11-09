@@ -23,8 +23,8 @@ android {
         applicationId = "com.chantingscheduler.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.3"
+        versionCode = 5
+        versionName = "1.3.1"
 
         // Update prompt (GitHub Releases check) — a future Play Store build
         // flips this to false, since Play forbids self-updating outside the store.
