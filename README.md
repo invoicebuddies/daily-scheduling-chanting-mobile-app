@@ -2,9 +2,8 @@
 
 **Your chants play on time, every day, without opening the app.**
 
-[![Latest release](https://img.shields.io/github/v/release/invoicebuddies/Daily-Chanting-Mobile-App)](https://github.com/invoicebuddies/Daily-Chanting-Mobile-App/releases/latest)
-[![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-brightgreen)](https://github.com/invoicebuddies/Daily-Chanting-Mobile-App/releases/latest)
-[![CI](https://github.com/invoicebuddies/Daily-Chanting-Mobile-App/actions/workflows/android.yml/badge.svg)](https://github.com/invoicebuddies/Daily-Chanting-Mobile-App/actions/workflows/android.yml)
+[![Latest release](https://img.shields.io/github/v/release/invoicebuddies/daily-scheduling-chanting-mobile-app)](https://github.com/invoicebuddies/daily-scheduling-chanting-mobile-app/releases/latest)
+[![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-brightgreen)](https://github.com/invoicebuddies/daily-scheduling-chanting-mobile-app/releases/latest)
 
 <p align="center">
   <img src="docs/screenshots/home.png" width="200" alt="Home screen">
@@ -22,7 +21,7 @@
 
 ## Download & install (no coding needed)
 
-1. Open the **[latest release](https://github.com/invoicebuddies/Daily-Chanting-Mobile-App/releases/latest)** and download the APK for your phone:
+1. Open the **[latest release](https://github.com/invoicebuddies/daily-scheduling-chanting-mobile-app/releases/latest)** and download the APK for your phone:
    | File | Which phone |
    |---|---|
    | `ChantingBuddy-vX.X-arm64-v8a.apk` | Most modern phones — pick this one |
