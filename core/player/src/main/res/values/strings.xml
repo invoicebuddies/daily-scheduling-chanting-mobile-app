@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Chanting Buddy</string>
+    <string name="builtin_morning_bell">Morning bell</string>
+    <string name="builtin_temple_bell">Temple bell</string>
+    <string name="builtin_singing_bowl">Singing bowl</string>
     <string name="playing">Playing…</string>
     <string name="stop">Stop</string>
     <string name="snooze">Snooze</string>

@@ -165,7 +165,8 @@ fun ScheduleEditScreen(
                         SoundItemEntity(
                             scheduleId = 0,
                             uri = builtin.uri,
-                            displayName = builtin.displayName,
+                            // Stable key, not the localized label — see BuiltinSounds.
+                            displayName = builtin.nameKey,
                             position = 0,
                         ),
                     )
@@ -261,7 +262,7 @@ fun ScheduleEditScreen(
                     builtins.forEach { builtin ->
                         Surface(
                             onClick = {
-                                steps.add(StepDraft(builtin.uri, builtin.displayName, 5))
+                                steps.add(StepDraft(builtin.uri, builtin.nameKey, 5))
                                 showSoundSourceDialog = false
                             },
                             shape = RoundedCornerShape(12.dp),
@@ -498,7 +499,8 @@ fun ScheduleEditScreen(
                                             SoundItemEntity(
                                                 scheduleId = 0,
                                                 uri = builtin.uri,
-                                                displayName = builtin.displayName,
+                                                // Stable key, not the localized label.
+                                                displayName = builtin.nameKey,
                                                 position = sounds.size,
                                             ),
                                         )
@@ -991,7 +993,7 @@ private fun StepDraftRow(
                     }
                 }
                 Text(
-                    "${index + 1}. ${step.soundName ?: stringResource(R.string.silence_step)}",
+                    "${index + 1}. ${step.soundName?.let { BuiltinSounds.labelFor(LocalContext.current, it) } ?: stringResource(R.string.silence_step)}",
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 12.dp),
@@ -1411,7 +1413,7 @@ private fun SoundItemRow(
                 }
             }
             Text(
-                "${index + 1}. ${sound.displayName}",
+                "${index + 1}. ${BuiltinSounds.labelFor(LocalContext.current, sound.displayName)}",
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 12.dp),

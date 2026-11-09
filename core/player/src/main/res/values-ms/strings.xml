@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Chanting Buddy</string>
+    <string name="builtin_morning_bell">Loceng pagi</string>
+    <string name="builtin_temple_bell">Loceng kuil</string>
+    <string name="builtin_singing_bowl">Mangkung nyanyi</string>
     <string name="playing">Sedang main…</string>
     <string name="stop">Berhenti</string>
     <string name="snooze">Tunda</string>

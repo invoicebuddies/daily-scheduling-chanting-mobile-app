@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Chanting Buddy</string>
+    <string name="builtin_morning_bell">晨钟</string>
+    <string name="builtin_temple_bell">寺钟</string>
+    <string name="builtin_singing_bowl">颂钵</string>
     <string name="playing">播放中…</string>
     <string name="stop">停止</string>
     <string name="snooze">稍后提醒</string>
