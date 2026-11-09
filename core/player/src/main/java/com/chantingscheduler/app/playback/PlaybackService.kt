@@ -75,6 +75,11 @@ class PlaybackService : MediaSessionService() {
     private var routine: RoutinePlan? = null
     private var stepIndex: Int = 0
     private var silenceWakeLock: PowerManager.WakeLock? = null
+    // Held through inter-track gaps: gap timers are uptime-based Handler posts,
+    // which don't fire while the CPU sleeps. During a gap the player is paused,
+    // so ExoPlayer's WAKE_MODE_LOCAL lock is released and the device can doze
+    // indefinitely, stalling the session mid-gap.
+    private var gapWakeLock: PowerManager.WakeLock? = null
     private var failedTrackCount: Int = 0
     private var playingFallback: Boolean = false
     private var gapActive: Boolean = false
@@ -98,10 +103,12 @@ class PlaybackService : MediaSessionService() {
                 // skips the remaining gap.
                 handler.removeCallbacksAndMessages(GAP_TOKEN)
                 gapActive = true
+                acquireGapWakeLock(gapMs + GAP_WAKELOCK_EXTRA_MS)
                 refreshNotification()
                 handler.postAtTime(
                     {
                         gapActive = false
+                        releaseGapWakeLock()
                         refreshNotification()
                         player?.play()
                     },
@@ -265,6 +272,7 @@ class PlaybackService : MediaSessionService() {
         handler.removeCallbacksAndMessages(AUTO_STOP_TOKEN)
         handler.removeCallbacksAndMessages(FADE_OUT_TOKEN)
         gapActive = false
+        releaseGapWakeLock()
         sessionActive = true
         startForegroundWithNotification()
         WidgetBridge.requestUpdate(this)
@@ -344,6 +352,18 @@ class PlaybackService : MediaSessionService() {
     private fun releaseSilenceWakeLock() {
         silenceWakeLock?.let { runCatching { if (it.isHeld) it.release() } }
         silenceWakeLock = null
+    }
+
+    private fun acquireGapWakeLock(timeoutMs: Long) {
+        releaseGapWakeLock()
+        gapWakeLock = getSystemService(PowerManager::class.java)
+            ?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "chanting:gap")
+            ?.apply { runCatching { acquire(timeoutMs) } }
+    }
+
+    private fun releaseGapWakeLock() {
+        gapWakeLock?.let { runCatching { if (it.isHeld) it.release() } }
+        gapWakeLock = null
     }
 
     // endregion
@@ -446,6 +466,7 @@ class PlaybackService : MediaSessionService() {
         }
         routine = null
         releaseSilenceWakeLock()
+        releaseGapWakeLock()
         PlaybackState.clear()
         runCatching { NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_BROKEN) }
         WidgetBridge.requestUpdate(this)
@@ -496,6 +517,8 @@ class PlaybackService : MediaSessionService() {
     override fun onDestroy() {
         sessionActive = false
         handler.removeCallbacksAndMessages(null)
+        releaseSilenceWakeLock()
+        releaseGapWakeLock()
         mediaSession?.let { session ->
             session.player.release()
             session.release()
@@ -664,6 +687,7 @@ class PlaybackService : MediaSessionService() {
         private const val FADE_STEP_MS = 50L
         private const val AUTO_STOP_FADE_MS = 5_000L
         private const val SILENCE_WAKELOCK_EXTRA_MS = 60_000L
+        private const val GAP_WAKELOCK_EXTRA_MS = 30_000L
         private val GAP_TOKEN = Any()
         private val FADE_TOKEN = Any()
         private val FADE_OUT_TOKEN = Any()
