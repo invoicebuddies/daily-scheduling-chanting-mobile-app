@@ -236,6 +236,7 @@
     <string name="ok">OK</string>
     <string name="a11y_hour">Hour</string>
     <string name="a11y_minute">Minute</string>
+    <string name="a11y_dial_value">%1$s, %2$s</string>
     <string name="reduce_motion">Reduce motion</string>
     <string name="reduce_motion_body">Stops breathing and pulsing animations.</string>
     <string name="content_desc_day_template">%1$s (day of week)</string>

@@ -1126,7 +1126,7 @@ private fun ReliabilitySection() {
             StatusRow(
                 icon = AppIcons.Bell,
                 title = stringResource(R.string.full_screen_row),
-                status = if (canFullScreen) "Allowed" else "Needed",
+                status = if (canFullScreen) stringResource(R.string.status_allowed) else stringResource(R.string.status_needed),
                 statusIsError = !canFullScreen,
                 actionLabel = if (canFullScreen) null else stringResource(R.string.fix),
                 onAction = {

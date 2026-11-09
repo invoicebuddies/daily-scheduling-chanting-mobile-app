@@ -234,6 +234,7 @@
     <string name="ok">OK</string>
     <string name="a11y_hour">Jam</string>
     <string name="a11y_minute">Minit</string>
+    <string name="a11y_dial_value">%1$s, %2$s</string>
     <string name="reduce_motion">Kurangkan gerakan</string>
     <string name="reduce_motion_body">Menghentikan animasi pernafasan dan denyutan.</string>
     <string name="content_desc_day_template">%1$s (hari minggu)</string>

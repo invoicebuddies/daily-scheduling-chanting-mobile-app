@@ -234,6 +234,7 @@
     <string name="ok">确定</string>
     <string name="a11y_hour">时</string>
     <string name="a11y_minute">分</string>
+    <string name="a11y_dial_value">%1$s，%2$s</string>
     <string name="reduce_motion">减弱动态效果</string>
     <string name="reduce_motion_body">停止呼吸与脉冲动画。</string>
     <string name="content_desc_day_template">%1$s（星期）</string>

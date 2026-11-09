@@ -222,6 +222,10 @@ private fun ArcDial(
 
     val pxPerStep = with(density) { DRAG_PX_PER_STEP.toPx() }
 
+    // Joined accessibility label, resolved in composition (semantics blocks
+    // can't call stringResource themselves).
+    val a11yValue = stringResource(R.string.a11y_dial_value, label, itemText(((selected % count) + count) % count))
+
     BoxWithConstraints(
         modifier
             .fillMaxWidth()
@@ -232,7 +236,7 @@ private fun ArcDial(
                 // Expose the dial as an adjustable progress control so it can
                 // be changed with TalkBack swipe gestures without dragging.
                 val valueText = itemText(((selected % count) + count) % count)
-                contentDescription = "$label, $valueText"
+                contentDescription = a11yValue
                 stateDescription = valueText
                 progressBarRangeInfo = ProgressBarRangeInfo(
                     current = selected.coerceIn(0, count - 1).toFloat(),
