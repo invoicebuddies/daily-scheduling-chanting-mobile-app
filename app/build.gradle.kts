@@ -74,13 +74,22 @@ android {
         val appVersion = android.defaultConfig.versionName ?: "dev"
         val copyReleaseApks = tasks.register("copyReleaseApks", Copy::class) {
             from(layout.buildDirectory.dir("outputs/apk/release")) {
-                include("app-*-release.apk")
+                // Unsigned CI builds (no keystore.properties) name outputs
+                // app-<abi>-release-unsigned.apk; signed builds drop the suffix.
+                include("app-*-release*.apk")
                 rename { name ->
-                    val abi = name.removePrefix("app-").removeSuffix("-release.apk")
+                    val abi = name.removePrefix("app-")
+                        .removeSuffix("-release-unsigned.apk")
+                        .removeSuffix("-release.apk")
                     "ChantingBuddy-v$appVersion-$abi.apk"
                 }
             }
             into(layout.buildDirectory.dir("outputs/release-named"))
+            doFirst {
+                // Drop stale named APKs (e.g. a different version built earlier)
+                // so release uploads can never include a previous build.
+                delete(layout.buildDirectory.dir("outputs/release-named"))
+            }
         }
         tasks.matching { it.name.startsWith("package") && it.name.endsWith("Release") }
             .configureEach { finalizedBy(copyReleaseApks) }
