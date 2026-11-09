@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The built-in chimes are referenced by name strings in stored URIs and by
+     R.raw ids in BuiltinSounds; keep them explicitly so the resource shrinker
+     can never strip or empty them in release builds. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@raw/builtin_*,@raw/fallback_chime" />
