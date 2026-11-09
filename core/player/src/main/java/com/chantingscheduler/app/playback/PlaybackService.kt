@@ -80,7 +80,8 @@ class PlaybackService : MediaSessionService() {
     // so ExoPlayer's WAKE_MODE_LOCAL lock is released and the device can doze
     // indefinitely, stalling the session mid-gap.
     private var gapWakeLock: PowerManager.WakeLock? = null
-    private var failedTrackCount: Int = 0
+    private val failurePolicy = PlaylistFailurePolicy()
+    private var uniquePlaylistUris: Set<String> = emptySet()
     private var failedStepCount: Int = 0
     // Uptime of the pending auto-stop deadline, so the fallback chime can keep
     // whichever end-of-session limit comes first. 0 = no auto-stop posted.
@@ -161,20 +162,25 @@ class PlaybackService : MediaSessionService() {
                 }
                 return
             }
-            failedTrackCount++
-            if (failedTrackCount >= trackCount) {
-                // Every URI failed (SAF permission revoked or files deleted):
-                // ring the bundled chime instead of ending in silence.
-                startFallbackChime()
-                return
-            }
-            // A broken/unreadable sound is skipped, mirroring the old advance-on-error behavior.
-            val nextIndex = p.currentMediaItemIndex + 1
-            if (nextIndex >= trackCount) {
-                stopPlayback(SessionEndReason.COMPLETED)
-            } else {
-                p.seekToDefaultPosition(nextIndex)
-                p.prepare()
+            val failedUri = p.currentMediaItem?.localConfiguration?.uri?.toString() ?: return
+            when (failurePolicy.onTrackFailed(failedUri, uniquePlaylistUris)) {
+                PlaylistFailurePolicy.Decision.Fallback -> startFallbackChime()
+                PlaylistFailurePolicy.Decision.Skip -> {
+                    // Remove the broken item so it isn't retried on every loop
+                    // pass; in REPEAT_MODE_ALL playback then continues (wrapping
+                    // to the start) instead of ending early on a broken last
+                    // track during an auto-stop session.
+                    val index = p.currentMediaItemIndex
+                    p.removeMediaItem(index)
+                    trackCount = p.mediaItemCount
+                    if (p.mediaItemCount == 0) {
+                        startFallbackChime()
+                    } else {
+                        p.seekTo(index.coerceAtMost(p.mediaItemCount - 1), C.TIME_UNSET)
+                        p.prepare()
+                        p.play()
+                    }
+                }
             }
         }
     }
@@ -271,7 +277,7 @@ class PlaybackService : MediaSessionService() {
             ?.let { runCatching { SessionSource.valueOf(it) }.getOrNull() }
             ?: SessionSource.MANUAL
         sessionStartMs = System.currentTimeMillis()
-        failedTrackCount = 0
+        failurePolicy.reset()
         failedStepCount = 0
         playingFallback = false
         audioAccumulatedMs = 0
@@ -297,6 +303,7 @@ class PlaybackService : MediaSessionService() {
         }
         // Playlist mode: expand to the requested number of passes so a
         // multi-pass session ends naturally after the last pass.
+        uniquePlaylistUris = uris.toSet()
         val expanded = if (repeatCount > 1) {
             List(repeatCount) { uris }.flatten()
         } else {
