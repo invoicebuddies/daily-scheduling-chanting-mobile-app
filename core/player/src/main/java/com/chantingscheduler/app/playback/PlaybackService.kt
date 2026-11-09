@@ -455,9 +455,14 @@ class PlaybackService : MediaSessionService() {
     private fun applySessionAudioAttributes(p: ExoPlayer) {
         val useAlarmVolume = sessionSource == SessionSource.ALARM &&
             PlaybackSettingsStore.get(this).currentAlarmVolumeEnabled
+        // handleAudioFocus is only supported for USAGE_MEDIA/USAGE_GAME;
+        // passing true with USAGE_ALARM throws asynchronously (surfaced as
+        // ERROR_CODE_FAILED_RUNTIME_CHECK), which used to kill every
+        // alarm-sourced routine via the failure path. The alarm stream
+        // doesn't duck other audio, so no focus handling is needed there.
         p.setAudioAttributes(
             if (useAlarmVolume) ALARM_AUDIO_ATTRIBUTES else AudioAttributes.DEFAULT,
-            /* handleAudioFocus= */ true,
+            /* handleAudioFocus= */ !useAlarmVolume,
         )
         if (useAlarmVolume) maybeNotifyAlarmVolumeMuted()
     }
