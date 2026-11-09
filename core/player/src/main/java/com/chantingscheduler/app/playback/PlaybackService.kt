@@ -82,6 +82,9 @@ class PlaybackService : MediaSessionService() {
     private var gapWakeLock: PowerManager.WakeLock? = null
     private var failedTrackCount: Int = 0
     private var failedStepCount: Int = 0
+    // Uptime of the pending auto-stop deadline, so the fallback chime can keep
+    // whichever end-of-session limit comes first. 0 = no auto-stop posted.
+    private var autoStopDeadlineUptimeMs: Long = 0
     private var playingFallback: Boolean = false
     private var gapActive: Boolean = false
     // Actual audio time, excluding inter-track gaps and silence (audioSeconds).
@@ -281,6 +284,7 @@ class PlaybackService : MediaSessionService() {
         handler.removeCallbacksAndMessages(STEP_TOKEN)
         handler.removeCallbacksAndMessages(AUTO_STOP_TOKEN)
         handler.removeCallbacksAndMessages(FADE_OUT_TOKEN)
+        handler.removeCallbacksAndMessages(FALLBACK_TOKEN)
         gapActive = false
         releaseGapWakeLock()
         sessionActive = true
@@ -309,7 +313,10 @@ class PlaybackService : MediaSessionService() {
             val deadline = sessionStartMs + maxDurationMinutes * 60_000L
             val fadeStart = (deadline - AUTO_STOP_FADE_MS - System.currentTimeMillis())
                 .coerceAtLeast(0)
+            autoStopDeadlineUptimeMs = SystemClock.uptimeMillis() + fadeStart + AUTO_STOP_FADE_MS
             handler.postAtTime(autoStop, AUTO_STOP_TOKEN, SystemClock.uptimeMillis() + fadeStart)
+        } else {
+            autoStopDeadlineUptimeMs = 0
         }
         startFadeIfNeeded()
         p.prepare()
@@ -405,6 +412,20 @@ class PlaybackService : MediaSessionService() {
         trackCount = 1
         val p = player ?: return
         handler.removeCallbacksAndMessages(GAP_TOKEN)
+        // The chime is a last resort, not an infinite bell: cap it at
+        // FALLBACK_MAX_MS, or at the schedule's auto-stop deadline when one is
+        // already armed, whichever comes first.
+        val fallbackDeadline = SystemClock.uptimeMillis() + FALLBACK_MAX_MS
+        val deadline = if (autoStopDeadlineUptimeMs > 0) {
+            minOf(fallbackDeadline, autoStopDeadlineUptimeMs)
+        } else {
+            fallbackDeadline
+        }
+        handler.postAtTime(
+            { stopPlayback(SessionEndReason.COMPLETED) },
+            FALLBACK_TOKEN,
+            deadline,
+        )
         p.repeatMode = Player.REPEAT_MODE_ONE
         p.setMediaItems(
             listOf(
@@ -702,11 +723,13 @@ class PlaybackService : MediaSessionService() {
         private const val AUTO_STOP_FADE_MS = 5_000L
         private const val SILENCE_WAKELOCK_EXTRA_MS = 60_000L
         private const val GAP_WAKELOCK_EXTRA_MS = 30_000L
+        private const val FALLBACK_MAX_MS = 120_000L
         private val GAP_TOKEN = Any()
         private val FADE_TOKEN = Any()
         private val FADE_OUT_TOKEN = Any()
         private val STEP_TOKEN = Any()
         private val AUTO_STOP_TOKEN = Any()
+        private val FALLBACK_TOKEN = Any()
 
         fun start(
             context: Context,
