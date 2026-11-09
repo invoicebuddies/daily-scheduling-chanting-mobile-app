@@ -819,7 +819,11 @@ class PlaybackService : MediaSessionService() {
          */
         fun notifyStartBlocked(context: Context, playIntent: Intent, label: String) {
             if (!NotificationManagerCompat.from(context).areNotificationsEnabled()) return
-            val startPending = PendingIntent.getService(
+            // The target must go foreground (the FGS start was the thing that
+            // got denied), so the tap has to use getForegroundService — a plain
+            // getService PendingIntent would re-deliver in the background and be
+            // refused again.
+            val startPending = PendingIntent.getForegroundService(
                 context,
                 3,
                 playIntent,
