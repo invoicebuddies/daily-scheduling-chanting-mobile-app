@@ -533,7 +533,14 @@ class PlaybackService : MediaSessionService() {
         }
     }
 
-    private fun buildNotification(): Notification {
+    /**
+     * Builds the session notification. Alarm-sourced sessions live on the
+     * high-importance [CHANNEL_ALARM] so the full-screen intent (locked-screen
+     * ringing page) and heads-up are honored; manual sessions stay on the
+     * quiet [CHANNEL_PLAYBACK] channel. [fullScreenIntent] is attached only to
+     * the *initial* alarm post — every later re-post must not re-trigger it.
+     */
+    private fun buildNotification(fullScreenIntent: Boolean): Notification {
         val openIntent = openIntent()
         val stopIntent = PendingIntent.getService(
             this,
@@ -552,25 +559,37 @@ class PlaybackService : MediaSessionService() {
         mediaSession?.let {
             mediaStyle.setMediaSession(MediaSessionCompat.Token.fromToken(it.platformToken))
         }
-        return NotificationCompat.Builder(this, CHANNEL_PLAYBACK)
+        val isAlarm = sessionSource == SessionSource.ALARM
+        val builder = NotificationCompat.Builder(
+            this,
+            if (isAlarm) CHANNEL_ALARM else CHANNEL_PLAYBACK,
+        )
             .setSmallIcon(R.drawable.ic_launcher)
             .setContentTitle(label)
             .setContentText(statusText())
             .setOngoing(true)
-            .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
+            .setCategory(
+                if (isAlarm) NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_TRANSPORT,
+            )
             .setContentIntent(openIntent)
-            .setFullScreenIntent(openIntent, true)
             .setStyle(mediaStyle)
             .addAction(R.drawable.ic_snooze, getString(R.string.snooze), snoozeIntent)
             .addAction(R.drawable.ic_stop, getString(R.string.stop), stopIntent)
-            .build()
+        if (fullScreenIntent && isAlarm) {
+            builder.setFullScreenIntent(openIntent, true)
+        } else {
+            // Re-posts (gap/step updates, Media3 provider refreshes) must not
+            // re-launch the ringing screen or re-alert.
+            builder.setOnlyAlertOnce(true)
+        }
+        return builder.build()
     }
 
     private fun startForegroundWithNotification() {
         ServiceCompat.startForeground(
             this,
             NOTIFICATION_ID,
-            buildNotification(),
+            buildNotification(fullScreenIntent = sessionSource == SessionSource.ALARM),
             ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
         )
     }
@@ -581,14 +600,16 @@ class PlaybackService : MediaSessionService() {
         if (!sessionActive) return
         if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) return
         runCatching {
-            NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, buildNotification())
+            NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, buildNotification(fullScreenIntent = false))
         }
     }
 
     /**
      * Serves the session's media notification. Rebuilds the app's own
-     * notification (same channel, full-screen intent, Stop + Snooze actions)
-     * instead of the generic Media3 layout, so existing behavior is preserved.
+     * notification (same channel and Stop + Snooze actions) instead of the
+     * generic Media3 layout, so existing behavior is preserved. Never
+     * re-attaches the full-screen intent — that fires only on the initial
+     * alarm-sourced post.
      */
     private inner class PlaybackNotificationProvider : MediaNotification.Provider {
         override fun createNotification(
@@ -596,7 +617,7 @@ class PlaybackService : MediaSessionService() {
             customLayout: ImmutableList<CommandButton>,
             actionFactory: MediaNotification.ActionFactory,
             onNotificationChangedCallback: MediaNotification.Provider.Callback,
-        ): MediaNotification = MediaNotification(NOTIFICATION_ID, buildNotification())
+        ): MediaNotification = MediaNotification(NOTIFICATION_ID, buildNotification(fullScreenIntent = false))
 
         override fun handleCustomCommand(
             session: MediaSession,
@@ -610,6 +631,14 @@ class PlaybackService : MediaSessionService() {
     companion object {
         /** Notification channel id; the channel itself is created by the app module. */
         const val CHANNEL_PLAYBACK = "playback"
+        /**
+         * High-importance channel for the initial notification of alarm-sourced
+         * sessions: below [android.app.NotificationManager.IMPORTANCE_HIGH]
+         * Android suppresses full-screen intents and heads-up, so the ringing
+         * page would never appear on a locked screen. No sound/vibration —
+         * the audio comes from ExoPlayer. Created by the app module.
+         */
+        const val CHANNEL_ALARM = "chant_alarm"
         /** High-priority channel for alarm-time notifications that can't start the FGS directly. */
         const val CHANNEL_FALLBACK = "playback_fallback"
         const val ACTION_PLAY = "com.chantingscheduler.app.action.PLAY"

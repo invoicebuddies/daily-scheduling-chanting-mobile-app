@@ -5,6 +5,7 @@
     <string name="stop">停止</string>
     <string name="snooze">稍后提醒</string>
     <string name="channel_fallback">闹钟</string>
+    <string name="channel_alarm">闹钟通知</string>
     <string name="time_to_chant_title">念诵时间到</string>
     <string name="time_to_chant_text">点按开始您的念诵时段。</string>
     <string name="sounds_broken_title">部分音频无法播放</string>

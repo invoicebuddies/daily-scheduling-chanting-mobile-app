@@ -1,6 +1,7 @@
 package com.chantingscheduler.app
 
 import android.app.Application
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import com.chantingscheduler.app.data.AppDatabase
@@ -30,6 +31,20 @@ class ChantingApp : Application() {
             NotificationManager.IMPORTANCE_HIGH,
         )
         getSystemService(NotificationManager::class.java).createNotificationChannel(fallbackChannel)
+        // Alarm-sourced sessions: IMPORTANCE_HIGH is required for the
+        // full-screen intent (locked-screen ringing page) to fire at all.
+        // Deliberately a NEW channel id — an existing channel's importance
+        // never updates in place. Silent: the chant audio is ExoPlayer's.
+        val alarmChannel = NotificationChannel(
+            PlaybackService.CHANNEL_ALARM,
+            getString(com.chantingscheduler.app.core.player.R.string.channel_alarm),
+            NotificationManager.IMPORTANCE_HIGH,
+        ).apply {
+            setSound(null, null)
+            enableVibration(false)
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+        }
+        getSystemService(NotificationManager::class.java).createNotificationChannel(alarmChannel)
         val reminderChannel = NotificationChannel(
             com.chantingscheduler.app.scheduling.ReminderReceiver.CHANNEL_REMINDERS,
             getString(com.chantingscheduler.app.core.scheduling.R.string.reminder_channel),
