@@ -121,6 +121,8 @@ Requirements: JDK 17+ and the Android SDK (API 36).
 
 ```bash
 ./gradlew assembleDebug   # debug APKs under app/build/outputs/apk/debug/
+./gradlew assembleRelease # release APKs under app/build/outputs/apk/release/,
+                          # plus user-facing copies in app/build/outputs/release-named/
 ./gradlew test            # JVM unit tests (trigger math, moons, routines, migrations, backup codec)
 ./gradlew lintDebug       # lint, 0 errors expected
 ```

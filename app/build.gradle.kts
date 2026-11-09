@@ -61,24 +61,25 @@ android {
         }
     }
 
-    // Release APKs carry the user-facing name the README's download table
-    // references (ChantingBuddy-vX.X-<abi>.apk / -universal.apk).
-    // VariantOutput.outputFileName was removed in AGP 8, so rename after
-    // packaging instead.
+    // Release APKs are additionally COPIED (not renamed) to
+    // build/outputs/release-named/ with the user-facing names the README's
+    // download table references. The original package outputs stay untouched
+    // so adb install and Android Studio keep working, and rebuilds can never
+    // leave a stale APK sitting under the release name.
     afterEvaluate {
         val appVersion = android.defaultConfig.versionName ?: "dev"
-        tasks.matching { it.name.startsWith("package") && it.name.endsWith("Release") }
-            .configureEach {
-                doLast {
-                    val outDir = layout.buildDirectory.dir("outputs/apk/release").get().asFile
-                    outDir.listFiles { f: File -> f.isFile && f.name.startsWith("app-") && f.extension == "apk" }
-                        ?.forEach { apk ->
-                            val abi = apk.name.removePrefix("app-").removeSuffix("-release.apk")
-                            val target = File(outDir, "ChantingBuddy-v$appVersion-$abi.apk")
-                            if (target != apk && !target.exists()) apk.renameTo(target)
-                        }
+        val copyReleaseApks = tasks.register("copyReleaseApks", Copy::class) {
+            from(layout.buildDirectory.dir("outputs/apk/release")) {
+                include("app-*-release.apk")
+                rename { name ->
+                    val abi = name.removePrefix("app-").removeSuffix("-release.apk")
+                    "ChantingBuddy-v$appVersion-$abi.apk"
                 }
             }
+            into(layout.buildDirectory.dir("outputs/release-named"))
+        }
+        tasks.matching { it.name.startsWith("package") && it.name.endsWith("Release") }
+            .configureEach { finalizedBy(copyReleaseApks) }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
