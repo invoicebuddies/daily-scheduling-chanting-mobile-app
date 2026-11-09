@@ -114,6 +114,7 @@ class MainActivity : ComponentActivity() {
         val snoozeMinutes by viewModel.snoozeMinutes.collectAsStateWithLifecycle()
         val alarmVolumeEnabled by viewModel.alarmVolumeEnabled.collectAsStateWithLifecycle()
         val lastDeleted by viewModel.lastDeleted.collectAsStateWithLifecycle()
+        val missingSoundUris by viewModel.missingSoundUris.collectAsStateWithLifecycle()
 
         // -1 = schedule list, 0 = new schedule, >0 = edit schedule with that id
         var screen by rememberSaveable { mutableLongStateOf(SCREEN_LIST) }
@@ -145,12 +146,17 @@ class MainActivity : ComponentActivity() {
         ) { uri ->
             if (uri != null) {
                 scope.launch {
-                    val ok = runCatching {
+                    val result = runCatching {
                         val json = activity.contentResolver.openInputStream(uri)
                             ?.use { it.readBytes().decodeToString() } ?: ""
                         viewModel.importBackup(json)
-                    }.getOrDefault(false)
-                    backupMessage = if (ok) getString(R.string.backup_imported) else getString(R.string.backup_import_failed)
+                    }.getOrNull()
+                    backupMessage = when {
+                        result == null -> getString(R.string.backup_import_failed)
+                        result.skipped > 0 ->
+                            getString(R.string.backup_imported_counts, result.imported, result.skipped)
+                        else -> getString(R.string.backup_imported)
+                    }
                 }
             }
         }
@@ -214,6 +220,7 @@ class MainActivity : ComponentActivity() {
                     schedules = schedules,
                     nowPlaying = nowPlaying,
                     location = location,
+                    missingSoundUris = missingSoundUris,
                     onAdd = { screen = SCREEN_NEW },
                     onEdit = { screen = it },
                     onOpenSettings = { showSettings = true },

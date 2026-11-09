@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -154,6 +155,7 @@ fun ScheduleListScreen(
     schedules: List<ScheduleWithSounds>,
     nowPlaying: NowPlaying,
     location: LatLng?,
+    missingSoundUris: Set<String> = emptySet(),
     onAdd: () -> Unit,
     onEdit: (Long) -> Unit,
     onOpenSettings: () -> Unit,
@@ -267,6 +269,8 @@ fun ScheduleListScreen(
                             item = item,
                             isPlayingThis = nowPlaying.isPlayingSchedule(item.schedule.id),
                             location = location,
+                            hasMissingSounds = item.sortedSounds.any { it.uri in missingSoundUris } ||
+                                item.sortedSteps.any { it.soundUri in missingSoundUris },
                             onClick = { onEdit(item.schedule.id) },
                             onToggle = { onToggle(item, it) },
                             onPlayToggle = { onPlayToggle(item) },
@@ -550,6 +554,7 @@ private fun ScheduleCard(
     item: ScheduleWithSounds,
     isPlayingThis: Boolean,
     location: LatLng?,
+    hasMissingSounds: Boolean = false,
     onClick: () -> Unit,
     onToggle: (Boolean) -> Unit,
     onPlayToggle: () -> Unit,
@@ -668,6 +673,33 @@ private fun ScheduleCard(
                     enabled = item.sounds.isNotEmpty() || item.steps.isNotEmpty(),
                     onClick = onPlayToggle,
                 )
+            }
+            if (hasMissingSounds) {
+                Spacer(Modifier.height(10.dp))
+                Surface(
+                    onClick = onClick,
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.errorContainer,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Row(
+                        Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            AppIcons.Alert,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.size(14.dp),
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            stringResource(R.string.repick_sounds_chip),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                    }
+                }
             }
         }
     }

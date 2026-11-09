@@ -38,6 +38,7 @@
     <string name="location_needed_title">需要位置信息</string>
     <string name="location_needed_body">日出/日落日程需要设置位置后才能生效。点按以设置。</string>
     <string name="sound_count">%1$d 个音频</string>
+    <string name="repick_sounds_chip">有音频文件需要重新选择——点按修复</string>
     <string name="gap_seconds">间隔 %1$d 秒</string>
     <string name="play_now">立即播放</string>
     <string name="stop_playback">停止播放</string>
@@ -143,6 +144,7 @@
     <string name="backup_exported">备份已导出。</string>
     <string name="backup_export_failed">导出失败。</string>
     <string name="backup_imported">备份已导入。</string>
+    <string name="backup_imported_counts">已导入 %1$d 项，跳过 %2$d 项重复。</string>
     <string name="backup_import_failed">导入失败——不是有效的备份文件。</string>
 
     <!-- Stats -->

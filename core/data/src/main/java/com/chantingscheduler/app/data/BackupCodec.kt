@@ -48,7 +48,16 @@ object BackupCodec {
         return root.toString(2)
     }
 
-    fun parse(json: String): Backup {
+    fun parse(
+        json: String,
+        /**
+         * Same-device imports: `content://` URIs the app still holds a
+         * persisted grant for play fine and keep their names; only URIs
+         * without a grant get the re-pick marker. Defaults to "nothing is
+         * granted" (restore-on-a-new-device behavior).
+         */
+        stillGranted: (String) -> Boolean = { false },
+    ): Backup {
         val root = JSONObject(json)
         val schedules = mutableListOf<ScheduleWithSounds>()
         val scheduleArray = root.optJSONArray("schedules") ?: JSONArray()
@@ -58,12 +67,12 @@ object BackupCodec {
             val sounds = mutableListOf<SoundItemEntity>()
             val soundArray = entry.optJSONArray("sounds") ?: JSONArray()
             for (j in 0 until soundArray.length()) {
-                sounds.add(soundFromJson(soundArray.getJSONObject(j), schedule.id))
+                sounds.add(soundFromJson(soundArray.getJSONObject(j), schedule.id, stillGranted))
             }
             val steps = mutableListOf<RoutineStepEntity>()
             val stepArray = entry.optJSONArray("steps") ?: JSONArray()
             for (j in 0 until stepArray.length()) {
-                steps.add(stepFromJson(stepArray.getJSONObject(j), schedule.id))
+                steps.add(stepFromJson(stepArray.getJSONObject(j), schedule.id, stillGranted))
             }
             schedules.add(ScheduleWithSounds(schedule, sounds, steps))
         }
@@ -78,12 +87,31 @@ object BackupCodec {
     private fun needsRepick(uri: String): Boolean =
         uri.isNotBlank() && !uri.startsWith("android.resource://")
 
-    private fun mark(name: String?, uri: String?): String? {
+    /**
+     * True when [candidate] is identical to one of [existing] — same label,
+     * trigger, time, days, and sounds/steps — i.e. re-importing the same
+     * backup would create a duplicate.
+     */
+    fun isDuplicate(candidate: ScheduleWithSounds, existing: List<ScheduleWithSounds>): Boolean =
+        existing.any { other ->
+            other.schedule.label == candidate.schedule.label &&
+                other.schedule.triggerType == candidate.schedule.triggerType &&
+                other.schedule.hour == candidate.schedule.hour &&
+                other.schedule.minute == candidate.schedule.minute &&
+                other.schedule.offsetMinutes == candidate.schedule.offsetMinutes &&
+                other.schedule.daysOfWeek == candidate.schedule.daysOfWeek &&
+                other.sortedSounds.map { it.uri } == candidate.sortedSounds.map { it.uri } &&
+                other.sortedSteps.map { Triple(it.soundUri, it.soundName, it.durationMinutes) } ==
+                candidate.sortedSteps.map { Triple(it.soundUri, it.soundName, it.durationMinutes) }
+        }
+
+    private fun mark(name: String?, uri: String?, stillGranted: (String) -> Boolean): String? {
         if (name == null) return null
-        return if (needsRepick(uri.orEmpty()) && !name.startsWith(REPICK_MARKER)) {
-            REPICK_MARKER + name
+        val stripped = name.removePrefix(REPICK_MARKER)
+        return if (needsRepick(uri.orEmpty()) && !stillGranted(uri.orEmpty())) {
+            REPICK_MARKER + stripped
         } else {
-            name
+            stripped
         }
     }
 
@@ -121,11 +149,15 @@ object BackupCodec {
         .put("displayName", s.displayName)
         .put("position", s.position)
 
-    private fun soundFromJson(o: JSONObject, scheduleId: Long): SoundItemEntity = SoundItemEntity(
+    private fun soundFromJson(
+        o: JSONObject,
+        scheduleId: Long,
+        stillGranted: (String) -> Boolean,
+    ): SoundItemEntity = SoundItemEntity(
         id = 0,
         scheduleId = scheduleId,
         uri = o.optString("uri"),
-        displayName = mark(o.optString("displayName"), o.optString("uri")).orEmpty(),
+        displayName = mark(o.optString("displayName"), o.optString("uri"), stillGranted).orEmpty(),
         position = o.optInt("position"),
     )
 
@@ -135,14 +167,18 @@ object BackupCodec {
         .put("durationMinutes", s.durationMinutes)
         .put("position", s.position)
 
-    private fun stepFromJson(o: JSONObject, scheduleId: Long): RoutineStepEntity = RoutineStepEntity(
+    private fun stepFromJson(
+        o: JSONObject,
+        scheduleId: Long,
+        stillGranted: (String) -> Boolean,
+    ): RoutineStepEntity = RoutineStepEntity(
         id = 0,
         scheduleId = scheduleId,
         soundUri = if (o.isNull("soundUri")) null else o.optString("soundUri"),
         soundName = if (o.isNull("soundName")) {
             null
         } else {
-            mark(o.optString("soundName"), o.optString("soundUri"))
+            mark(o.optString("soundName"), o.optString("soundUri"), stillGranted)
         },
         durationMinutes = o.optInt("durationMinutes"),
         position = o.optInt("position"),

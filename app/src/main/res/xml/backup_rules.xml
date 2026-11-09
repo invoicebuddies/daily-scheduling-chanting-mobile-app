@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The Room DB stores SAF content:// URIs whose grants never survive a
-     restore; excluding the database keeps auto-backup from resurrecting dead
-     sound references. Users have the explicit JSON export/import instead. -->
+<!-- The Room DB is included in cloud backup / device transfer so a new phone
+     keeps schedules and history. Dead SAF content:// grants after a restore
+     are handled at runtime: the app flags missing URIs with a "Re-pick" chip
+     and playback falls back to the bundled chime. The location pref stays
+     excluded: it may reference coordinates the user set on another device. -->
 <full-backup-content>
-    <exclude domain="database" path="chanting.db" />
     <exclude domain="sharedpref" path="location.xml" />
 </full-backup-content>

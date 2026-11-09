@@ -24,6 +24,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -100,15 +101,41 @@ class ScheduleViewModel @Inject constructor(
     /** JSON snapshot of all schedules (with sounds/steps) and history. */
     suspend fun exportBackupJson(): String = BackupCodec.toJson(repository.snapshot())
 
-    /** Parses and imports a backup, then re-arms every enabled schedule. */
-    fun importBackup(json: String): Boolean {
-        val backup = runCatching { BackupCodec.parse(json) }.getOrNull() ?: return false
-        viewModelScope.launch {
-            repository.importBackup(backup)
-            rearmAll()
-        }
-        return true
+    /**
+     * Parses and imports a backup, then re-arms every enabled schedule.
+     * `content://` URIs the app still holds a persisted grant for are
+     * re-attached cleanly; the rest keep their re-pick marker. Returns the
+     * number of schedules imported and skipped as duplicates, or null when
+     * the file could not be parsed.
+     */
+    suspend fun importBackup(json: String): ScheduleRepository.ImportResult? {
+        val granted = appContext.contentResolver.persistedUriPermissions
+            .map { it.uri.toString() }
+            .toSet()
+        val backup = runCatching { BackupCodec.parse(json) { it in granted } }.getOrNull()
+            ?: return null
+        val result = repository.importBackup(backup)
+        repository.getEnabled().forEach { alarmScheduler.schedule(it.schedule) }
+        return result
     }
+
+    /**
+     * `content://` sound URIs whose persisted grant is gone (file deleted or
+     * restored from a backup onto a device that never held the grant). The
+     * list screen shows a "Re-pick" chip on affected schedules.
+     */
+    val missingSoundUris: StateFlow<Set<String>> = schedules
+        .map { list ->
+            val granted = appContext.contentResolver.persistedUriPermissions
+                .map { it.uri.toString() }
+                .toSet()
+            list.flatMap { item ->
+                (item.sortedSounds.map { it.uri } +
+                    item.sortedSteps.mapNotNull { it.soundUri })
+                    .filter { it.startsWith("content://") && it !in granted }
+            }.toSet()
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
     fun save(schedule: ScheduleEntity, sounds: List<SoundItemEntity>, steps: List<RoutineStepEntity> = emptyList()) {
         viewModelScope.launch {

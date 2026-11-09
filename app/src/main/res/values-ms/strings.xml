@@ -38,6 +38,7 @@
     <string name="location_needed_title">Lokasi diperlukan</string>
     <string name="location_needed_body">Jadual matahari terbit/terbenam tidak dapat berbunyi sehingga anda menetapkan lokasi. Ketik untuk tetapkan.</string>
     <string name="sound_count">%1$d bunyi</string>
+    <string name="repick_sounds_chip">Fail bunyi perlu dipilih semula — ketik untuk baiki</string>
     <string name="gap_seconds">jeda %1$ds</string>
     <string name="play_now">Main sekarang</string>
     <string name="stop_playback">Hentikan mainan</string>
@@ -143,6 +144,7 @@
     <string name="backup_exported">Sandaran telah dieksport.</string>
     <string name="backup_export_failed">Eksport gagal.</string>
     <string name="backup_imported">Sandaran telah diimport.</string>
+    <string name="backup_imported_counts">%1$d diimport, %2$d pendua dilangkau.</string>
     <string name="backup_import_failed">Import gagal — bukan fail sandaran yang sah.</string>
 
     <!-- Stats -->

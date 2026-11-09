@@ -69,21 +69,37 @@ class ScheduleRepository @Inject constructor(private val db: AppDatabase) {
 
     /**
      * Inserts imported schedules (with sounds/steps) and session history as
-     * fresh rows; existing data is left untouched. Phone-file sound URIs are
-     * expected to arrive already marked by [BackupCodec].
+     * fresh rows; existing data is left untouched. Schedules identical to one
+     * already present (same label, trigger, time, days, sounds) are skipped
+     * as re-import duplicates. Phone-file sound URIs are expected to arrive
+     * already marked by [BackupCodec].
      */
-    suspend fun importBackup(backup: BackupCodec.Backup) {
+    suspend fun importBackup(backup: BackupCodec.Backup): ImportResult =
         db.withTransaction {
+            val existing = dao.getAllOnce()
+            val accepted = mutableListOf<ScheduleWithSounds>()
+            var imported = 0
+            var skipped = 0
             backup.schedules.forEach { item ->
-                val id = dao.insertSchedule(item.schedule.copy(id = 0))
-                dao.insertSounds(
-                    item.sounds.map { it.copy(id = 0, scheduleId = id) },
-                )
-                dao.insertSteps(
-                    item.steps.map { it.copy(id = 0, scheduleId = id) },
-                )
+                // Skip when an identical schedule exists already or was
+                // accepted earlier in this same import.
+                if (BackupCodec.isDuplicate(item, existing + accepted)) {
+                    skipped++
+                } else {
+                    val id = dao.insertSchedule(item.schedule.copy(id = 0))
+                    dao.insertSounds(
+                        item.sounds.map { it.copy(id = 0, scheduleId = id) },
+                    )
+                    dao.insertSteps(
+                        item.steps.map { it.copy(id = 0, scheduleId = id) },
+                    )
+                    imported++
+                    accepted.add(item)
+                }
             }
             backup.sessions.forEach { sessionLogDao.insert(it.copy(id = 0)) }
+            ImportResult(imported = imported, skipped = skipped)
         }
-    }
+
+    data class ImportResult(val imported: Int, val skipped: Int)
 }

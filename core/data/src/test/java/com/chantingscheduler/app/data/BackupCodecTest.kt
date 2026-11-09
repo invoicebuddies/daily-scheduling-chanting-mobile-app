@@ -116,4 +116,64 @@ class BackupCodecTest {
         assertTrue(parsed.sessions.isEmpty())
         assertEquals(BackupCodec.VERSION, org.json.JSONObject(json).getInt("version"))
     }
+
+    @Test
+    fun `still-granted uris keep their names and lose the marker`() {
+        val item = ScheduleWithSounds(
+            schedule = ScheduleEntity(hour = 8, minute = 0),
+            sounds = listOf(
+                SoundItemEntity(id = 1, scheduleId = 1, uri = "content://music.mp3", displayName = "Music", position = 0),
+                SoundItemEntity(id = 2, scheduleId = 1, uri = "content://gone.mp3", displayName = "Gone", position = 1),
+            ),
+        )
+        val json = BackupCodec.toJson(BackupCodec.Backup(listOf(item), emptyList()))
+
+        // Same-device import: the grant for content://music.mp3 survives.
+        val parsed = BackupCodec.parse(json) { it == "content://music.mp3" }
+
+        assertEquals("Music", parsed.schedules[0].sounds[0].displayName)
+        assertEquals(BackupCodec.REPICK_MARKER + "Gone", parsed.schedules[0].sounds[1].displayName)
+    }
+
+    @Test
+    fun `import strips a stale marker when the grant is held again`() {
+        val item = ScheduleWithSounds(
+            schedule = ScheduleEntity(hour = 8, minute = 0),
+            sounds = listOf(
+                SoundItemEntity(
+                    id = 1, scheduleId = 1, uri = "content://music.mp3",
+                    displayName = BackupCodec.REPICK_MARKER + "Music", position = 0,
+                ),
+            ),
+        )
+        val json = BackupCodec.toJson(BackupCodec.Backup(listOf(item), emptyList()))
+
+        val parsed = BackupCodec.parse(json) { true }
+
+        assertEquals("Music", parsed.schedules[0].sounds[0].displayName)
+    }
+
+    @Test
+    fun `isDuplicate matches identical schedule`() {
+        val item = ScheduleWithSounds(
+            schedule = ScheduleEntity(hour = 6, minute = 30, label = "Morning"),
+            sounds = listOf(SoundItemEntity(id = 1, scheduleId = 1, uri = "content://a", displayName = "A", position = 0)),
+        )
+        val existing = listOf(item.copy(schedule = item.schedule.copy(id = 42)))
+        assertTrue(BackupCodec.isDuplicate(item, existing))
+    }
+
+    @Test
+    fun `isDuplicate ignores different time or sounds`() {
+        val item = ScheduleWithSounds(
+            schedule = ScheduleEntity(hour = 6, minute = 30, label = "Morning"),
+            sounds = listOf(SoundItemEntity(id = 1, scheduleId = 1, uri = "content://a", displayName = "A", position = 0)),
+        )
+        val otherTime = listOf(item.copy(schedule = item.schedule.copy(minute = 0)))
+        val otherSound = listOf(
+            item.copy(sounds = listOf(SoundItemEntity(id = 2, scheduleId = 1, uri = "content://b", displayName = "B", position = 0))),
+        )
+        org.junit.Assert.assertFalse(BackupCodec.isDuplicate(item, otherTime))
+        org.junit.Assert.assertFalse(BackupCodec.isDuplicate(item, otherSound))
+    }
 }

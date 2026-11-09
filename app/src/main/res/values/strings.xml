@@ -38,6 +38,7 @@
     <string name="location_needed_title">Location needed</string>
     <string name="location_needed_body">Sunrise/sunset schedules can\'t fire until you set a location. Tap to configure.</string>
     <string name="sound_count">%1$d sound(s)</string>
+    <string name="repick_sounds_chip">A sound file needs re-picking — tap to fix</string>
     <string name="gap_seconds">gap %1$ds</string>
     <string name="play_now">Play now</string>
     <string name="stop_playback">Stop playback</string>
@@ -143,6 +144,7 @@
     <string name="backup_exported">Backup exported.</string>
     <string name="backup_export_failed">Export failed.</string>
     <string name="backup_imported">Backup imported.</string>
+    <string name="backup_imported_counts">Imported %1$d, skipped %2$d duplicates.</string>
     <string name="backup_import_failed">Import failed — not a valid backup file.</string>
 
     <!-- Stats -->

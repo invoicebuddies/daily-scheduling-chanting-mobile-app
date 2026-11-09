@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- See backup_rules.xml: the DB is included so cloud backup and device
+     transfer preserve schedules and history; dead SAF grants on the new
+     device are flagged in the UI (Re-pick chip) rather than excluded here. -->
 <data-extraction-rules>
     <cloud-backup>
-        <exclude domain="database" path="chanting.db" />
         <exclude domain="sharedpref" path="location.xml" />
     </cloud-backup>
     <device-transfer>
-        <exclude domain="database" path="chanting.db" />
         <exclude domain="sharedpref" path="location.xml" />
     </device-transfer>
 </data-extraction-rules>
