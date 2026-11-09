@@ -16,6 +16,9 @@ class RoutinePlan(steps: List<RoutineStepPlan>) {
 
     val stepCount: Int get() = steps.size
 
+    /** Steps that actually render audio (silence steps excluded). */
+    val playableStepCount: Int get() = steps.count { it.soundUri != null }
+
     val totalDurationMinutes: Int get() = steps.sumOf { it.durationMinutes }
 
     fun isSilence(index: Int): Boolean = steps[index].soundUri == null

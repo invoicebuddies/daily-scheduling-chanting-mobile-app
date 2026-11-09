@@ -81,6 +81,7 @@ class PlaybackService : MediaSessionService() {
     // indefinitely, stalling the session mid-gap.
     private var gapWakeLock: PowerManager.WakeLock? = null
     private var failedTrackCount: Int = 0
+    private var failedStepCount: Int = 0
     private var playingFallback: Boolean = false
     private var gapActive: Boolean = false
     // Actual audio time, excluding inter-track gaps and silence (audioSeconds).
@@ -144,9 +145,17 @@ class PlaybackService : MediaSessionService() {
                 return
             }
             if (routine != null) {
-                // A broken step sound is skipped; the routine moves on.
+                // A broken step sound is skipped; the routine moves on. When
+                // every playable step has failed, ring the fallback chime so
+                // the routine doesn't run in silence.
                 notifySoundsBroken()
-                advanceStep()
+                failedStepCount++
+                val plan = routine
+                if (plan != null && failedStepCount >= plan.playableStepCount) {
+                    startFallbackChime()
+                } else {
+                    advanceStep()
+                }
                 return
             }
             failedTrackCount++
@@ -260,6 +269,7 @@ class PlaybackService : MediaSessionService() {
             ?: SessionSource.MANUAL
         sessionStartMs = System.currentTimeMillis()
         failedTrackCount = 0
+        failedStepCount = 0
         playingFallback = false
         audioAccumulatedMs = 0
         playingSinceUptimeMs = 0
@@ -312,6 +322,10 @@ class PlaybackService : MediaSessionService() {
     private fun startStep(index: Int) {
         val plan = routine ?: return
         stepIndex = index
+        // A broken step may have been skipped by onPlayerError while its own
+        // stepAdvance timer was still posted — clear it so a stale timer can't
+        // fire mid-step and cut the replacement step short.
+        handler.removeCallbacksAndMessages(STEP_TOKEN)
         releaseSilenceWakeLock()
         publishState()
         refreshNotification()
