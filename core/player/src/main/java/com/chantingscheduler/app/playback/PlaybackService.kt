@@ -869,10 +869,18 @@ class PlaybackService : MediaSessionService() {
     }
 
     private fun startForegroundWithNotification() {
+        val fullScreen = sessionSource == SessionSource.ALARM
+        if (fullScreen) {
+            // Drop any previous ongoing post first: the system only launches
+            // the full-screen intent when the notification is NEWLY posted.
+            // Re-posting over an existing id can suppress the locked-screen
+            // ringing page (observed as an occasional missed FSI launch).
+            runCatching { NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID) }
+        }
         ServiceCompat.startForeground(
             this,
             NOTIFICATION_ID,
-            buildNotification(fullScreenIntent = sessionSource == SessionSource.ALARM),
+            buildNotification(fullScreenIntent = fullScreen),
             ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
         )
     }
