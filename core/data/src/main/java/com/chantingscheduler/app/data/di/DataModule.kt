@@ -8,6 +8,7 @@ import com.chantingscheduler.app.data.PlaybackSettingsStore
 import com.chantingscheduler.app.data.ScheduleDao
 import com.chantingscheduler.app.data.SessionLogDao
 import com.chantingscheduler.app.data.ThemeStore
+import com.chantingscheduler.app.data.UpdateStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -48,4 +49,9 @@ object DataModule {
     @Singleton
     fun providePlaybackSettingsStore(@ApplicationContext context: Context): PlaybackSettingsStore =
         PlaybackSettingsStore.get(context)
+
+    @Provides
+    @Singleton
+    fun provideUpdateStore(@ApplicationContext context: Context): UpdateStore =
+        UpdateStore.get(context)
 }

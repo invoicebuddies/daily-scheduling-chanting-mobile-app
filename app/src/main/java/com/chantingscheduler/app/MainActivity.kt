@@ -114,8 +114,25 @@ class MainActivity : ComponentActivity() {
         val snoozeMinutes by viewModel.snoozeMinutes.collectAsStateWithLifecycle()
         val alarmVolumeEnabled by viewModel.alarmVolumeEnabled.collectAsStateWithLifecycle()
         val chantVolumePercent by viewModel.chantVolumePercent.collectAsStateWithLifecycle()
+        val updateAutoCheck by viewModel.updateAutoCheck.collectAsStateWithLifecycle()
         val lastDeleted by viewModel.lastDeleted.collectAsStateWithLifecycle()
         val missingSoundUris by viewModel.missingSoundUris.collectAsStateWithLifecycle()
+        val updateCard by viewModel.updateCard.collectAsStateWithLifecycle()
+        val updateStatusMessage by viewModel.updateStatusMessage.collectAsStateWithLifecycle()
+
+        // Anonymous GitHub update check on app open (throttled to once/24h
+        // by the view model; silent on every failure).
+        LaunchedEffect(Unit) {
+            if (com.chantingscheduler.app.BuildConfig.GITHUB_UPDATE_CHECK) {
+                viewModel.checkForUpdates(force = false)
+            }
+        }
+        updateStatusMessage?.let { messageRes ->
+            LaunchedEffect(messageRes) {
+                android.widget.Toast.makeText(activity, activity.getString(messageRes), android.widget.Toast.LENGTH_SHORT).show()
+                viewModel.consumeUpdateStatusMessage()
+            }
+        }
 
         // -1 = schedule list, 0 = new schedule, >0 = edit schedule with that id
         var screen by rememberSaveable { mutableLongStateOf(SCREEN_LIST) }
@@ -232,6 +249,22 @@ class MainActivity : ComponentActivity() {
                     nowPlaying = nowPlaying,
                     location = location,
                     missingSoundUris = missingSoundUris,
+                    updateCard = updateCard?.let {
+                        com.chantingscheduler.app.ui.UpdateCardUi(
+                            version = it.version,
+                            notes = it.notes,
+                            downloadUrl = it.downloadUrl,
+                        )
+                    },
+                    onUpdateDownload = {
+                        updateCard?.let { card ->
+                            runCatching {
+                                activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(card.downloadUrl)))
+                            }
+                        }
+                    },
+                    onUpdateLater = viewModel::dismissUpdateLater,
+                    onUpdateSkip = viewModel::skipThisUpdateVersion,
                     onAdd = { screen = SCREEN_NEW },
                     onEdit = { screen = it },
                     onOpenSettings = { showSettings = true },
@@ -310,6 +343,9 @@ class MainActivity : ComponentActivity() {
                 onAlarmVolumeChange = viewModel::setAlarmVolumeEnabled,
                 chantVolumePercent = chantVolumePercent,
                 onChantVolumeChange = viewModel::setChantVolumePercent,
+                updateAutoCheck = updateAutoCheck,
+                onUpdateAutoCheckChange = viewModel::setUpdateAutoCheck,
+                onCheckUpdatesNow = { viewModel.checkForUpdates(force = true) },
                 onReplayIntroduction = {
                     showSettings = false
                     replayOnboarding = true

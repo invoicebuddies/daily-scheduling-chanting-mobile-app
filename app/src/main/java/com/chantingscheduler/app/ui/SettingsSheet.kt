@@ -140,6 +140,9 @@ fun SettingsSheet(
     onAlarmVolumeChange: (Boolean) -> Unit,
     chantVolumePercent: Int,
     onChantVolumeChange: (Int) -> Unit,
+    updateAutoCheck: Boolean,
+    onUpdateAutoCheckChange: (Boolean) -> Unit,
+    onCheckUpdatesNow: () -> Unit,
     onReplayIntroduction: () -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
@@ -386,6 +389,9 @@ fun SettingsSheet(
                 onReplayIntroduction = onReplayIntroduction,
                 onExport = onExport,
                 onImport = onImport,
+                updateAutoCheck = updateAutoCheck,
+                onUpdateAutoCheckChange = onUpdateAutoCheckChange,
+                onCheckUpdatesNow = onCheckUpdatesNow,
             )
 
             Spacer(Modifier.height(20.dp))
@@ -1261,8 +1267,42 @@ private fun AboutSection(
     onReplayIntroduction: () -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
+    updateAutoCheck: Boolean,
+    onUpdateAutoCheckChange: (Boolean) -> Unit,
+    onCheckUpdatesNow: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        // Update check rows come first: they're about keeping the app itself
+        // healthy, ahead of data export.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.update_auto_check_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    stringResource(R.string.update_auto_check_body),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Switch(
+                checked = updateAutoCheck,
+                onCheckedChange = onUpdateAutoCheckChange,
+            )
+        }
+        StatusRow(
+            icon = AppIcons.Repeat,
+            title = stringResource(R.string.update_check_now_title),
+            status = "v${BuildConfig.VERSION_NAME}",
+            statusIsError = false,
+            actionLabel = stringResource(R.string.update_check_now_action),
+            onAction = onCheckUpdatesNow,
+        )
         StatusRow(
             icon = AppIcons.Info,
             title = stringResource(R.string.app_name),

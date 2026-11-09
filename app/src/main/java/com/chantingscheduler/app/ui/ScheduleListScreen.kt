@@ -53,6 +53,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -156,6 +157,10 @@ fun ScheduleListScreen(
     nowPlaying: NowPlaying,
     location: LatLng?,
     missingSoundUris: Set<String> = emptySet(),
+    updateCard: UpdateCardUi? = null,
+    onUpdateDownload: () -> Unit = {},
+    onUpdateLater: () -> Unit = {},
+    onUpdateSkip: () -> Unit = {},
     onAdd: () -> Unit,
     onEdit: (Long) -> Unit,
     onOpenSettings: () -> Unit,
@@ -259,6 +264,16 @@ fun ScheduleListScreen(
                             )
                         }
                     }
+                    if (updateCard != null) {
+                        item(key = "update-card") {
+                            UpdateCardBanner(
+                                card = updateCard,
+                                onDownload = onUpdateDownload,
+                                onLater = onUpdateLater,
+                                onSkip = onUpdateSkip,
+                            )
+                        }
+                    }
                     if (needsLocation) {
                         item(key = "location-warning") {
                             LocationWarningBanner(onClick = onOpenSettings)
@@ -302,9 +317,80 @@ fun ScheduleListScreen(
     }
 }
 
+/** UI model for the update-prompt card (see ScheduleViewModel.updateCard). */
+data class UpdateCardUi(
+    val version: String,
+    val notes: String,
+    val downloadUrl: String,
+)
+
+/** Calm, dismissible card at the top of the list: a newer version exists. */
 @Composable
-private fun NextSessionHero(
-    item: ScheduleWithSounds,
+private fun UpdateCardBanner(
+    card: UpdateCardUi,
+    onDownload: () -> Unit,
+    onLater: () -> Unit,
+    onSkip: () -> Unit,
+) {
+    val haptics = LocalHapticFeedback.current
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(18.dp)) {
+            Text(
+                stringResource(R.string.update_available_title, card.version),
+                style = MaterialTheme.typography.titleMedium,
+                fontFamily = UrbanistFamily,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            if (card.notes.isNotBlank()) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    card.notes,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f),
+                )
+            }
+            Spacer(Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onDownload()
+                    },
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.primary,
+                ) {
+                    Text(
+                        stringResource(R.string.update_download),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp),
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                TextButton(onClick = onLater) {
+                    Text(
+                        stringResource(R.string.update_later),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
+                TextButton(onClick = onSkip) {
+                    Text(
+                        stringResource(R.string.update_skip),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NextSessionHero(    item: ScheduleWithSounds,
     triggerAt: Long,
     onClick: () -> Unit,
 ) {

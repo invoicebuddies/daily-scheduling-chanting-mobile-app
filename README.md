@@ -109,6 +109,8 @@ The app doesn't collect, send, or sell any personal data. Everything stays on yo
 
 Everything — schedules, sounds, history, settings — is stored on your device. There is no analytics, no account, no server. Your location is used only to calculate sun times and never leaves the phone, except when you use the optional address search, which goes through Android's built-in Geocoder.
 
+**Update check:** if you installed the app from the APK here, it checks for a newer release at most once a day. That request goes to GitHub's public API with a generic "ChantingBuddy/&lt;version&gt;" user agent — no account, no device identifier, nothing personal. It can be turned off in **Settings → About**, and "Check for updates now" never sends anything beyond that same anonymous request.
+
 ## Support the project
 
 If Chanting Buddy has become part of your daily practice and you'd like to say thanks, you're welcome to buy me a coffee: https://ko-fi.com/xia0da. No pressure at all — the app is free either way.

@@ -2,6 +2,9 @@ package com.chantingscheduler.app.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.os.Build
+import com.chantingscheduler.app.BuildConfig
+import com.chantingscheduler.app.R
 import com.chantingscheduler.app.data.AppTheme
 import com.chantingscheduler.app.data.LatLng
 import com.chantingscheduler.app.data.LocationStore
@@ -14,8 +17,12 @@ import com.chantingscheduler.app.data.SoundItemEntity
 import com.chantingscheduler.app.data.RoutineStepEntity
 import com.chantingscheduler.app.data.BackupCodec
 import com.chantingscheduler.app.data.ThemeStore
+import com.chantingscheduler.app.data.UpdatePromptLogic
+import com.chantingscheduler.app.data.UpdateStore
+import com.chantingscheduler.app.data.VersionComparator
 import com.chantingscheduler.app.playback.WidgetBridge
 import com.chantingscheduler.app.scheduling.AlarmScheduler
+import com.chantingscheduler.app.update.GitHubReleaseChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
@@ -36,6 +43,7 @@ class ScheduleViewModel @Inject constructor(
     private val themeStore: ThemeStore,
     private val onboardingStore: OnboardingStore,
     private val playbackSettingsStore: PlaybackSettingsStore,
+    private val updateStore: UpdateStore,
     @param:ApplicationContext private val appContext: Context,
 ) : ViewModel() {
 
@@ -60,6 +68,91 @@ class ScheduleViewModel @Inject constructor(
     private val _lastDeleted = MutableStateFlow<ScheduleWithSounds?>(null)
     val lastDeleted: StateFlow<ScheduleWithSounds?> = _lastDeleted
     private var undoExpireJob: Job? = null
+
+    // region Update check (GitHub Releases)
+
+    /** Card shown at the top of the schedule list when a newer version exists. */
+    data class UpdateCard(
+        /** New version, without the leading "v" (for display). */
+        val version: String,
+        /** Tag with leading "v" (for skip bookkeeping). */
+        val tag: String,
+        /** First ~3 lines of the release notes, markdown stripped. */
+        val notes: String,
+        /** Best download target: matching ABI asset, universal, or release page. */
+        val downloadUrl: String,
+    )
+
+    private val _updateCard = MutableStateFlow<UpdateCard?>(null)
+    val updateCard: StateFlow<UpdateCard?> = _updateCard
+
+    /** One-shot status message (e.g. "You're up to date") for the caller to toast. */
+    private val _updateStatusMessage = MutableStateFlow<Int?>(null)
+    val updateStatusMessage: StateFlow<Int?> = _updateStatusMessage
+
+    private val _updateAutoCheck = MutableStateFlow(updateStore.autoCheckEnabled)
+    val updateAutoCheck: StateFlow<Boolean> = _updateAutoCheck
+
+    fun setUpdateAutoCheck(enabled: Boolean) {
+        updateStore.autoCheckEnabled = enabled
+        _updateAutoCheck.value = enabled
+    }
+
+    fun consumeUpdateStatusMessage() {
+        _updateStatusMessage.value = null
+    }
+
+    /**
+     * Anonymous check against the latest GitHub release. Automatic checks
+     * (force=false) run at most once per 24 h, respect the auto-check toggle,
+     * and honor "Skip this version"; a forced check ignores the throttle and
+     * the skipped version. Every failure is silent; only a forced check on a
+     * current version reports "up to date". Gated on
+     * [com.chantingscheduler.app.BuildConfig.GITHUB_UPDATE_CHECK] so a future
+     * Play build can switch the whole feature off.
+     */
+    fun checkForUpdates(force: Boolean = false) {
+        if (!BuildConfig.GITHUB_UPDATE_CHECK) return
+        val now = System.currentTimeMillis()
+        if (!force) {
+            if (!_updateAutoCheck.value) return
+            if (now - updateStore.lastCheckMs < UpdateStore.CHECK_INTERVAL_MS) return
+        }
+        viewModelScope.launch {
+            updateStore.lastCheckMs = System.currentTimeMillis()
+            val release = GitHubReleaseChecker.fetchLatest(
+                "ChantingBuddy/${BuildConfig.VERSION_NAME}",
+            ) ?: return@launch
+            if (!VersionComparator.isNewer(release.tag, BuildConfig.VERSION_NAME)) {
+                if (force) _updateStatusMessage.value = R.string.update_up_to_date
+                return@launch
+            }
+            if (!force && updateStore.skippedVersion == release.tag) return@launch
+            _updateCard.value = UpdateCard(
+                version = release.tag.removePrefix("v"),
+                tag = release.tag,
+                notes = UpdatePromptLogic.stripMarkdown(release.body),
+                downloadUrl = UpdatePromptLogic.pickAssetUrl(
+                    release.assetUrls,
+                    Build.SUPPORTED_ABIS.toList(),
+                    release.htmlUrl,
+                ),
+            )
+        }
+    }
+
+    /** "Later": hide the card until the next (24 h) check. */
+    fun dismissUpdateLater() {
+        _updateCard.value = null
+    }
+
+    /** "Skip this version": hide until an even newer tag appears. */
+    fun skipThisUpdateVersion() {
+        _updateCard.value?.let { updateStore.skippedVersion = it.tag }
+        _updateCard.value = null
+    }
+
+    // endregion
 
     fun markOnboardingSeen() {
         onboardingStore.markSeen()

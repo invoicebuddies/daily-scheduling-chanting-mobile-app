@@ -25,6 +25,10 @@ android {
         targetSdk = 36
         versionCode = 3
         versionName = "1.2"
+
+        // Update prompt (GitHub Releases check) — a future Play Store build
+        // flips this to false, since Play forbids self-updating outside the store.
+        buildConfigField("boolean", "GITHUB_UPDATE_CHECK", "true")
     }
 
     signingConfigs {

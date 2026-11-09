@@ -39,6 +39,15 @@
     <string name="location_needed_body">日出/日落日程需要设置位置后才能生效。点按以设置。</string>
     <string name="sound_count">%1$d 个音频</string>
     <string name="repick_sounds_chip">有音频文件需要重新选择——点按修复</string>
+    <string name="update_available_title">Chanting Buddy %1$s 已发布</string>
+    <string name="update_download">下载</string>
+    <string name="update_later">稍后</string>
+    <string name="update_skip">跳过此版本</string>
+    <string name="update_up_to_date">已是最新版本。</string>
+    <string name="update_auto_check_title">自动检查更新</string>
+    <string name="update_auto_check_body">每天最多一次，应用会匿名询问 GitHub 是否有新版本。不会发送任何个人数据。</string>
+    <string name="update_check_now_title">立即检查更新</string>
+    <string name="update_check_now_action">检查</string>
     <string name="gap_seconds">间隔 %1$d 秒</string>
     <string name="play_now">立即播放</string>
     <string name="stop_playback">停止播放</string>

@@ -39,6 +39,15 @@
     <string name="location_needed_body">Jadual matahari terbit/terbenam tidak dapat berbunyi sehingga anda menetapkan lokasi. Ketik untuk tetapkan.</string>
     <string name="sound_count">%1$d bunyi</string>
     <string name="repick_sounds_chip">Fail bunyi perlu dipilih semula — ketik untuk baiki</string>
+    <string name="update_available_title">Chanting Buddy %1$s telah tersedia</string>
+    <string name="update_download">Muat turun</string>
+    <string name="update_later">Kemudian</string>
+    <string name="update_skip">Langkau versi ini</string>
+    <string name="update_up_to_date">Anda sudah pada versi terkini.</string>
+    <string name="update_auto_check_title">Semak kemas kini secara automatik</string>
+    <string name="update_auto_check_body">Sekali sehari pada paling banyak, aplikasi bertanya secara anonim kepada GitHub sama ada versi baharu wujud. Tiada data peribadi dihantar.</string>
+    <string name="update_check_now_title">Semak kemas kini sekarang</string>
+    <string name="update_check_now_action">Semak</string>
     <string name="gap_seconds">jeda %1$ds</string>
     <string name="play_now">Main sekarang</string>
     <string name="stop_playback">Hentikan mainan</string>
