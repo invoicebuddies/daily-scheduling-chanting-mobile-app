@@ -53,4 +53,31 @@ class PlaylistFailurePolicyTest {
         val decision = policy.onTrackFailed("only", setOf("only"))
         assertEquals(PlaylistFailurePolicy.Decision.Fallback, decision)
     }
+
+    @Test
+    fun `broken middle track seeks to the same index`() {
+        // The next track slid into the removed index.
+        val next = policy.nextIndexAfterRemoval(removedIndex = 1, remainingCount = 2, loops = false)
+        assertEquals(PlaylistFailurePolicy.NextIndex.Seek(1), next)
+    }
+
+    @Test
+    fun `broken last track of a one-shot playlist completes`() {
+        // Regression: seekTo(index.coerceAtMost(count-1)) replayed the previous
+        // track; a non-looping playlist must end naturally instead.
+        val next = policy.nextIndexAfterRemoval(removedIndex = 2, remainingCount = 2, loops = false)
+        assertEquals(PlaylistFailurePolicy.NextIndex.Complete, next)
+    }
+
+    @Test
+    fun `broken last track of a looping playlist wraps to zero`() {
+        val next = policy.nextIndexAfterRemoval(removedIndex = 2, remainingCount = 2, loops = true)
+        assertEquals(PlaylistFailurePolicy.NextIndex.Seek(0), next)
+    }
+
+    @Test
+    fun `removing the only track completes`() {
+        val next = policy.nextIndexAfterRemoval(removedIndex = 0, remainingCount = 0, loops = true)
+        assertEquals(PlaylistFailurePolicy.NextIndex.Complete, next)
+    }
 }

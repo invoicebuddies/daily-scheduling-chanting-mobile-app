@@ -199,18 +199,27 @@ class PlaybackService : MediaSessionService() {
                 PlaylistFailurePolicy.Decision.Fallback -> startFallbackChime()
                 PlaylistFailurePolicy.Decision.Skip -> {
                     // Remove the broken item so it isn't retried on every loop
-                    // pass; in REPEAT_MODE_ALL playback then continues (wrapping
-                    // to the start) instead of ending early on a broken last
-                    // track during an auto-stop session.
+                    // pass; the policy decides where playback continues.
                     val index = p.currentMediaItemIndex
                     p.removeMediaItem(index)
                     trackCount = p.mediaItemCount
-                    if (p.mediaItemCount == 0) {
-                        startFallbackChime()
-                    } else {
-                        p.seekTo(index.coerceAtMost(p.mediaItemCount - 1), C.TIME_UNSET)
-                        p.prepare()
-                        p.play()
+                    val next = failurePolicy.nextIndexAfterRemoval(
+                        removedIndex = index,
+                        remainingCount = p.mediaItemCount,
+                        loops = p.repeatMode == Player.REPEAT_MODE_ALL,
+                    )
+                    when (next) {
+                        is PlaylistFailurePolicy.NextIndex.Seek -> {
+                            p.seekTo(next.index, C.TIME_UNSET)
+                            p.prepare()
+                            p.play()
+                        }
+                        PlaylistFailurePolicy.NextIndex.Complete -> {
+                            // All-failed single track never reaches here (the
+                            // decision is Fallback); this is a one-shot
+                            // playlist whose broken item was last.
+                            stopPlayback(SessionEndReason.COMPLETED)
+                        }
                     }
                 }
             }

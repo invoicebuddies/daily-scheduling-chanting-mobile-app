@@ -19,6 +19,31 @@ class PlaylistFailurePolicy {
         data object Fallback : Decision
     }
 
+    /** Where playback continues after the failed item is removed. */
+    sealed interface NextIndex {
+        /** Seek to this index and continue. */
+        data class Seek(val index: Int) : NextIndex
+
+        /** Nothing playable remains at that position — end the session. */
+        data object Complete : NextIndex
+    }
+
+    /**
+     * After removing the failed item at [removedIndex] from a playlist of
+     * [remainingCount] items: the next track slid into [removedIndex] unless
+     * the failed item was last — then a looping playlist wraps to 0 and a
+     * one-shot playlist ends instead of replaying the previous track.
+     */
+    fun nextIndexAfterRemoval(
+        removedIndex: Int,
+        remainingCount: Int,
+        loops: Boolean,
+    ): NextIndex = when {
+        remainingCount <= 0 -> NextIndex.Complete
+        removedIndex >= remainingCount -> if (loops) NextIndex.Seek(0) else NextIndex.Complete
+        else -> NextIndex.Seek(removedIndex)
+    }
+
     private val failedUris = mutableSetOf<String>()
 
     val failedCount: Int get() = failedUris.size
