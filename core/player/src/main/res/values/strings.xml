@@ -6,6 +6,8 @@
     <string name="snooze">Snooze</string>
     <string name="channel_fallback">Alarms</string>
     <string name="channel_alarm">Alarm notifications</string>
+    <string name="alarm_volume_muted_title">Your alarm volume is muted</string>
+    <string name="alarm_volume_muted_text">The chant may play silently — raise the alarm volume, or turn off “Play scheduled chants on alarm volume” in Settings.</string>
     <string name="time_to_chant_title">Time to chant</string>
     <string name="time_to_chant_text">Tap to start your chanting session.</string>
     <string name="routine_step_status">Step %1$d of %2$d</string>

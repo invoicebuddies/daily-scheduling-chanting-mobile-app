@@ -135,6 +135,8 @@ fun SettingsSheet(
     onFadeInChange: (Int) -> Unit,
     snoozeMinutes: Int,
     onSnoozeMinutesChange: (Int) -> Unit,
+    alarmVolumeEnabled: Boolean,
+    onAlarmVolumeChange: (Boolean) -> Unit,
     onReplayIntroduction: () -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
@@ -365,6 +367,8 @@ fun SettingsSheet(
                 onFadeInChange = onFadeInChange,
                 snoozeMinutes = snoozeMinutes,
                 onSnoozeMinutesChange = onSnoozeMinutesChange,
+                alarmVolumeEnabled = alarmVolumeEnabled,
+                onAlarmVolumeChange = onAlarmVolumeChange,
             )
 
             Spacer(Modifier.height(24.dp))
@@ -914,6 +918,8 @@ private fun PlaybackSection(
     onFadeInChange: (Int) -> Unit,
     snoozeMinutes: Int,
     onSnoozeMinutesChange: (Int) -> Unit,
+    alarmVolumeEnabled: Boolean,
+    onAlarmVolumeChange: (Boolean) -> Unit,
 ) {
     Surface(
         shape = RoundedCornerShape(20.dp),
@@ -960,6 +966,27 @@ private fun PlaybackSection(
                     options = PlaybackSettingsStore.SNOOZE_OPTIONS.map { it to stringResource(R.string.snooze_minutes, it) },
                     selected = snoozeMinutes,
                     onSelect = onSnoozeMinutesChange,
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.alarm_volume_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        stringResource(R.string.alarm_volume_body),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = alarmVolumeEnabled,
+                    onCheckedChange = onAlarmVolumeChange,
                 )
             }
         }

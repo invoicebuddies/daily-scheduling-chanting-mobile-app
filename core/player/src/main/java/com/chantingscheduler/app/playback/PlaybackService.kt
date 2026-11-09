@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -88,6 +89,7 @@ class PlaybackService : MediaSessionService() {
     // whichever end-of-session limit comes first. 0 = no auto-stop posted.
     private var autoStopDeadlineUptimeMs: Long = 0
     private var playingFallback: Boolean = false
+    private var alarmMutedNotified: Boolean = false
     private var gapActive: Boolean = false
     // Actual audio time, excluding inter-track gaps and silence (audioSeconds).
     private var audioAccumulatedMs: Long = 0
@@ -283,6 +285,7 @@ class PlaybackService : MediaSessionService() {
         playingFallback = false
         audioAccumulatedMs = 0
         playingSinceUptimeMs = 0
+        alarmMutedNotified = false
         // A real session takes over the audio focus; stop any edit-screen preview.
         SoundPreviewPlayer.stop()
         // A fresh session supersedes any pending snooze for this schedule.
@@ -298,6 +301,7 @@ class PlaybackService : MediaSessionService() {
         startForegroundWithNotification()
         WidgetBridge.requestUpdate(this)
         val p = player ?: return
+        applySessionAudioAttributes(p)
         if (routine != null) {
             startStep(0)
             return
@@ -330,6 +334,52 @@ class PlaybackService : MediaSessionService() {
         p.prepare()
         p.play()
         publishState()
+    }
+
+    /**
+     * Alarm-sourced sessions render on the alarm audio stream when the setting
+     * is on, so a chant still sounds at media volume 0 or under DND. ExoPlayer
+     * fixes the audio stream at prepare() time, so this must run before any
+     * prepare/play for the session. Manual sessions keep the media stream.
+     */
+    private fun applySessionAudioAttributes(p: ExoPlayer) {
+        val useAlarmVolume = sessionSource == SessionSource.ALARM &&
+            PlaybackSettingsStore.get(this).currentAlarmVolumeEnabled
+        p.setAudioAttributes(
+            if (useAlarmVolume) ALARM_AUDIO_ATTRIBUTES else AudioAttributes.DEFAULT,
+            /* handleAudioFocus= */ true,
+        )
+        if (useAlarmVolume) maybeNotifyAlarmVolumeMuted()
+    }
+
+    /** One-time heads-up when the alarm stream is muted, so a "silent alarm" is never a surprise. */
+    @SuppressLint("MissingPermission") // areNotificationsEnabled() guards the post
+    private fun maybeNotifyAlarmVolumeMuted() {
+        if (alarmMutedNotified) return
+        val audioManager = getSystemService(AudioManager::class.java) ?: return
+        if (audioManager.getStreamVolume(AudioManager.STREAM_ALARM) > 0) return
+        alarmMutedNotified = true
+        if (!NotificationManagerCompat.from(this).areNotificationsEnabled()) return
+        val openApp = PendingIntent.getActivity(
+            this,
+            5,
+            Intent()
+                .setClassName(packageName, "com.chantingscheduler.app.MainActivity")
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val notification = NotificationCompat.Builder(this, CHANNEL_FALLBACK)
+            .setSmallIcon(R.drawable.ic_launcher)
+            .setContentTitle(getString(R.string.alarm_volume_muted_title))
+            .setContentText(getString(R.string.alarm_volume_muted_text))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setAutoCancel(true)
+            .setContentIntent(openApp)
+            .build()
+        runCatching {
+            NotificationManagerCompat.from(this).notify(NOTIFICATION_ID_MUTED, notification)
+        }
     }
 
     // region Routine mode
@@ -512,6 +562,7 @@ class PlaybackService : MediaSessionService() {
         releaseGapWakeLock()
         PlaybackState.clear()
         runCatching { NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_BROKEN) }
+        runCatching { NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_MUTED) }
         WidgetBridge.requestUpdate(this)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -573,6 +624,7 @@ class PlaybackService : MediaSessionService() {
         runCatching {
             NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
             NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_BROKEN)
+            NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID_MUTED)
         }
     }
 
@@ -710,6 +762,11 @@ class PlaybackService : MediaSessionService() {
         const val ACTION_PLAY = "com.chantingscheduler.app.action.PLAY"
         const val ACTION_STOP = "com.chantingscheduler.app.action.STOP"
         const val ACTION_SNOOZE = "com.chantingscheduler.app.action.SNOOZE"
+        /** Alarm-stream attributes for alarm-sourced sessions (setting on). */
+        private val ALARM_AUDIO_ATTRIBUTES: AudioAttributes = AudioAttributes.Builder()
+            .setUsage(C.USAGE_ALARM)
+            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+            .build()
         const val EXTRA_URIS = "uris"
         const val EXTRA_GAP_SECONDS = "gap_seconds"
         const val EXTRA_LABEL = "label"
@@ -727,6 +784,7 @@ class PlaybackService : MediaSessionService() {
         private const val NOTIFICATION_ID = 1001
         private const val NOTIFICATION_ID_BROKEN = 1002
         private const val NOTIFICATION_ID_BLOCKED = 1003
+        private const val NOTIFICATION_ID_MUTED = 1004
         private const val FADE_STEP_MS = 50L
         private const val AUTO_STOP_FADE_MS = 5_000L
         private const val SILENCE_WAKELOCK_EXTRA_MS = 60_000L

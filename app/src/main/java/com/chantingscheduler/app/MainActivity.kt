@@ -112,6 +112,7 @@ class MainActivity : ComponentActivity() {
         val theme by viewModel.theme.collectAsStateWithLifecycle()
         val fadeInSeconds by viewModel.fadeInSeconds.collectAsStateWithLifecycle()
         val snoozeMinutes by viewModel.snoozeMinutes.collectAsStateWithLifecycle()
+        val alarmVolumeEnabled by viewModel.alarmVolumeEnabled.collectAsStateWithLifecycle()
         val lastDeleted by viewModel.lastDeleted.collectAsStateWithLifecycle()
 
         // -1 = schedule list, 0 = new schedule, >0 = edit schedule with that id
@@ -287,6 +288,8 @@ class MainActivity : ComponentActivity() {
                 onFadeInChange = viewModel::setFadeInSeconds,
                 snoozeMinutes = snoozeMinutes,
                 onSnoozeMinutesChange = viewModel::setSnoozeMinutes,
+                alarmVolumeEnabled = alarmVolumeEnabled,
+                onAlarmVolumeChange = viewModel::setAlarmVolumeEnabled,
                 onReplayIntroduction = {
                     showSettings = false
                     replayOnboarding = true

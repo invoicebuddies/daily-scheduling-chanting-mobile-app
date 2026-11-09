@@ -51,6 +51,8 @@ class ScheduleViewModel @Inject constructor(
 
     val snoozeMinutes: StateFlow<Int> = playbackSettingsStore.snoozeMinutes
 
+    val alarmVolumeEnabled: StateFlow<Boolean> = playbackSettingsStore.alarmVolumeEnabled
+
     /** Most recently deleted schedule, offered for undo for 5 seconds. */
     private val _lastDeleted = MutableStateFlow<ScheduleWithSounds?>(null)
     val lastDeleted: StateFlow<ScheduleWithSounds?> = _lastDeleted
@@ -70,6 +72,10 @@ class ScheduleViewModel @Inject constructor(
 
     fun setSnoozeMinutes(minutes: Int) {
         playbackSettingsStore.setSnoozeMinutes(minutes)
+    }
+
+    fun setAlarmVolumeEnabled(enabled: Boolean) {
+        playbackSettingsStore.setAlarmVolumeEnabled(enabled)
     }
 
     fun saveLocation(latitude: Double, longitude: Double, address: String? = null) {

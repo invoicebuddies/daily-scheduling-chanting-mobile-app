@@ -192,6 +192,8 @@
     <string name="snooze_length">Snooze length</string>
     <string name="snooze_length_body">How long snoozing waits before the chant rings again.</string>
     <string name="snooze_minutes">%1$d min</string>
+    <string name="alarm_volume_title">Play scheduled chants on alarm volume</string>
+    <string name="alarm_volume_body">Alarm sessions follow the alarm stream, so they sound even when media volume is low or Do Not Disturb is on. Manual play stays on media volume.</string>
     <string name="fade_minutes">%1$dm</string>
     <string name="fade_seconds">%1$ds</string>
     <string name="reliability_section">Alarms &amp; reliability</string>

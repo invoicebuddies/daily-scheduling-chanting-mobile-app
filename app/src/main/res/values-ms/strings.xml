@@ -192,6 +192,8 @@
     <string name="snooze_length">Tempoh tunda</string>
     <string name="snooze_length_body">Berapa lama tunda sebelum lantunan berbunyi semula.</string>
     <string name="snooze_minutes">%1$d min</string>
+    <string name="alarm_volume_title">Mainkan lantunan berjadual pada volum penggera</string>
+    <string name="alarm_volume_body">Sesi penggera mengikut saluran penggera, jadi kedengaran walaupun volum media rendah atau Mod Jangan Ganggu aktif. Main manual kekal pada volum media.</string>
     <string name="fade_minutes">%1$d min</string>
     <string name="fade_seconds">%1$d s</string>
     <string name="reliability_section">Penggera &amp; kebolehpercayaan</string>

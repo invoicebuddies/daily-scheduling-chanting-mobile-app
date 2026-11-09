@@ -6,6 +6,8 @@
     <string name="snooze">Tunda</string>
     <string name="channel_fallback">Penggera</string>
     <string name="channel_alarm">Pemberitahuan penggera</string>
+    <string name="alarm_volume_muted_title">Volum penggera anda dibisukan</string>
+    <string name="alarm_volume_muted_text">Lantunan mungkin dimainkan secara senyap — naikkan volum penggera, atau matikan “Mainkan lantunan berjadual pada volum penggera” dalam Tetapan.</string>
     <string name="time_to_chant_title">Masa untuk lantunan</string>
     <string name="time_to_chant_text">Ketik untuk memulakan sesi lantunan anda.</string>
     <string name="sounds_broken_title">Sesetengah bunyi tidak dapat dimainkan</string>

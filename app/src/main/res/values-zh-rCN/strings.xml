@@ -192,6 +192,8 @@
     <string name="snooze_length">贪睡时长</string>
     <string name="snooze_length_body">贪睡后等待多久再次响铃。</string>
     <string name="snooze_minutes">%1$d 分钟</string>
+    <string name="alarm_volume_title">定时念诵使用闹钟音量</string>
+    <string name="alarm_volume_body">闹钟触发的念诵走闹钟声道，即使媒体音量低或开启了勿扰模式也能听到。手动播放仍使用媒体音量。</string>
     <string name="fade_minutes">%1$d 分钟</string>
     <string name="fade_seconds">%1$d 秒</string>
     <string name="reliability_section">闹钟与可靠性</string>
