@@ -93,6 +93,17 @@ class PlaybackService : MediaSessionService() {
     // True once the player has rendered audio this session; gates the
     // audio-focus retry loop for alarm sessions.
     private var audioRendered: Boolean = false
+    // True when the user deliberately paused (lock-screen/Bluetooth controls).
+    // The audio-focus retry must never fight a user pause.
+    private var userPaused: Boolean = false
+    // Set around internal pause() calls (gap hold) so they aren't mistaken for
+    // a user pause in onPlayWhenReadyChanged.
+    private var internalPause: Boolean = false
+    // Wall-clock base for the audio-focus retry window: session start for
+    // playlists, the current audible routine step's start for routines. Never
+    // a silence step — silence-first/silence-only routines must not be killed
+    // by a window that started before any audio was expected.
+    private var retryWindowStartMs: Long = 0
     // Original ACTION_PLAY intent, kept so the "missed chant" notification can re-deliver it.
     private var lastPlayIntent: Intent? = null
     private var gapActive: Boolean = false
@@ -116,7 +127,9 @@ class PlaybackService : MediaSessionService() {
                 // skips the remaining gap.
                 handler.removeCallbacksAndMessages(GAP_TOKEN)
                 gapActive = true
+                internalPause = true
                 player?.pause()
+                internalPause = false
                 acquireGapWakeLock(gapMs + GAP_WAKELOCK_EXTRA_MS)
                 refreshNotification()
                 handler.postAtTime(
@@ -148,6 +161,15 @@ class PlaybackService : MediaSessionService() {
             } else if (playingSinceUptimeMs > 0) {
                 audioAccumulatedMs += SystemClock.uptimeMillis() - playingSinceUptimeMs
                 playingSinceUptimeMs = 0
+            }
+        }
+
+        override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+            if (reason != Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST) return
+            if (!playWhenReady && !internalPause) {
+                userPaused = true
+            } else if (playWhenReady) {
+                userPaused = false
             }
         }
 
@@ -234,13 +256,14 @@ class PlaybackService : MediaSessionService() {
     private val audioFocusRetry = object : Runnable {
         override fun run() {
             val p = player ?: return
-            if (!sessionActive || audioRendered) return
-            val elapsed = System.currentTimeMillis() - sessionStartMs
+            if (!sessionActive || audioRendered || userPaused) return
+            val elapsed = System.currentTimeMillis() - retryWindowStartMs
             when (
                 AudioFocusRetryPolicy(
                     isAlarmSession = sessionSource == SessionSource.ALARM,
                     startElapsedMs = elapsed,
                     hasRenderedAudio = audioRendered,
+                    userPaused = userPaused,
                 ).action()
             ) {
                 AudioFocusRetryPolicy.Action.Retry -> {
@@ -334,6 +357,8 @@ class PlaybackService : MediaSessionService() {
         playingSinceUptimeMs = 0
         alarmMutedNotified = false
         audioRendered = false
+        userPaused = false
+        retryWindowStartMs = sessionStartMs
         lastPlayIntent = intent
         // A real session takes over the audio focus; stop any edit-screen preview.
         SoundPreviewPlayer.stop()
@@ -353,16 +378,18 @@ class PlaybackService : MediaSessionService() {
         WidgetBridge.requestUpdate(this)
         val p = player ?: return
         applySessionAudioAttributes(p)
+        if (routine != null) {
+            // Routines arm the retry per audible step in startStep — a
+            // silence-first routine must not inherit the session-start window.
+            startStep(0)
+            return
+        }
         if (sessionSource == SessionSource.ALARM) {
             handler.postAtTime(
                 audioFocusRetry,
                 FOCUS_RETRY_TOKEN,
                 SystemClock.uptimeMillis() + AudioFocusRetryPolicy.FIRST_RETRY_MS,
             )
-        }
-        if (routine != null) {
-            startStep(0)
-            return
         }
         // Playlist mode: expand to the requested number of passes so a
         // multi-pass session ends naturally after the last pass.
@@ -493,6 +520,9 @@ class PlaybackService : MediaSessionService() {
         publishState()
         refreshNotification()
         if (plan.isSilence(index)) {
+            // No audio is expected during silence: the focus retry must not
+            // run (and never on a silence-only routine).
+            handler.removeCallbacksAndMessages(FOCUS_RETRY_TOKEN)
             // Hold the CPU through the silence so the timer can't be deferred.
             val timeoutMs = plan.durationMillis(index) + SILENCE_WAKELOCK_EXTRA_MS
             silenceWakeLock = getSystemService(PowerManager::class.java)
@@ -513,6 +543,16 @@ class PlaybackService : MediaSessionService() {
                 stepAdvance, STEP_TOKEN,
                 SystemClock.uptimeMillis() + plan.durationMillis(index),
             )
+            // Arm the focus retry for this audible step, window starting now.
+            retryWindowStartMs = System.currentTimeMillis()
+            if (sessionSource == SessionSource.ALARM && !userPaused) {
+                handler.removeCallbacksAndMessages(FOCUS_RETRY_TOKEN)
+                handler.postAtTime(
+                    audioFocusRetry,
+                    FOCUS_RETRY_TOKEN,
+                    SystemClock.uptimeMillis() + AudioFocusRetryPolicy.FIRST_RETRY_MS,
+                )
+            }
         }
     }
 

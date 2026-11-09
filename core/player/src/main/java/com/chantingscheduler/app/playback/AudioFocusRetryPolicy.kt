@@ -10,14 +10,17 @@ package com.chantingscheduler.app.playback
  */
 class AudioFocusRetryPolicy(
     private val isAlarmSession: Boolean,
-    /** Milliseconds since the session started. */
+    /** Milliseconds since audio became expected (session start, or the current
+     *  audible routine step's start — never a silence step). */
     private val startElapsedMs: Long,
     /** True once the player has actually rendered audio this session. */
     private val hasRenderedAudio: Boolean,
+    /** True when the user deliberately paused (lock-screen/Bluetooth controls). */
+    private val userPaused: Boolean = false,
 ) {
 
     sealed interface Action {
-        /** Nothing to do (manual session, or audio already playing). */
+        /** Nothing to do (manual session, audio already playing, or user paused). */
         data object None : Action
 
         /** Re-issue play() and check again after [RETRY_INTERVAL_MS]. */
@@ -28,7 +31,7 @@ class AudioFocusRetryPolicy(
     }
 
     fun action(): Action = when {
-        !isAlarmSession || hasRenderedAudio -> Action.None
+        !isAlarmSession || hasRenderedAudio || userPaused -> Action.None
         startElapsedMs >= MAX_WAIT_MS -> Action.GiveUp
         startElapsedMs >= FIRST_RETRY_MS -> Action.Retry
         else -> Action.None
