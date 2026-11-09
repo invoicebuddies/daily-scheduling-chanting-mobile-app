@@ -6,6 +6,18 @@ package com.chantingscheduler.app.data
  */
 object UpdatePromptLogic {
 
+    private val ASSET_NAME = Regex("""ChantingBuddy-v[0-9][0-9.]*-([A-Za-z0-9_-]+)\.apk""")
+
+    /**
+     * ABI tag ("arm64-v8a", "universal", …) for a release asset name, or null
+     * when the name isn't a recognizable ChantingBuddy APK — including any
+     * `-UNSIGNED.apk` build, which must never be offered as a download.
+     */
+    fun assetAbi(name: String): String? {
+        val abi = ASSET_NAME.matchEntire(name)?.groupValues?.get(1) ?: return null
+        return if (abi == "UNSIGNED" || abi.endsWith("-UNSIGNED")) null else abi
+    }
+
     /**
      * First [maxLines] of the release body as plain text: markdown headers,
      * bold/italic, links, images, and list markers stripped; blank runs

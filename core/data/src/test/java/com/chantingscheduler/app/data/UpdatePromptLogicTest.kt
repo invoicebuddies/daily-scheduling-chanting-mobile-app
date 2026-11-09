@@ -44,4 +44,35 @@ class UpdatePromptLogicTest {
         assertEquals("url-u", UpdatePromptLogic.pickAssetUrl(mapOf("universal" to "url-u"), listOf("arm64-v8a"), "page"))
         assertEquals("page", UpdatePromptLogic.pickAssetUrl(emptyMap(), listOf("arm64-v8a"), "page"))
     }
+
+    @Test
+    fun `assetAbi recognizes each release APK naming`() {
+        assertEquals("arm64-v8a", UpdatePromptLogic.assetAbi("ChantingBuddy-v1.3.1-arm64-v8a.apk"))
+        assertEquals("x86_64", UpdatePromptLogic.assetAbi("ChantingBuddy-v1.3-x86_64.apk"))
+        assertEquals("universal", UpdatePromptLogic.assetAbi("ChantingBuddy-v1.3.1-universal.apk"))
+    }
+
+    @Test
+    fun `assetAbi rejects unsigned and foreign names`() {
+        // Unsigned CI copies must never be picked as a download, whatever ABI.
+        assertEquals(null, UpdatePromptLogic.assetAbi("ChantingBuddy-v1.3.1-arm64-v8a-UNSIGNED.apk"))
+        assertEquals(null, UpdatePromptLogic.assetAbi("ChantingBuddy-v1.3.1-universal-UNSIGNED.apk"))
+        assertEquals(null, UpdatePromptLogic.assetAbi("app-x86_64-release-unsigned.apk"))
+        assertEquals(null, UpdatePromptLogic.assetAbi("ChantingBuddy-v1.3.1-arm64-v8a.apk.sha256"))
+        assertEquals(null, UpdatePromptLogic.assetAbi("random-file.apk"))
+    }
+
+    @Test
+    fun `pickAssetUrl never returns an unsigned asset`() {
+        // Even if an unsigned name somehow entered the map, its key can only
+        // come from assetAbi, which never produces it — simulate the parse.
+        val parsed = listOf(
+            "ChantingBuddy-v1.3.1-arm64-v8a-UNSIGNED.apk",
+            "ChantingBuddy-v1.3.1-arm64-v8a.apk",
+        ).mapNotNull { name -> UpdatePromptLogic.assetAbi(name)?.let { it to "url-$it" } }.toMap()
+        assertEquals(
+            "url-arm64-v8a",
+            UpdatePromptLogic.pickAssetUrl(parsed, listOf("arm64-v8a"), "page"),
+        )
+    }
 }

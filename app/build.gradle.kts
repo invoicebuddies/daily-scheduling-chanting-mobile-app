@@ -76,12 +76,16 @@ android {
             from(layout.buildDirectory.dir("outputs/apk/release")) {
                 // Unsigned CI builds (no keystore.properties) name outputs
                 // app-<abi>-release-unsigned.apk; signed builds drop the suffix.
+                // Unsigned APKs can never be installed, so their copies must
+                // carry an unmistakable name — the update checker's asset
+                // matcher also refuses to treat them as downloads.
                 include("app-*-release*.apk")
                 rename { name ->
+                    val unsigned = name.removeSuffix(".apk").endsWith("-unsigned")
                     val abi = name.removePrefix("app-")
                         .removeSuffix("-release-unsigned.apk")
                         .removeSuffix("-release.apk")
-                    "ChantingBuddy-v$appVersion-$abi.apk"
+                    "ChantingBuddy-v$appVersion-$abi${if (unsigned) "-UNSIGNED" else ""}.apk"
                 }
             }
             into(layout.buildDirectory.dir("outputs/release-named"))

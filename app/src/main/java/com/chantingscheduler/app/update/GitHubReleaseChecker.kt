@@ -1,5 +1,6 @@
 package com.chantingscheduler.app.update
 
+import com.chantingscheduler.app.data.UpdatePromptLogic
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlinx.coroutines.Dispatchers
@@ -30,7 +31,6 @@ object GitHubReleaseChecker {
     private const val API_URL =
         "https://api.github.com/repos/invoicebuddies/daily-scheduling-chanting-mobile-app/releases/latest"
     private const val TIMEOUT_MS = 10_000
-    private val ASSET_NAME = Regex("""ChantingBuddy-v[0-9][0-9.]*-([A-Za-z0-9_-]+)\.apk""")
 
     suspend fun fetchLatest(userAgent: String): ReleaseInfo? = withContext(Dispatchers.IO) {
         runCatching {
@@ -52,8 +52,8 @@ object GitHubReleaseChecker {
         val arr: JSONArray = root.optJSONArray("assets") ?: JSONArray()
         for (i in 0 until arr.length()) {
             val asset = arr.getJSONObject(i)
-            val match = ASSET_NAME.matchEntire(asset.optString("name")) ?: continue
-            assets[match.groupValues[1]] = asset.getString("browser_download_url")
+            val abi = UpdatePromptLogic.assetAbi(asset.optString("name")) ?: continue
+            assets[abi] = asset.getString("browser_download_url")
         }
         ReleaseInfo(
             tag = tag,
