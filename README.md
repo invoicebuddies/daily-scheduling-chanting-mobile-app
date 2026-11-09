@@ -4,6 +4,7 @@
 
 [![Latest release](https://img.shields.io/github/v/release/invoicebuddies/daily-scheduling-chanting-mobile-app)](https://github.com/invoicebuddies/daily-scheduling-chanting-mobile-app/releases/latest)
 [![Android 8.0+](https://img.shields.io/badge/Android-8.0%2B-brightgreen)](https://github.com/invoicebuddies/daily-scheduling-chanting-mobile-app/releases/latest)
+[![CI](https://github.com/invoicebuddies/daily-scheduling-chanting-mobile-app/actions/workflows/android.yml/badge.svg)](https://github.com/invoicebuddies/daily-scheduling-chanting-mobile-app/actions/workflows/android.yml)
 
 <p align="center">
   <img src="docs/screenshots/home.png" width="200" alt="Home screen">
