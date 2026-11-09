@@ -144,7 +144,8 @@
     <string name="backup_exported">Sandaran telah dieksport.</string>
     <string name="backup_export_failed">Eksport gagal.</string>
     <string name="backup_imported">Sandaran telah diimport.</string>
-    <string name="backup_imported_counts">%1$d diimport, %2$d pendua dilangkau.</string>
+    <string name="backup_imported_full">%1$d jadual dan %2$d sesi diimport.</string>
+    <string name="backup_imported_counts">%1$d jadual diimport (%3$d sesi baharu), %2$d jadual pendua dan %4$d sesi pendua dilangkau.</string>
     <string name="backup_import_failed">Import gagal — bukan fail sandaran yang sah.</string>
 
     <!-- Stats -->

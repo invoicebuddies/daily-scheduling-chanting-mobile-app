@@ -153,9 +153,19 @@ class MainActivity : ComponentActivity() {
                     }.getOrNull()
                     backupMessage = when {
                         result == null -> getString(R.string.backup_import_failed)
-                        result.skipped > 0 ->
-                            getString(R.string.backup_imported_counts, result.imported, result.skipped)
-                        else -> getString(R.string.backup_imported)
+                        result.skipped > 0 || result.sessionsSkipped > 0 ->
+                            getString(
+                                R.string.backup_imported_counts,
+                                result.imported,
+                                result.skipped,
+                                result.sessionsImported,
+                                result.sessionsSkipped,
+                            )
+                        else -> getString(
+                            R.string.backup_imported_full,
+                            result.imported,
+                            result.sessionsImported,
+                        )
                     }
                 }
             }

@@ -144,7 +144,8 @@
     <string name="backup_exported">备份已导出。</string>
     <string name="backup_export_failed">导出失败。</string>
     <string name="backup_imported">备份已导入。</string>
-    <string name="backup_imported_counts">已导入 %1$d 项，跳过 %2$d 项重复。</string>
+    <string name="backup_imported_full">已导入 %1$d 个日程和 %2$d 条记录。</string>
+    <string name="backup_imported_counts">已导入 %1$d 个日程（%3$d 条新记录），跳过 %2$d 个重复日程和 %4$d 条重复记录。</string>
     <string name="backup_import_failed">导入失败——不是有效的备份文件。</string>
 
     <!-- Stats -->

@@ -144,7 +144,8 @@
     <string name="backup_exported">Backup exported.</string>
     <string name="backup_export_failed">Export failed.</string>
     <string name="backup_imported">Backup imported.</string>
-    <string name="backup_imported_counts">Imported %1$d, skipped %2$d duplicates.</string>
+    <string name="backup_imported_full">Imported %1$d schedules and %2$d sessions.</string>
+    <string name="backup_imported_counts">Imported %1$d schedules (%3$d new sessions), skipped %2$d duplicate schedules and %4$d duplicate sessions.</string>
     <string name="backup_import_failed">Import failed — not a valid backup file.</string>
 
     <!-- Stats -->

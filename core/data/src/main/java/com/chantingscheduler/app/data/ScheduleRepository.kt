@@ -71,8 +71,10 @@ class ScheduleRepository @Inject constructor(private val db: AppDatabase) {
      * Inserts imported schedules (with sounds/steps) and session history as
      * fresh rows; existing data is left untouched. Schedules identical to one
      * already present (same label, trigger, time, days, sounds) are skipped
-     * as re-import duplicates. Phone-file sound URIs are expected to arrive
-     * already marked by [BackupCodec].
+     * as re-import duplicates, as are session rows identical to an existing
+     * one — re-importing a backup must not double-count streaks, minutes, or
+     * the calendar. Phone-file sound URIs are expected to arrive already
+     * marked by [BackupCodec].
      */
     suspend fun importBackup(backup: BackupCodec.Backup): ImportResult =
         db.withTransaction {
@@ -97,9 +99,47 @@ class ScheduleRepository @Inject constructor(private val db: AppDatabase) {
                     accepted.add(item)
                 }
             }
-            backup.sessions.forEach { sessionLogDao.insert(it.copy(id = 0)) }
-            ImportResult(imported = imported, skipped = skipped)
+            val sessionKeys = sessionLogDao.getAllOnce()
+                .map { sessionKeyOf(it) }
+                .toMutableSet()
+            var sessionsImported = 0
+            var sessionsSkipped = 0
+            backup.sessions.forEach { session ->
+                val key = sessionKeyOf(session)
+                if (sessionKeys.add(key)) {
+                    sessionLogDao.insert(session.copy(id = 0))
+                    sessionsImported++
+                } else {
+                    sessionsSkipped++
+                }
+            }
+            ImportResult(
+                imported = imported,
+                skipped = skipped,
+                sessionsImported = sessionsImported,
+                sessionsSkipped = sessionsSkipped,
+            )
         }
 
-    data class ImportResult(val imported: Int, val skipped: Int)
+    /** Identity of a session row for duplicate detection on import. */
+    private data class SessionKey(
+        val startedAtEpochMs: Long,
+        val durationSeconds: Int,
+        val endReason: SessionEndReason,
+        val source: SessionSource,
+    )
+
+    private fun sessionKeyOf(s: SessionLogEntity) = SessionKey(
+        s.startedAtEpochMs,
+        s.durationSeconds,
+        s.endReason,
+        s.source,
+    )
+
+    data class ImportResult(
+        val imported: Int,
+        val skipped: Int,
+        val sessionsImported: Int,
+        val sessionsSkipped: Int,
+    )
 }
