@@ -60,6 +60,23 @@ android {
             isUniversalApk = true
         }
     }
+
+    // Release APKs carry the user-facing name the README's download table
+    // references (ChantingBuddy-vX.X-<abi>.apk / -universal.apk).
+    androidComponents {
+        onVariants(selector().withBuildType("release")) { variant ->
+            variant.outputs.forEach { output ->
+                val abi = output.filters
+                    .find { it.filterType == com.android.build.api.variant.ABI }
+                    ?.identifier
+                output.outputFileName = if (abi != null) {
+                    "ChantingBuddy-v${variant.versionName.get()}-$abi.apk"
+                } else {
+                    "ChantingBuddy-v${variant.versionName.get()}-universal.apk"
+                }
+            }
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
