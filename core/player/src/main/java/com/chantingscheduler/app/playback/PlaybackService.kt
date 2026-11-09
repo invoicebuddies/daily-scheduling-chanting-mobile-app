@@ -116,6 +116,7 @@ class PlaybackService : MediaSessionService() {
                 // skips the remaining gap.
                 handler.removeCallbacksAndMessages(GAP_TOKEN)
                 gapActive = true
+                player?.pause()
                 acquireGapWakeLock(gapMs + GAP_WAKELOCK_EXTRA_MS)
                 refreshNotification()
                 handler.postAtTime(
