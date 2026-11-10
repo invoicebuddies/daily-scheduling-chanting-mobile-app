@@ -101,9 +101,10 @@ class PlaybackService : MediaSessionService() {
     // True when the user deliberately paused (lock-screen/Bluetooth controls).
     // The audio-focus retry must never fight a user pause.
     private var userPaused: Boolean = false
-    // Set around internal pause() calls (gap hold) so they aren't mistaken for
-    // a user pause in onPlayWhenReadyChanged.
-    private var internalPause: Boolean = false
+    // One-shot marker set before every internal pause(): ExoPlayer delivers
+    // onPlayWhenReadyChanged asynchronously, so a scoped flag would already be
+    // cleared when the callback runs — the consumer resets this instead.
+    private var suppressUserPauseOnce: Boolean = false
     // Wall-clock base for the audio-focus retry window: session start for
     // playlists, the current audible routine step's start for routines. Never
     // a silence step — silence-first/silence-only routines must not be killed
@@ -141,9 +142,7 @@ class PlaybackService : MediaSessionService() {
                 // skips the remaining gap.
                 handler.removeCallbacksAndMessages(GAP_TOKEN)
                 gapActive = true
-                internalPause = true
-                player?.pause()
-                internalPause = false
+                pauseInternally()
                 acquireGapWakeLock(gapMs + GAP_WAKELOCK_EXTRA_MS)
                 refreshNotification()
                 handler.postAtTime(
@@ -183,9 +182,17 @@ class PlaybackService : MediaSessionService() {
 
         override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
             if (reason != Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST) return
-            if (!playWhenReady && !internalPause) {
-                userPaused = true
-            } else if (playWhenReady) {
+            if (!playWhenReady) {
+                // ExoPlayer delivers this callback asynchronously, so a
+                // "was this us?" flag read here would already be cleared.
+                // Consume the one-shot marker set by pauseInternally() instead.
+                if (suppressUserPauseOnce) {
+                    suppressUserPauseOnce = false
+                } else {
+                    userPaused = true
+                }
+            } else {
+                suppressUserPauseOnce = false
                 userPaused = false
             }
         }
@@ -399,6 +406,7 @@ class PlaybackService : MediaSessionService() {
         alarmMutedNotified = false
         audioRendered = false
         userPaused = false
+        suppressUserPauseOnce = false
         retryWindowStartMs = sessionStartMs
         lastPlayIntent = intent
         // A replaced session drops any focus the previous one held; the new
@@ -499,9 +507,7 @@ class PlaybackService : MediaSessionService() {
         when (AlarmAudioFocusPolicy.actionFor(change, focusLossPaused, userPaused)) {
             AlarmAudioFocusPolicy.Action.Pause -> {
                 focusLossPaused = true
-                internalPause = true
-                player?.pause()
-                internalPause = false
+                pauseInternally()
             }
             AlarmAudioFocusPolicy.Action.Resume -> {
                 focusLossPaused = false
@@ -544,6 +550,12 @@ class PlaybackService : MediaSessionService() {
         alarmFocusRequest = null
         focusLossPaused = false
         getSystemService(AudioManager::class.java)?.abandonAudioFocusRequest(request)
+    }
+
+    /** Internal pause that onPlayWhenReadyChanged must not read as a user pause. */
+    private fun pauseInternally() {
+        suppressUserPauseOnce = true
+        player?.pause()
     }
 
     /**
