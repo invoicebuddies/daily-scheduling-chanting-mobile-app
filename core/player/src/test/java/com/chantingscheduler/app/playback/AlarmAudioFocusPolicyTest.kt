@@ -20,9 +20,9 @@ class AlarmAudioFocusPolicyTest {
     }
 
     @Test
-    fun `permanent loss pauses`() {
+    fun `permanent loss stops the session`() {
         assertEquals(
-            AlarmAudioFocusPolicy.Action.Pause,
+            AlarmAudioFocusPolicy.Action.Stop,
             AlarmAudioFocusPolicy.actionFor(
                 AudioManager.AUDIOFOCUS_LOSS,
                 focusLossPaused = false,
@@ -86,5 +86,90 @@ class AlarmAudioFocusPolicyTest {
                 userPaused = false,
             ),
         )
+    }
+
+    // mayStart: the gate for every automatic play() (gap end, routine step,
+    // fallback chime, retry, failure seek).
+
+    @Test
+    fun `mayStart false when a gap ends mid-call`() {
+        assertEquals(
+            false,
+            AlarmAudioFocusPolicy.mayStart(
+                useAlarmStream = true, focusHeld = true,
+                focusLossPaused = true, userPaused = false,
+            ),
+        )
+    }
+
+    @Test
+    fun `mayStart false when a routine step starts mid-call`() {
+        assertEquals(
+            false,
+            AlarmAudioFocusPolicy.mayStart(
+                useAlarmStream = true, focusHeld = true,
+                focusLossPaused = true, userPaused = false,
+            ),
+        )
+    }
+
+    @Test
+    fun `mayStart false for the fallback chime mid-call`() {
+        assertEquals(
+            false,
+            AlarmAudioFocusPolicy.mayStart(
+                useAlarmStream = true, focusHeld = true,
+                focusLossPaused = true, userPaused = false,
+            ),
+        )
+    }
+
+    @Test
+    fun `mayStart false when focus was never granted`() {
+        assertEquals(
+            false,
+            AlarmAudioFocusPolicy.mayStart(
+                useAlarmStream = true, focusHeld = false,
+                focusLossPaused = false, userPaused = false,
+            ),
+        )
+    }
+
+    @Test
+    fun `mayStart false on user pause`() {
+        assertEquals(
+            false,
+            AlarmAudioFocusPolicy.mayStart(
+                useAlarmStream = true, focusHeld = true,
+                focusLossPaused = false, userPaused = true,
+            ),
+        )
+    }
+
+    @Test
+    fun `mayStart true for a healthy alarm-stream session`() {
+        assertEquals(
+            true,
+            AlarmAudioFocusPolicy.mayStart(
+                useAlarmStream = true, focusHeld = true,
+                focusLossPaused = false, userPaused = false,
+            ),
+        )
+    }
+
+    @Test
+    fun `media-stream sessions ignore focus state entirely`() {
+        // ExoPlayer owns focus for media streams: any combination may start.
+        for (held in listOf(true, false)) {
+            for (lossPaused in listOf(true, false)) {
+                assertEquals(
+                    true,
+                    AlarmAudioFocusPolicy.mayStart(
+                        useAlarmStream = false, focusHeld = held,
+                        focusLossPaused = lossPaused, userPaused = false,
+                    ),
+                )
+            }
+        }
     }
 }
