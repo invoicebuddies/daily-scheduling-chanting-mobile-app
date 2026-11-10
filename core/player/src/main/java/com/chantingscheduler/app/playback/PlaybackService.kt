@@ -151,7 +151,10 @@ class PlaybackService : MediaSessionService() {
                         gapActive = false
                         releaseGapWakeLock()
                         refreshNotification()
-                        player?.play()
+                        // A call may have started during the gap: never resume
+                        // over it — stay prepared and let the focus Resume
+                        // action start playback on AUDIOFOCUS_GAIN.
+                        if (canStartAudio()) player?.play()
                     },
                     GAP_TOKEN,
                     SystemClock.uptimeMillis() + gapMs,
@@ -226,7 +229,7 @@ class PlaybackService : MediaSessionService() {
                         is PlaylistFailurePolicy.NextIndex.Seek -> {
                             p.seekTo(next.index, C.TIME_UNSET)
                             p.prepare()
-                            p.play()
+                            if (canStartAudio()) p.play()
                         }
                         PlaylistFailurePolicy.NextIndex.Complete -> {
                             // All-failed single track never reaches here (the
@@ -294,7 +297,7 @@ class PlaybackService : MediaSessionService() {
                     // Focus denied (e.g. during a call): re-request on every
                     // retry so audio starts as soon as the call ends.
                     if (useAlarmStream) requestAlarmAudioFocus()
-                    if (audibleStartPermitted() && !focusLossPaused) p.play()
+                    if (canStartAudio()) p.play()
                     handler.postAtTime(
                         this,
                         FOCUS_RETRY_TOKEN,
@@ -461,7 +464,7 @@ class PlaybackService : MediaSessionService() {
         p.prepare()
         // Denied alarm-stream focus (e.g. a call in progress) means stay
         // silent; the retry loop re-requests and starts once it is granted.
-        if (audibleStartPermitted()) p.play()
+        if (canStartAudio()) p.play()
         publishState()
     }
 
@@ -509,6 +512,7 @@ class PlaybackService : MediaSessionService() {
                 if (!inSilence && !gapActive && !userPaused) player?.play()
             }
             AlarmAudioFocusPolicy.Action.KeepPlaying -> Unit
+            AlarmAudioFocusPolicy.Action.Stop -> stopPlayback(SessionEndReason.STOPPED)
             null -> Unit
         }
     }
@@ -542,8 +546,18 @@ class PlaybackService : MediaSessionService() {
         getSystemService(AudioManager::class.java)?.abandonAudioFocusRequest(request)
     }
 
-    /** Alarm-stream audio must not start while focus is unheld (e.g. mid-call). */
-    private fun audibleStartPermitted(): Boolean = !useAlarmStream || alarmFocusRequest != null
+    /**
+     * Gate for every automatic play() (gap end, routine step, fallback chime,
+     * retry re-issue, track-failure seek): never start alarm-stream audio over
+     * a transient focus loss (e.g. a call) or against a user pause. When false
+     * the player stays prepared and the Resume action starts it on GAIN.
+     */
+    private fun canStartAudio(): Boolean = AlarmAudioFocusPolicy.mayStart(
+        useAlarmStream = useAlarmStream,
+        focusHeld = alarmFocusRequest != null,
+        focusLossPaused = focusLossPaused,
+        userPaused = userPaused,
+    )
 
     /** One-time heads-up when the alarm stream is muted, so a "silent alarm" is never a surprise. */
     @SuppressLint("MissingPermission") // areNotificationsEnabled() guards the post
@@ -646,7 +660,7 @@ class PlaybackService : MediaSessionService() {
             p.setMediaItems(listOf(MediaItem.fromUri(plan.soundUri(index)!!)))
             startFadeIfNeeded()
             p.prepare()
-            if (audibleStartPermitted()) p.play()
+            if (canStartAudio()) p.play()
             handler.postAtTime(
                 stepAdvance, STEP_TOKEN,
                 SystemClock.uptimeMillis() + plan.durationMillis(index),
@@ -739,7 +753,7 @@ class PlaybackService : MediaSessionService() {
             ),
         )
         p.prepare()
-        if (audibleStartPermitted()) p.play()
+        if (canStartAudio()) p.play()
         publishState()
     }
 

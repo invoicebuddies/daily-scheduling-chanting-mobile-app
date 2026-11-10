@@ -22,6 +22,9 @@ object AlarmAudioFocusPolicy {
 
         /** Keep playing — the loss allows ducking and the alarm stream doesn't duck. */
         KeepPlaying,
+
+        /** Permanent loss (the user chose other audio): end the session calmly. */
+        Stop,
     }
 
     /**
@@ -32,9 +35,11 @@ object AlarmAudioFocusPolicy {
      */
     fun actionFor(focusChange: Int, focusLossPaused: Boolean, userPaused: Boolean): Action? =
         when (focusChange) {
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT,
-            AudioManager.AUDIOFOCUS_LOSS,
-            -> Action.Pause
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> Action.Pause
+
+            // Permanent loss: no matching GAIN will ever arrive, so pausing
+            // would zombie the session — end it instead.
+            AudioManager.AUDIOFOCUS_LOSS -> Action.Stop
 
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> Action.KeepPlaying
 
@@ -43,4 +48,21 @@ object AlarmAudioFocusPolicy {
 
             else -> null
         }
+
+    /**
+     * Whether an automatic (non-user) play() may start now — gap ends, routine
+     * step starts, fallback chime, retry re-issue, track-failure seek.
+     *
+     * Media-stream sessions always may start: ExoPlayer owns focus there and
+     * gates playback itself. Alarm-stream sessions need held focus and must
+     * not start over a transient loss (e.g. mid-call) or against a user pause;
+     * when false the player stays prepared and the `Resume` action starts it
+     * on AUDIOFOCUS_GAIN.
+     */
+    fun mayStart(
+        useAlarmStream: Boolean,
+        focusHeld: Boolean,
+        focusLossPaused: Boolean,
+        userPaused: Boolean,
+    ): Boolean = !useAlarmStream || (focusHeld && !focusLossPaused && !userPaused)
 }
