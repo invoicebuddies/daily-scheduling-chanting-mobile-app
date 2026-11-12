@@ -2,6 +2,7 @@ package com.chantingscheduler.app
 
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -57,8 +58,11 @@ import com.chantingscheduler.app.data.ScheduleRepository
 import com.chantingscheduler.app.data.ThemeStore
 import com.chantingscheduler.app.data.TriggerType
 import com.chantingscheduler.app.ui.rememberReduceMotion
+import com.chantingscheduler.app.playback.EndedSession
 import com.chantingscheduler.app.playback.PlaybackService
 import com.chantingscheduler.app.playback.PlaybackState
+import com.chantingscheduler.app.playback.RingingTimer
+import com.chantingscheduler.app.playback.RingingTimerLabel
 import com.chantingscheduler.app.ui.AppIcons
 import com.chantingscheduler.app.ui.theme.ChantingSchedulerTheme
 import com.chantingscheduler.app.ui.theme.UrbanistFamily
@@ -116,7 +120,33 @@ class RingingActivity : ComponentActivity() {
                     }
                 }
                 val nowPlaying by PlaybackState.state.collectAsStateWithLifecycle()
+                val endedSession by PlaybackState.endedSession.collectAsStateWithLifecycle()
                 val snoozeMinutes by playbackSettingsStore.snoozeMinutes.collectAsStateWithLifecycle()
+
+                // The session ended by itself (completed / auto-stop / focus
+                // loss): close immediately when the screen is off or locked,
+                // otherwise switch to the calm complete state and auto-close
+                // after a quiet minute with no interaction.
+                var complete by remember { mutableStateOf<EndedSession?>(null) }
+                LaunchedEffect(endedSession) {
+                    val ended = endedSession ?: return@LaunchedEffect
+                    PlaybackState.clearEnded()
+                    if (complete != null) return@LaunchedEffect
+                    val interactive =
+                        getSystemService(PowerManager::class.java)?.isInteractive != false
+                    if (!interactive) {
+                        finish()
+                    } else {
+                        complete = ended
+                    }
+                }
+                LaunchedEffect(complete) {
+                    if (complete != null) {
+                        delay(SESSION_COMPLETE_CLOSE_MS)
+                        finish()
+                    }
+                }
+
                 RingingScreen(
                     triggerType = triggerType,
                     label = nowPlaying.label,
@@ -125,6 +155,9 @@ class RingingActivity : ComponentActivity() {
                     currentStep = nowPlaying.currentStep,
                     totalSteps = nowPlaying.totalSteps,
                     startedAtMillis = nowPlaying.startedAtMillis,
+                    stepEndsAtMillis = nowPlaying.stepEndsAtMillis,
+                    autoStopAtMillis = nowPlaying.autoStopAtMillis,
+                    complete = complete,
                     snoozeMinutes = snoozeMinutes,
                     onSnooze = {
                         PlaybackService.snooze(this)
@@ -134,6 +167,10 @@ class RingingActivity : ComponentActivity() {
                         PlaybackService.stop(this)
                         finish()
                     },
+                    onDone = {
+                        complete = null
+                        finish()
+                    },
                 )
             }
         }
@@ -141,6 +178,9 @@ class RingingActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_SCHEDULE_ID = "schedule_id"
+
+        /** Auto-close of the complete state when nothing was touched. */
+        private const val SESSION_COMPLETE_CLOSE_MS = 60_000L
     }
 }
 
@@ -153,24 +193,43 @@ private fun RingingScreen(
     currentStep: Int,
     totalSteps: Int,
     startedAtMillis: Long,
+    stepEndsAtMillis: Long,
+    autoStopAtMillis: Long,
+    complete: EndedSession?,
     snoozeMinutes: Int,
     onSnooze: () -> Unit,
     onStop: () -> Unit,
+    onDone: () -> Unit,
 ) {
-    var elapsedSeconds by remember { mutableLongStateOf(0L) }
+    // Tick once a second; the pill text is derived from this "now".
+    var nowMs by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(startedAtMillis) {
         while (true) {
-            elapsedSeconds =
-                ((System.currentTimeMillis() - startedAtMillis) / 1000L).coerceAtLeast(0L)
+            nowMs = System.currentTimeMillis()
             delay(1000)
         }
     }
+    val timer = RingingTimerLabel.resolve(
+        isRoutine = totalSteps > 0,
+        currentStep = currentStep,
+        totalSteps = totalSteps,
+        stepEndsAtMs = stepEndsAtMillis,
+        autoStopAtMs = autoStopAtMillis,
+        nowMs = nowMs,
+        startedAtMs = startedAtMillis,
+    )
 
     Box(Modifier.fillMaxSize()) {
         when (triggerType) {
             TriggerType.SUNRISE -> DawnBackground()
             TriggerType.SUNSET -> DuskBackground()
             TriggerType.FIXED, TriggerType.FULL_MOON, TriggerType.NEW_MOON -> NightBackground()
+        }
+
+        val ended = complete
+        if (ended != null) {
+            SessionCompleteContent(ended = ended, onDone = onDone)
+            return@Box
         }
 
         Column(
@@ -210,7 +269,7 @@ private fun RingingScreen(
                 color = Color.White.copy(alpha = 0.16f),
             ) {
                 Text(
-                    "%d:%02d".format(elapsedSeconds / 60, elapsedSeconds % 60),
+                    timerText(timer),
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White,
                     modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp),
@@ -270,6 +329,75 @@ private fun RingingScreen(
             }
             Spacer(Modifier.height(32.dp))
         }
+    }
+}
+
+/** Pill text for the resolved timer: "Step x of n · mm:ss left", "mm:ss left", or "mm:ss". */
+@Composable
+private fun timerText(timer: RingingTimer): String = when (timer) {
+    is RingingTimer.Step -> stringResource(
+        R.string.ringing_step_time_left,
+        timer.step,
+        timer.totalSteps,
+        RingingTimerLabel.formatClock(timer.remainingMs),
+    )
+    is RingingTimer.Countdown ->
+        stringResource(R.string.ringing_time_left, RingingTimerLabel.formatClock(timer.remainingMs))
+    is RingingTimer.Elapsed -> RingingTimerLabel.formatClock(timer.elapsedMs)
+}
+
+/** Calm end-of-session state: what played, for how long, and a quiet way out. */
+@Composable
+private fun SessionCompleteContent(ended: EndedSession, onDone: () -> Unit) {
+    val minutes = ((ended.endedAtMillis - ended.startedAtMillis) / 60_000L)
+        .toInt()
+        .coerceAtLeast(1)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Spacer(Modifier.weight(1f))
+        Text(
+            stringResource(R.string.session_complete_title),
+            fontFamily = UrbanistFamily,
+            fontWeight = FontWeight.ExtraBold,
+            fontSize = 32.sp,
+            color = Color.White,
+        )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            ended.label.ifBlank { stringResource(R.string.ringing_default_label) },
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.White.copy(alpha = 0.85f),
+        )
+        Text(
+            stringResource(R.string.session_complete_minutes, minutes),
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.White.copy(alpha = 0.75f),
+        )
+        Spacer(Modifier.weight(1f))
+        Button(
+            onClick = onDone,
+            shape = RoundedCornerShape(32.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White,
+                contentColor = Color(0xFF1A2340),
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(64.dp),
+        ) {
+            Text(
+                stringResource(R.string.done_button),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold,
+            )
+        }
+        Spacer(Modifier.height(32.dp))
     }
 }
 

@@ -127,6 +127,11 @@
     <string name="snooze_button">稍后 %1$d 分钟</string>
     <string name="stop_button">停止</string>
     <string name="content_desc_alarm_ringing">闹钟响铃</string>
+    <string name="ringing_step_time_left">第 %1$d 步，共 %2$d 步 · 剩 %3$s</string>
+    <string name="ringing_time_left">剩 %1$s</string>
+    <string name="session_complete_title">本次念诵已完成</string>
+    <string name="session_complete_minutes">%1$d 分钟</string>
+    <string name="done_button">完成</string>
 
     <!-- Time picker -->
     <string name="am">上午</string>

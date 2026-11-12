@@ -127,6 +127,11 @@
     <string name="snooze_button">SNOOZE %1$dM</string>
     <string name="stop_button">STOP</string>
     <string name="content_desc_alarm_ringing">alarm ringing</string>
+    <string name="ringing_step_time_left">Step %1$d of %2$d · %3$s</string>
+    <string name="ringing_time_left">%1$s left</string>
+    <string name="session_complete_title">Session complete</string>
+    <string name="session_complete_minutes">%1$d min</string>
+    <string name="done_button">Done</string>
 
     <!-- Time picker -->
     <string name="am">AM</string>

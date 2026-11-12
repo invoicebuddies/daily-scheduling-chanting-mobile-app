@@ -127,6 +127,11 @@
     <string name="snooze_button">TUNDA %1$dM</string>
     <string name="stop_button">BERHENTI</string>
     <string name="content_desc_alarm_ringing">penggera berbunyi</string>
+    <string name="ringing_step_time_left">Langkah %1$d daripada %2$d · %3$s lagi</string>
+    <string name="ringing_time_left">%1$s lagi</string>
+    <string name="session_complete_title">Sesi selesai</string>
+    <string name="session_complete_minutes">%1$d min</string>
+    <string name="done_button">Selesai</string>
 
     <!-- Time picker -->
     <string name="am">PG</string>

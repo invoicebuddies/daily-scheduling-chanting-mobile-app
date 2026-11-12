@@ -89,6 +89,10 @@ class PlaybackService : MediaSessionService() {
     // Uptime of the pending auto-stop deadline, so the fallback chime can keep
     // whichever end-of-session limit comes first. 0 = no auto-stop posted.
     private var autoStopDeadlineUptimeMs: Long = 0
+    // Wall-clock auto-stop deadline published to the UI (0 = none).
+    private var sessionAutoStopAtMs: Long = 0
+    // Wall-clock deadline of the current routine step published to the UI.
+    private var stepEndsAtMs: Long = 0
     // Chant loudness ceiling (0.25..1.0) read at session start; VolumeFade
     // ramps up to this instead of 1.0. Alarm-stream chants are often much
     // louder than media-stream ones, so playback is capped by default (70%).
@@ -165,7 +169,7 @@ class PlaybackService : MediaSessionService() {
             if (playbackState == Player.STATE_ENDED) {
                 // In routine mode the playlist never ends on its own; silence
                 // steps don't drive playback state at all.
-                if (routine == null) stopPlayback(SessionEndReason.COMPLETED)
+                if (routine == null) stopPlayback(SessionEndReason.COMPLETED, selfEnded = true)
             }
         }
 
@@ -201,7 +205,7 @@ class PlaybackService : MediaSessionService() {
             val p = player ?: return
             if (playingFallback) {
                 // Even the bundled chime failed (shouldn't happen): end cleanly.
-                stopPlayback(SessionEndReason.COMPLETED)
+                stopPlayback(SessionEndReason.COMPLETED, selfEnded = true)
                 return
             }
             if (routine != null) {
@@ -242,7 +246,7 @@ class PlaybackService : MediaSessionService() {
                             // All-failed single track never reaches here (the
                             // decision is Fallback); this is a one-shot
                             // playlist whose broken item was last.
-                            stopPlayback(SessionEndReason.COMPLETED)
+                            stopPlayback(SessionEndReason.COMPLETED, selfEnded = true)
                         }
                     }
                 }
@@ -331,7 +335,7 @@ class PlaybackService : MediaSessionService() {
         fadeStartUptimeMs = SystemClock.uptimeMillis()
         handler.postAtTime(fadeOutStep, FADE_OUT_TOKEN, SystemClock.uptimeMillis() + FADE_STEP_MS)
         handler.postAtTime(
-            { stopPlayback(SessionEndReason.COMPLETED) },
+            { stopPlayback(SessionEndReason.COMPLETED, selfEnded = true) },
             AUTO_STOP_TOKEN,
             SystemClock.uptimeMillis() + AUTO_STOP_FADE_MS,
         )
@@ -373,7 +377,7 @@ class PlaybackService : MediaSessionService() {
             return
         }
         // Replacing an active session counts as stopping it.
-        logSession(SessionEndReason.STOPPED)
+        logSession(SessionEndReason.STOPPED, selfEnded = false)
         routine = stepPlan.takeIf { it.isRoutine }
         stepIndex = 0
         gapMs = if (routine != null) 0 else intent.getIntExtra(EXTRA_GAP_SECONDS, 0) * 1000L
@@ -398,6 +402,12 @@ class PlaybackService : MediaSessionService() {
         val repeatCount = intent.getIntExtra(EXTRA_REPEAT_COUNT, 1).coerceAtLeast(1)
         val maxDurationMinutes = intent.getIntExtra(EXTRA_MAX_DURATION_MINUTES, -1)
         sessionStartMs = System.currentTimeMillis()
+        sessionAutoStopAtMs = if (maxDurationMinutes > 0) {
+            sessionStartMs + maxDurationMinutes * 60_000L
+        } else {
+            0
+        }
+        stepEndsAtMs = 0
         failurePolicy.reset()
         failedStepCount = 0
         playingFallback = false
@@ -518,7 +528,9 @@ class PlaybackService : MediaSessionService() {
                 if (!inSilence && !gapActive && !userPaused) player?.play()
             }
             AlarmAudioFocusPolicy.Action.KeepPlaying -> Unit
-            AlarmAudioFocusPolicy.Action.Stop -> stopPlayback(SessionEndReason.STOPPED)
+            // Permanent loss (the user started other audio): the session ends
+            // by itself, so the ringing page switches to its complete state.
+            AlarmAudioFocusPolicy.Action.Stop -> stopPlayback(SessionEndReason.STOPPED, selfEnded = true)
             null -> Unit
         }
     }
@@ -652,6 +664,7 @@ class PlaybackService : MediaSessionService() {
     private fun startStep(index: Int) {
         val plan = routine ?: return
         stepIndex = index
+        stepEndsAtMs = System.currentTimeMillis() + plan.durationMillis(index)
         // A broken step may have been skipped by onPlayerError while its own
         // stepAdvance timer was still posted — clear it so a stale timer can't
         // fire mid-step and cut the replacement step short.
@@ -700,7 +713,7 @@ class PlaybackService : MediaSessionService() {
         val plan = routine ?: return
         val next = plan.indexAfter(stepIndex)
         if (next < 0) {
-            stopPlayback(SessionEndReason.COMPLETED)
+            stopPlayback(SessionEndReason.COMPLETED, selfEnded = true)
         } else {
             startStep(next)
         }
@@ -758,7 +771,7 @@ class PlaybackService : MediaSessionService() {
             fallbackDeadline
         }
         handler.postAtTime(
-            { stopPlayback(SessionEndReason.COMPLETED) },
+            { stopPlayback(SessionEndReason.COMPLETED, selfEnded = true) },
             FALLBACK_TOKEN,
             deadline,
         )
@@ -809,9 +822,18 @@ class PlaybackService : MediaSessionService() {
                 scheduleId = scheduleId,
                 currentStep = stepIndex + 1,
                 totalSteps = plan.stepCount,
+                stepEndsAtMillis = stepEndsAtMs,
+                autoStopAtMillis = sessionAutoStopAtMs,
             )
         } else {
-            PlaybackState.update(label, p.currentMediaItemIndex + 1, trackCount, scheduleId)
+            PlaybackState.update(
+                label = label,
+                currentTrack = p.currentMediaItemIndex + 1,
+                totalTracks = trackCount,
+                scheduleId = scheduleId,
+                stepEndsAtMillis = stepEndsAtMs,
+                autoStopAtMillis = sessionAutoStopAtMs,
+            )
         }
     }
 
@@ -825,8 +847,14 @@ class PlaybackService : MediaSessionService() {
         stopPlayback(SessionEndReason.SNOOZED)
     }
 
-    private fun stopPlayback(endReason: SessionEndReason) {
-        logSession(endReason)
+    /**
+     * Stops the session. [selfEnded] marks ends the user did not request —
+     * playlist/routine completion, auto-stop, or a permanent focus loss — so
+     * the ringing page can switch to its calm "Session complete" state.
+     * User Stop/Snooze close the page themselves and stay non-self.
+     */
+    private fun stopPlayback(endReason: SessionEndReason, selfEnded: Boolean = false) {
+        logSession(endReason, selfEnded)
         sessionActive = false
         abandonAlarmAudioFocus()
         handler.removeCallbacksAndMessages(null)
@@ -855,7 +883,7 @@ class PlaybackService : MediaSessionService() {
      * [SoundPreviewPlayer]). [SessionLogEntity.audioSeconds] counts actual
      * audio rendering time, excluding gaps and silence.
      */
-    private fun logSession(endReason: SessionEndReason) {
+    private fun logSession(endReason: SessionEndReason, selfEnded: Boolean) {
         val startedAt = sessionStartMs
         if (!sessionActive || startedAt <= 0L) return
         if (playingSinceUptimeMs > 0) {
@@ -872,7 +900,20 @@ class PlaybackService : MediaSessionService() {
             audioSeconds = (audioAccumulatedMs / 1000L).toInt(),
         )
         serviceScope.launch {
-            runCatching { ScheduleRepository(AppDatabase.get(applicationContext)).logSession(log) }
+            val logId = runCatching {
+                ScheduleRepository(AppDatabase.get(applicationContext)).logSession(log)
+            }.getOrNull()
+            if (selfEnded) {
+                PlaybackState.publishEnded(
+                    EndedSession(
+                        scheduleId = scheduleId,
+                        logId = logId,
+                        label = label,
+                        startedAtMillis = startedAt,
+                        endedAtMillis = System.currentTimeMillis(),
+                    ),
+                )
+            }
         }
     }
 
