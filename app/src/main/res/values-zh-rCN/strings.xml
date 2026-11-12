@@ -52,6 +52,11 @@
     <string name="play_now">立即播放</string>
     <string name="stop_playback">停止播放</string>
     <string name="track_status">第 %1$d 首，共 %2$d 首</string>
+    <string name="missed_chant_single">%3$s 的 %1$s 念诵（%2$s）没有播放。</string>
+    <string name="missed_chant_multiple">本周有 %1$d 次念诵没有播放。</string>
+    <string name="missed_chant_body">手机可能处于关机状态，或电池设置拦截了闹钟。</string>
+    <string name="missed_chant_fix">修复提醒可靠性</string>
+    <string name="missed_chant_dismiss">知道了</string>
     <string name="deleted_snackbar">已删除“%1$s”</string>
     <string name="default_schedule_name">日程</string>
     <string name="default_session_name">念诵时段</string>

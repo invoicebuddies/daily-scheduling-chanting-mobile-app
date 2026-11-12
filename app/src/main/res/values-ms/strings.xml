@@ -52,6 +52,11 @@
     <string name="play_now">Main sekarang</string>
     <string name="stop_playback">Hentikan mainan</string>
     <string name="track_status">Lagu %1$d daripada %2$d</string>
+    <string name="missed_chant_single">Lantunan %2$s pada %1$s tidak berbunyi pada hari %3$s.</string>
+    <string name="missed_chant_multiple">%1$d lantunan tidak berbunyi minggu ini.</string>
+    <string name="missed_chant_body">Telefon mungkin dimatikan, atau tetapan bateri menyekat penggera.</string>
+    <string name="missed_chant_fix">Baiki kebolehpercayaan</string>
+    <string name="missed_chant_dismiss">Ketepikan</string>
     <string name="deleted_snackbar">“%1$s” telah dipadam</string>
     <string name="default_schedule_name">Jadual</string>
     <string name="default_session_name">Sesi lantunan</string>

@@ -52,6 +52,11 @@
     <string name="play_now">Play now</string>
     <string name="stop_playback">Stop playback</string>
     <string name="track_status">Track %1$d of %2$d</string>
+    <string name="missed_chant_single">Your %1$s %2$s chant didn\'t play on %3$s.</string>
+    <string name="missed_chant_multiple">%1$d chants didn\'t play this week.</string>
+    <string name="missed_chant_body">The phone may have been off, or battery settings blocked the alarm.</string>
+    <string name="missed_chant_fix">Fix reliability</string>
+    <string name="missed_chant_dismiss">Dismiss</string>
     <string name="deleted_snackbar">Deleted “%1$s”</string>
     <string name="default_schedule_name">Schedule</string>
     <string name="default_session_name">Chanting session</string>

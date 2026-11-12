@@ -79,6 +79,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -128,6 +130,7 @@ private val PreviewDarkCard = Color(0xFF223936)
 @Composable
 fun SettingsSheet(
     theme: AppTheme,
+    highlightReliability: Boolean = false,
     onThemeChange: (AppTheme) -> Unit,
     location: LatLng?,
     onSave: (Double, Double, String?) -> Unit,
@@ -151,6 +154,15 @@ fun SettingsSheet(
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
+
+    // Deep-link from the missed-chant card: scroll to the reliability section.
+    val scrollState = rememberScrollState()
+    var reliabilityOffset by remember { mutableIntStateOf(-1) }
+    LaunchedEffect(highlightReliability, reliabilityOffset) {
+        if (highlightReliability && reliabilityOffset >= 0) {
+            scrollState.animateScrollTo(reliabilityOffset)
+        }
+    }
 
     // (text, isError) inline feedback under the device-location button.
     var message by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
@@ -205,7 +217,7 @@ fun SettingsSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
                 .imePadding()
                 .padding(start = 20.dp, end = 20.dp, bottom = 24.dp),
         ) {
@@ -380,8 +392,19 @@ fun SettingsSheet(
             )
 
             Spacer(Modifier.height(24.dp))
-            SectionOverline(stringResource(R.string.reliability_section))
-            ReliabilitySection()
+            SectionOverline(
+                stringResource(R.string.reliability_section),
+                modifier = Modifier.onGloballyPositioned {
+                    // First layout happens at scroll position 0, so the parent
+                    // offset is absolute content position; capture it once.
+                    if (reliabilityOffset < 0) {
+                        reliabilityOffset = it.boundsInParent().top.toInt() + scrollState.value
+                    }
+                },
+            )
+            ReliabilitySection(
+                highlighted = highlightReliability,
+            )
 
             Spacer(Modifier.height(24.dp))
             SectionOverline(stringResource(R.string.about_section))
@@ -1084,7 +1107,7 @@ private fun <T> OptionChips(
 // region Alarms & reliability
 
 @Composable
-private fun ReliabilitySection() {
+private fun ReliabilitySection(highlighted: Boolean = false) {
     val context = LocalContext.current
     // Re-read statuses when the sheet resumes (e.g. back from system settings).
     var resumeTick by remember { mutableIntStateOf(0) }
@@ -1120,7 +1143,19 @@ private fun ReliabilitySection() {
         }
     }
 
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    // Deep-link emphasis from the missed-chant card: a soft accent frame
+    // around the rows the card pointed at.
+    val highlightModifier = if (highlighted) {
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+            .padding(10.dp)
+    } else {
+        Modifier
+    }
+
+    Column(highlightModifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         StatusRow(
             icon = AppIcons.Bell,
             title = stringResource(R.string.exact_alarms_row),

@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import com.chantingscheduler.app.data.AlarmLedgerStore
 import com.chantingscheduler.app.data.LocationStore
 import com.chantingscheduler.app.data.PlaybackSettingsStore
 import com.chantingscheduler.app.data.ScheduleEntity
@@ -50,6 +51,9 @@ class AlarmScheduler @Inject constructor(@param:ApplicationContext private val c
             return
         }
         arm(triggerAt, pendingIntent(schedule.id))
+        // The missed-chant ledger records what we promised; AlarmReceiver
+        // records what actually happened.
+        AlarmLedgerStore.get(context).markExpected(schedule.id, triggerAt)
         // Pre-session reminder rides along on its own request-code range.
         // It must NOT use setAlarmClock: the lock screen and other apps would
         // show the reminder time as the device's "next alarm".
@@ -69,6 +73,9 @@ class AlarmScheduler @Inject constructor(@param:ApplicationContext private val c
     fun cancel(scheduleId: Long) {
         alarmManager.cancel(pendingIntent(scheduleId))
         alarmManager.cancel(reminderPendingIntent(scheduleId, 0))
+        // Disable/delete/edit all flow through cancel: the promise is moot,
+        // so a stale expectation must not surface as a "missed" chant later.
+        AlarmLedgerStore.get(context).clear(scheduleId)
     }
 
     /**
@@ -94,8 +101,13 @@ class AlarmScheduler @Inject constructor(@param:ApplicationContext private val c
      * Also restores persisted snoozes that are still in the future and drops
      * the stale ones — alarm PendingIntents never survive a reboot, but the
      * user's snooze intent should.
+     *
+     * Runs missed-chant detection BEFORE any re-arm: re-arming overwrites the
+     * ledger's expectations with the next occurrence, which would erase the
+     * evidence of an alarm that never fired.
      */
     fun rearmAll(enabledSchedules: List<ScheduleEntity>) {
+        reportMissedChants(enabledSchedules)
         enabledSchedules.forEach { schedule(it) }
         val store = PlaybackSettingsStore.get(context)
         val pending = store.pendingSnoozes()
@@ -104,6 +116,26 @@ class AlarmScheduler @Inject constructor(@param:ApplicationContext private val c
         toRestore.forEach { (scheduleId, triggerAt) ->
             arm(triggerAt, snoozePendingIntent(scheduleId))
         }
+    }
+
+    /**
+     * Compares what was promised ([AlarmLedgerStore] expectations) with what
+     * happened (fire marks) and moves genuine misses to the store's pending
+     * list. The list screen shows them once, calmly, with a reliability link.
+     */
+    private fun reportMissedChants(enabledSchedules: List<ScheduleEntity>) {
+        val ledger = AlarmLedgerStore.get(context)
+        val result = MissedChantDetector.detect(
+            ledger = ledger.entries(),
+            enabledScheduleIds = enabledSchedules.map { it.id }.toSet(),
+            nowMs = System.currentTimeMillis(),
+        )
+        if (result.missed.isNotEmpty()) {
+            ledger.addMissed(
+                result.missed.map { AlarmLedgerStore.MissedChant(it.scheduleId, it.expectedAtMs) },
+            )
+        }
+        result.clearScheduleIds.forEach(ledger::clear)
     }
 
     private fun arm(triggerAt: Long, pendingIntent: PendingIntent) {

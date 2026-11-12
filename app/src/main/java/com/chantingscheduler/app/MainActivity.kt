@@ -139,8 +139,10 @@ class MainActivity : ComponentActivity() {
         var editing by remember { mutableStateOf<ScheduleWithSounds?>(null) }
         var showExactAlarmHint by remember { mutableStateOf(false) }
         var showSettings by remember { mutableStateOf(false) }
+        var settingsHighlightReliability by remember { mutableStateOf(false) }
         var replayOnboarding by remember { mutableStateOf(false) }
         val onboardingSeen by viewModel.onboardingSeen.collectAsStateWithLifecycle()
+        val missedChantCard by viewModel.missedChantCard.collectAsStateWithLifecycle()
 
         val scope = rememberCoroutineScope()
         var backupMessage by remember { mutableStateOf<String?>(null) }
@@ -249,6 +251,19 @@ class MainActivity : ComponentActivity() {
                     nowPlaying = nowPlaying,
                     location = location,
                     missingSoundUris = missingSoundUris,
+                    missedChantCard = missedChantCard?.let {
+                        com.chantingscheduler.app.ui.MissedChantUi(
+                            time = it.time,
+                            weekday = it.weekday,
+                            label = it.label,
+                            count = it.count,
+                        )
+                    },
+                    onOpenReliability = {
+                        settingsHighlightReliability = true
+                        showSettings = true
+                    },
+                    onDismissMissed = viewModel::dismissMissedChants,
                     updateCard = updateCard?.let {
                         com.chantingscheduler.app.ui.UpdateCardUi(
                             version = it.version,
@@ -267,7 +282,10 @@ class MainActivity : ComponentActivity() {
                     onUpdateSkip = viewModel::skipThisUpdateVersion,
                     onAdd = { screen = SCREEN_NEW },
                     onEdit = { screen = it },
-                    onOpenSettings = { showSettings = true },
+                    onOpenSettings = {
+                        settingsHighlightReliability = false
+                        showSettings = true
+                    },
                     onOpenStats = { screen = SCREEN_STATS },
                     onToggle = viewModel::setEnabled,
                     deletedItem = lastDeleted,
@@ -331,6 +349,7 @@ class MainActivity : ComponentActivity() {
         if (showSettings) {
             SettingsSheet(
                 theme = theme,
+                highlightReliability = settingsHighlightReliability,
                 onThemeChange = viewModel::setTheme,
                 location = location,
                 onSave = { lat, lng, address -> viewModel.saveLocation(lat, lng, address) },

@@ -157,6 +157,9 @@ fun ScheduleListScreen(
     nowPlaying: NowPlaying,
     location: LatLng?,
     missingSoundUris: Set<String> = emptySet(),
+    missedChantCard: MissedChantUi? = null,
+    onOpenReliability: () -> Unit = {},
+    onDismissMissed: () -> Unit = {},
     updateCard: UpdateCardUi? = null,
     onUpdateDownload: () -> Unit = {},
     onUpdateLater: () -> Unit = {},
@@ -264,6 +267,15 @@ fun ScheduleListScreen(
                             )
                         }
                     }
+                    if (missedChantCard != null) {
+                        item(key = "missed-chant") {
+                            MissedChantBanner(
+                                card = missedChantCard,
+                                onFixReliability = onOpenReliability,
+                                onDismiss = onDismissMissed,
+                            )
+                        }
+                    }
                     if (updateCard != null) {
                         item(key = "update-card") {
                             UpdateCardBanner(
@@ -323,6 +335,84 @@ data class UpdateCardUi(
     val notes: String,
     val downloadUrl: String,
 )
+
+/** UI model for the missed-chant card (see ScheduleViewModel.missedChantCard). */
+data class MissedChantUi(
+    val time: String,
+    val weekday: String,
+    val label: String,
+    val count: Int,
+)
+
+/**
+ * Gentle, honest card: a scheduled chant never played. One miss names the
+ * schedule and day; several collapse into a single count. Offers the
+ * reliability settings, never blames the user.
+ */
+@Composable
+private fun MissedChantBanner(
+    card: MissedChantUi,
+    onFixReliability: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val haptics = LocalHapticFeedback.current
+    val defaultName = stringResource(R.string.default_schedule_name)
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(18.dp)) {
+            Text(
+                if (card.count == 1) {
+                    stringResource(
+                        R.string.missed_chant_single,
+                        card.time,
+                        card.label.ifBlank { defaultName },
+                        card.weekday,
+                    )
+                } else {
+                    stringResource(R.string.missed_chant_multiple, card.count)
+                },
+                style = MaterialTheme.typography.titleMedium,
+                fontFamily = UrbanistFamily,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                stringResource(R.string.missed_chant_body),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f),
+            )
+            Spacer(Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onFixReliability()
+                    },
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.primary,
+                ) {
+                    Text(
+                        stringResource(R.string.missed_chant_fix),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp),
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                TextButton(onClick = onDismiss) {
+                    Text(
+                        stringResource(R.string.missed_chant_dismiss),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                    )
+                }
+            }
+        }
+    }
+}
 
 /** Calm, dismissible card at the top of the list: a newer version exists. */
 @Composable

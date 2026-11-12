@@ -3,6 +3,7 @@ package com.chantingscheduler.app.scheduling
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.chantingscheduler.app.data.AlarmLedgerStore
 import com.chantingscheduler.app.data.PlaybackSettingsStore
 import com.chantingscheduler.app.data.ScheduleRepository
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,6 +30,10 @@ class AlarmReceiver : BroadcastReceiver() {
         if (intent.action != ACTION_FIRE) return
         val scheduleId = intent.getLongExtra(EXTRA_SCHEDULE_ID, -1L)
         if (scheduleId < 0) return
+
+        // First thing, before any async work: record that the alarm fired.
+        // Even if the process is killed mid-handling, the ledger now knows.
+        AlarmLedgerStore.get(context).markFired(scheduleId, System.currentTimeMillis())
 
         val pendingResult = goAsync()
         CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
