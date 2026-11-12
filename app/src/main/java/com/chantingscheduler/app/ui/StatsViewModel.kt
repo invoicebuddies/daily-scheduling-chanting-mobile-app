@@ -14,13 +14,17 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** One row of the recent-session history list on the stats screen. */
 data class SessionHistoryItem(
+    val logId: Long,
     val startedAtEpochMs: Long,
     val label: String?,
     val minutes: Int,
     val endReason: SessionEndReason,
+    /** Optional practice-journal note; null when untouched. */
+    val note: String? = null,
 )
 
 data class StatsUiState(
@@ -35,7 +39,7 @@ data class StatsUiState(
 
 @HiltViewModel
 class StatsViewModel @Inject constructor(
-    repository: ScheduleRepository,
+    private val repository: ScheduleRepository,
 ) : ViewModel() {
 
     val stats: StateFlow<StatsUiState> = combine(
@@ -60,11 +64,20 @@ class StatsViewModel @Inject constructor(
     private fun SessionLogEntity.toHistoryItem(
         labels: Map<Long, String>,
     ): SessionHistoryItem = SessionHistoryItem(
+        logId = id,
         startedAtEpochMs = startedAtEpochMs,
         label = scheduleId?.let { labels[it]?.ifBlank { null } },
         minutes = ((audioSeconds ?: durationSeconds) + 30) / 60,
         endReason = endReason,
+        note = note,
     )
+
+    /** Adds, edits, or clears (null/blank) the journal note of a history row. */
+    fun updateSessionNote(logId: Long, note: String?) {
+        viewModelScope.launch {
+            repository.updateSessionNote(logId, note?.ifBlank { null })
+        }
+    }
 
     private companion object {
         const val HISTORY_LIMIT = 20

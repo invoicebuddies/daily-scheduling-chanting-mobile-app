@@ -26,4 +26,8 @@ interface SessionLogDao {
             "ORDER BY startedAtEpochMs DESC",
     )
     suspend fun inRange(fromMs: Long, toMs: Long): List<SessionLogEntity>
+
+    /** Adds, edits, or clears (null) the practice-journal note of one row. */
+    @Query("UPDATE session_logs SET note = :note WHERE id = :id")
+    suspend fun updateNote(id: Long, note: String?)
 }

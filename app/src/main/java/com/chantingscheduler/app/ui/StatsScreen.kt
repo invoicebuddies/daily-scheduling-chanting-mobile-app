@@ -22,12 +22,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import com.chantingscheduler.app.R
 import com.chantingscheduler.app.data.SessionEndReason
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,7 +40,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chantingscheduler.app.ui.theme.UrbanistFamily
@@ -55,11 +58,15 @@ private val WEEKDAY_LETTERS = listOf("M", "T", "W", "T", "F", "S", "S")
 fun StatsScreen(onBack: () -> Unit) {
     val viewModel: StatsViewModel = viewModel()
     val stats by viewModel.stats.collectAsStateWithLifecycle()
-    StatsContent(stats = stats, onBack = onBack)
+    StatsContent(stats = stats, onBack = onBack, onUpdateNote = viewModel::updateSessionNote)
 }
 
 @Composable
-private fun StatsContent(stats: StatsUiState, onBack: () -> Unit) {
+private fun StatsContent(
+    stats: StatsUiState,
+    onBack: () -> Unit,
+    onUpdateNote: (Long, String?) -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -136,7 +143,7 @@ private fun StatsContent(stats: StatsUiState, onBack: () -> Unit) {
 
         if (stats.history.isNotEmpty()) {
             Spacer(Modifier.height(16.dp))
-            HistoryCard(items = stats.history)
+            HistoryCard(items = stats.history, onUpdateNote = onUpdateNote)
         }
 
         Spacer(Modifier.height(24.dp))
@@ -221,12 +228,18 @@ private fun StreakCard(value: Int, label: String) {
     }
 }
 
-/** Recent sessions: date, schedule label, duration, and how they ended. */
+/** Recent sessions: date, schedule label, duration, how they ended, and an
+ * optional journal note (tap a row to add, edit, or clear it). */
 @Composable
-private fun HistoryCard(items: List<SessionHistoryItem>) {
+private fun HistoryCard(
+    items: List<SessionHistoryItem>,
+    onUpdateNote: (Long, String?) -> Unit,
+) {
     val datePattern = stringResource(R.string.stats_history_date_format)
     val dateFormat = remember(datePattern) { DateTimeFormatter.ofPattern(datePattern) }
     val zone = remember { ZoneId.systemDefault() }
+    var noteTarget by remember { mutableStateOf<SessionHistoryItem?>(null) }
+
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
@@ -249,26 +262,96 @@ private fun HistoryCard(items: List<SessionHistoryItem>) {
                         SessionEndReason.SNOOZED -> R.string.end_reason_snoozed
                     },
                 )
-                Text(
-                    if (item.label != null) {
-                        stringResource(
-                            R.string.stats_history_with_label,
-                            date,
-                            item.label,
-                            item.minutes,
-                            reason,
+                Surface(
+                    onClick = { noteTarget = item },
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color.Transparent,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Column(Modifier.padding(vertical = 4.dp, horizontal = 6.dp)) {
+                        Text(
+                            if (item.label != null) {
+                                stringResource(
+                                    R.string.stats_history_with_label,
+                                    date,
+                                    item.label,
+                                    item.minutes,
+                                    reason,
+                                )
+                            } else {
+                                stringResource(R.string.stats_history_no_label, date, item.minutes, reason)
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                    } else {
-                        stringResource(R.string.stats_history_no_label, date, item.minutes, reason)
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(vertical = 4.dp),
-                )
+                        item.note?.let { note ->
+                            Text(
+                                note,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
             }
         }
     }
+
+    noteTarget?.let { target ->
+        HistoryNoteDialog(
+            item = target,
+            onSave = { newNote ->
+                onUpdateNote(target.logId, newNote)
+                noteTarget = null
+            },
+            onDismiss = { noteTarget = null },
+        )
+    }
 }
+
+/** Small quiet dialog: one optional line about a past session. */
+@Composable
+private fun HistoryNoteDialog(
+    item: SessionHistoryItem,
+    onSave: (String?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var text by remember(item.logId) { mutableStateOf(item.note.orEmpty()) }
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.stats_note_dialog_title)) },
+        text = {
+            androidx.compose.material3.OutlinedTextField(
+                value = text,
+                onValueChange = { if (it.length <= NOTE_MAX_LENGTH) text = it },
+                placeholder = { Text(stringResource(R.string.session_note_hint)) },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp),
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(text.trim().ifBlank { null }) }) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            Row {
+                if (!item.note.isNullOrBlank()) {
+                    TextButton(onClick = { onSave(null) }) {
+                        Text(stringResource(R.string.clear))
+                    }
+                }
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        },
+    )
+}
+
+private const val NOTE_MAX_LENGTH = 200
 
 @Composable
 private fun MinutesCard(label: String, minutes: Int, modifier: Modifier = Modifier) {

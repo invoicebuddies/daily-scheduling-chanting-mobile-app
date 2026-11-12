@@ -142,6 +142,7 @@
     <string name="session_complete_title">Sesi selesai</string>
     <string name="session_complete_minutes">%1$d min</string>
     <string name="done_button">Selesai</string>
+    <string name="session_note_hint">Bagaimana amalan anda hari ini? (pilihan)</string>
 
     <!-- Time picker -->
     <string name="am">PG</string>
@@ -183,6 +184,7 @@
     <string name="stats_longest_streak">Trek terpanjang</string>
     <string name="stats_mindful_min">minit berfokus</string>
     <string name="stats_history_title">Sejarah</string>
+    <string name="stats_note_dialog_title">Nota amalan</string>
     <string name="stats_history_date_format">d MMM</string>
     <string name="stats_history_with_label">%1$s · %2$s · %3$d min · %4$s</string>
     <string name="stats_history_no_label">%1$s · %2$d min · %3$s</string>

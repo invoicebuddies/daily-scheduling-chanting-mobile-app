@@ -16,7 +16,7 @@ import org.json.JSONObject
  */
 object BackupCodec {
 
-    const val VERSION = 2
+    const val VERSION = 3
     const val REPICK_MARKER = "⚠ "
 
     data class Backup(
@@ -195,6 +195,7 @@ object BackupCodec {
         .put("endReason", s.endReason.name)
         .put("source", s.source.name)
         .put("audioSeconds", s.audioSeconds ?: JSONObject.NULL)
+        .put("note", s.note ?: JSONObject.NULL)
 
     private fun sessionFromJson(o: JSONObject): SessionLogEntity = SessionLogEntity(
         id = 0,
@@ -206,5 +207,7 @@ object BackupCodec {
         source = runCatching { SessionSource.valueOf(o.optString("source")) }
             .getOrDefault(SessionSource.ALARM),
         audioSeconds = if (o.isNull("audioSeconds")) null else o.optInt("audioSeconds"),
+        // v1/v2 backups predate the journal note: missing field = null.
+        note = if (o.isNull("note")) null else o.optString("note"),
     )
 }

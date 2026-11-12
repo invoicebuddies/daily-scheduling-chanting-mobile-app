@@ -68,7 +68,11 @@ import com.chantingscheduler.app.ui.theme.ChantingSchedulerTheme
 import com.chantingscheduler.app.ui.theme.UrbanistFamily
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Full-screen "alarm ringing" page shown while a chanting session plays.
@@ -77,6 +81,10 @@ import kotlinx.coroutines.delay
  * wobbling crescent) for fixed times. Opened from the playback notification
  * (tap or full-screen intent) and from the in-app ringing card.
  */
+
+/** Practice-journal notes are one quiet line. */
+private const val NOTE_MAX_LENGTH = 200
+
 @AndroidEntryPoint
 class RingingActivity : ComponentActivity() {
 
@@ -85,6 +93,9 @@ class RingingActivity : ComponentActivity() {
 
     @Inject
     lateinit var playbackSettingsStore: PlaybackSettingsStore
+
+    /** Fire-and-forget scope for the journal-note write on Done. */
+    private val noteScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -126,8 +137,10 @@ class RingingActivity : ComponentActivity() {
                 // The session ended by itself (completed / auto-stop / focus
                 // loss): close immediately when the screen is off or locked,
                 // otherwise switch to the calm complete state and auto-close
-                // after a quiet minute with no interaction.
+                // after a quiet minute with no interaction (typing counts as
+                // interaction and resets the minute).
                 var complete by remember { mutableStateOf<EndedSession?>(null) }
+                var noteText by remember { mutableStateOf("") }
                 LaunchedEffect(endedSession) {
                     val ended = endedSession ?: return@LaunchedEffect
                     PlaybackState.clearEnded()
@@ -140,7 +153,7 @@ class RingingActivity : ComponentActivity() {
                         complete = ended
                     }
                 }
-                LaunchedEffect(complete) {
+                LaunchedEffect(complete, noteText) {
                     if (complete != null) {
                         delay(SESSION_COMPLETE_CLOSE_MS)
                         finish()
@@ -158,6 +171,8 @@ class RingingActivity : ComponentActivity() {
                     stepEndsAtMillis = nowPlaying.stepEndsAtMillis,
                     autoStopAtMillis = nowPlaying.autoStopAtMillis,
                     complete = complete,
+                    noteText = noteText,
+                    onNoteChange = { noteText = it },
                     snoozeMinutes = snoozeMinutes,
                     onSnooze = {
                         PlaybackService.snooze(this)
@@ -168,6 +183,17 @@ class RingingActivity : ComponentActivity() {
                         finish()
                     },
                     onDone = {
+                        val note = noteText.trim()
+                        complete?.logId?.let { logId ->
+                            noteScope.launch {
+                                runCatching {
+                                    repository.updateSessionNote(
+                                        logId,
+                                        note.ifBlank { null },
+                                    )
+                                }
+                            }
+                        }
                         complete = null
                         finish()
                     },
@@ -196,6 +222,8 @@ private fun RingingScreen(
     stepEndsAtMillis: Long,
     autoStopAtMillis: Long,
     complete: EndedSession?,
+    noteText: String,
+    onNoteChange: (String) -> Unit,
     snoozeMinutes: Int,
     onSnooze: () -> Unit,
     onStop: () -> Unit,
@@ -228,7 +256,12 @@ private fun RingingScreen(
 
         val ended = complete
         if (ended != null) {
-            SessionCompleteContent(ended = ended, onDone = onDone)
+            SessionCompleteContent(
+                ended = ended,
+                noteText = noteText,
+                onNoteChange = onNoteChange,
+                onDone = onDone,
+            )
             return@Box
         }
 
@@ -346,9 +379,15 @@ private fun timerText(timer: RingingTimer): String = when (timer) {
     is RingingTimer.Elapsed -> RingingTimerLabel.formatClock(timer.elapsedMs)
 }
 
-/** Calm end-of-session state: what played, for how long, and a quiet way out. */
+/** Calm end-of-session state: what played, for how long, an optional journal
+ * line, and a quiet way out. */
 @Composable
-private fun SessionCompleteContent(ended: EndedSession, onDone: () -> Unit) {
+private fun SessionCompleteContent(
+    ended: EndedSession,
+    noteText: String,
+    onNoteChange: (String) -> Unit,
+    onDone: () -> Unit,
+) {
     val minutes = ((ended.endedAtMillis - ended.startedAtMillis) / 60_000L)
         .toInt()
         .coerceAtLeast(1)
@@ -378,6 +417,29 @@ private fun SessionCompleteContent(ended: EndedSession, onDone: () -> Unit) {
             stringResource(R.string.session_complete_minutes, minutes),
             style = MaterialTheme.typography.titleMedium,
             color = Color.White.copy(alpha = 0.75f),
+        )
+        Spacer(Modifier.height(20.dp))
+        androidx.compose.material3.OutlinedTextField(
+            value = noteText,
+            onValueChange = { if (it.length <= NOTE_MAX_LENGTH) onNoteChange(it) },
+            placeholder = {
+                Text(
+                    stringResource(R.string.session_note_hint),
+                    color = Color.White.copy(alpha = 0.5f),
+                )
+            },
+            singleLine = true,
+            shape = RoundedCornerShape(16.dp),
+            colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedBorderColor = Color.White.copy(alpha = 0.7f),
+                unfocusedBorderColor = Color.White.copy(alpha = 0.35f),
+                focusedContainerColor = Color.White.copy(alpha = 0.08f),
+                unfocusedContainerColor = Color.White.copy(alpha = 0.08f),
+                cursorColor = Color.White,
+            ),
+            modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.weight(1f))
         Button(

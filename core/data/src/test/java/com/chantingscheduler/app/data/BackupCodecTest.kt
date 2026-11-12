@@ -51,6 +51,7 @@ class BackupCodecTest {
                 endReason = SessionEndReason.SNOOZED,
                 source = SessionSource.ALARM,
                 audioSeconds = 540,
+                note = "Calm morning.",
             ),
         )
 
@@ -73,6 +74,7 @@ class BackupCodecTest {
         assertEquals(1, parsed.steps.size)
         assertEquals(1, backup.sessions.size)
         assertEquals(540, backup.sessions[0].audioSeconds)
+        assertEquals("Calm morning.", backup.sessions[0].note)
         assertEquals(SessionEndReason.SNOOZED, backup.sessions[0].endReason)
     }
 

@@ -56,6 +56,9 @@ class ScheduleRepository @Inject constructor(private val db: AppDatabase) {
 
     suspend fun logSession(log: SessionLogEntity): Long = sessionLogDao.insert(log)
 
+    /** Adds, edits, or clears (null) the practice-journal note of one row. */
+    suspend fun updateSessionNote(id: Long, note: String?) = sessionLogDao.updateNote(id, note)
+
     fun observeSessionLogs(): Flow<List<SessionLogEntity>> = sessionLogDao.observeAll()
 
     suspend fun sessionLogsInRange(fromMs: Long, toMs: Long): List<SessionLogEntity> =
