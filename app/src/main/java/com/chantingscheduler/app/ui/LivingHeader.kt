@@ -59,6 +59,7 @@ fun LivingHeader(
     isChanting: Boolean,
     onOpenSettings: () -> Unit,
     onOpenStats: () -> Unit,
+    onOpenSupport: () -> Unit = {},
 ) {
     val morning = remember(location) { isMorningNow(location) }
 
@@ -92,6 +93,13 @@ fun LivingHeader(
             )
         }
         Row(Modifier.align(Alignment.TopEnd)) {
+            IconButton(onClick = onOpenSupport) {
+                Icon(
+                    AppIcons.Heart,
+                    contentDescription = stringResource(R.string.content_desc_support),
+                    tint = ink.copy(alpha = 0.8f),
+                )
+            }
             IconButton(onClick = onOpenStats) {
                 Icon(
                     AppIcons.Chart,

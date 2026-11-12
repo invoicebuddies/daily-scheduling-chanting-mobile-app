@@ -29,6 +29,10 @@ android {
         // Update prompt (GitHub Releases check) — a future Play Store build
         // flips this to false, since Play forbids self-updating outside the store.
         buildConfigField("boolean", "GITHUB_UPDATE_CHECK", "true")
+
+        // Ko-fi tip link on the Support screen — a future Play Store build
+        // flips this to false (Play restricts external payment links).
+        buildConfigField("boolean", "SHOW_TIP_LINK", "true")
     }
 
     signingConfigs {

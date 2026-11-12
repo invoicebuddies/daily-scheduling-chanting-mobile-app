@@ -255,6 +255,33 @@
     <string name="collapse">Collapse</string>
     <string name="expand">Expand</string>
 
+    <!-- Support -->
+    <string name="support_title">Support</string>
+    <string name="content_desc_support">Support</string>
+    <string name="support_row">Support &amp; feedback</string>
+    <string name="support_tip_title">Chanting Buddy is free, and always will be.</string>
+    <string name="support_tip_body">No ads, no accounts, no tracking — just your daily practice. If it brings you a little peace and you\'d like to say thanks, you can buy me a coffee. It\'s completely optional, and the app works exactly the same either way. 🙏</string>
+    <string name="support_tip_button">Buy me a coffee on Ko-fi</string>
+    <string name="support_feedback_title">Help &amp; feedback</string>
+    <string name="feedback_topic_label">Topic</string>
+    <string name="feedback_topic_bug">Report a bug</string>
+    <string name="feedback_topic_feature">Suggest a feature</string>
+    <string name="feedback_topic_question">Question about using the app</string>
+    <string name="feedback_topic_translation">Translation issue</string>
+    <string name="feedback_topic_other">Something else</string>
+    <string name="feedback_message_label">Message</string>
+    <string name="feedback_char_count">%1$d/%2$d</string>
+    <string name="feedback_email_label">Your email (optional)</string>
+    <string name="feedback_email_invalid">That email address doesn\'t look right.</string>
+    <string name="feedback_include_diagnostics">Include app &amp; device info (helps fix bugs)</string>
+    <string name="feedback_preview_show">See exactly what will be included</string>
+    <string name="feedback_preview_hide">Hide details</string>
+    <string name="feedback_send">Send</string>
+    <string name="feedback_send_hint">This opens your email app with everything filled in — nothing is sent until you press send there.</string>
+    <string name="feedback_no_email_title">No email app found</string>
+    <string name="feedback_no_email_body">Copy your message and send it to %1$s any way you like.</string>
+    <string name="feedback_copy">Copy to clipboard</string>
+
     <!-- Widget / tile -->
     <string name="widget_description">Next chanting session with a play/stop toggle</string>
     <string name="widget_no_session">No upcoming session</string>

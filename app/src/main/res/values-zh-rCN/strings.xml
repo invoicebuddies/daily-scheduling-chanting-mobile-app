@@ -255,6 +255,33 @@
     <string name="collapse">收起</string>
     <string name="expand">展开</string>
 
+    <!-- Support -->
+    <string name="support_title">支持</string>
+    <string name="content_desc_support">支持</string>
+    <string name="support_row">支持与反馈</string>
+    <string name="support_tip_title">Chanting Buddy 永远免费。</string>
+    <string name="support_tip_body">没有广告，没有账号，没有跟踪——只有您的日常修行。如果它为您带来了一点宁静，而您想表示感谢，可以请我喝一杯咖啡。这完全是自愿的，无论是否支持，应用的功能都完全相同。🙏</string>
+    <string name="support_tip_button">在 Ko-fi 上请我喝咖啡</string>
+    <string name="support_feedback_title">帮助与反馈</string>
+    <string name="feedback_topic_label">主题</string>
+    <string name="feedback_topic_bug">报告问题</string>
+    <string name="feedback_topic_feature">建议新功能</string>
+    <string name="feedback_topic_question">使用咨询</string>
+    <string name="feedback_topic_translation">翻译问题</string>
+    <string name="feedback_topic_other">其他</string>
+    <string name="feedback_message_label">留言内容</string>
+    <string name="feedback_char_count">%1$d/%2$d</string>
+    <string name="feedback_email_label">您的邮箱（可选）</string>
+    <string name="feedback_email_invalid">邮箱地址格式似乎不正确。</string>
+    <string name="feedback_include_diagnostics">包含应用和设备信息（有助于修复问题）</string>
+    <string name="feedback_preview_show">查看具体包含哪些信息</string>
+    <string name="feedback_preview_hide">隐藏详情</string>
+    <string name="feedback_send">发送</string>
+    <string name="feedback_send_hint">这将打开您的邮件应用并自动填好内容——在您于邮件应用中点击发送之前，什么都不会被发出。</string>
+    <string name="feedback_no_email_title">未找到邮件应用</string>
+    <string name="feedback_no_email_body">请复制您的留言，并通过任何方式发送至 %1$s。</string>
+    <string name="feedback_copy">复制到剪贴板</string>
+
     <!-- Widget / tile -->
     <string name="widget_description">显示下一节念诵并可直接播放/停止</string>
     <string name="widget_no_session">暂无即将开始的念诵</string>

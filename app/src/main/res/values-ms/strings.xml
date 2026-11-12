@@ -255,6 +255,33 @@
     <string name="collapse">Kuncup</string>
     <string name="expand">Kembang</string>
 
+    <!-- Support -->
+    <string name="support_title">Sokongan</string>
+    <string name="content_desc_support">Sokongan</string>
+    <string name="support_row">Sokongan &amp; maklum balas</string>
+    <string name="support_tip_title">Chanting Buddy percuma, dan akan kekal percuma.</string>
+    <string name="support_tip_body">Tanpa iklan, tanpa akaun, tanpa penjejakan — hanya amalan harian anda. Jika ia memberi anda sedikit ketenangan dan anda ingin berterima kasih, anda boleh belikan saya secawan kopi. Ia sepenuhnya pilihan, dan aplikasi berfungsi dengan sama sahaja sama ada anda menyokong atau tidak. 🙏</string>
+    <string name="support_tip_button">Belikan saya kopi di Ko-fi</string>
+    <string name="support_feedback_title">Bantuan &amp; maklum balas</string>
+    <string name="feedback_topic_label">Topik</string>
+    <string name="feedback_topic_bug">Lapor pepijat</string>
+    <string name="feedback_topic_feature">Cadangkan ciri</string>
+    <string name="feedback_topic_question">Soalan penggunaan aplikasi</string>
+    <string name="feedback_topic_translation">Isu terjemahan</string>
+    <string name="feedback_topic_other">Lain-lain</string>
+    <string name="feedback_message_label">Mesej</string>
+    <string name="feedback_char_count">%1$d/%2$d</string>
+    <string name="feedback_email_label">E-mel anda (pilihan)</string>
+    <string name="feedback_email_invalid">Alamat e-mel itu tidak kelihatan betul.</string>
+    <string name="feedback_include_diagnostics">Sertakan maklumat aplikasi &amp; peranti (membantu membaiki pepijat)</string>
+    <string name="feedback_preview_show">Lihat dengan tepat apa yang akan disertakan</string>
+    <string name="feedback_preview_hide">Sembunyikan butiran</string>
+    <string name="feedback_send">Hantar</string>
+    <string name="feedback_send_hint">Ini membuka aplikasi e-mel anda dengan semuanya terisi — tiada apa dihantar sehingga anda menekan hantar di sana.</string>
+    <string name="feedback_no_email_title">Tiada aplikasi e-mel dijumpai</string>
+    <string name="feedback_no_email_body">Salin mesej anda dan hantarkannya kepada %1$s dengan cara apa sahaja.</string>
+    <string name="feedback_copy">Salin ke papan keratan</string>
+
     <!-- Widget / tile -->
     <string name="widget_description">Sesi lantunan seterusnya dengan butang main/berhenti</string>
     <string name="widget_no_session">Tiada sesi akan datang</string>

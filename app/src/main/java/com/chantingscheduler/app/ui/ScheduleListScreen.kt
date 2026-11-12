@@ -168,6 +168,7 @@ fun ScheduleListScreen(
     onEdit: (Long) -> Unit,
     onOpenSettings: () -> Unit,
     onOpenStats: () -> Unit,
+    onOpenSupport: () -> Unit = {},
     onToggle: (ScheduleWithSounds, Boolean) -> Unit,
     onPlayToggle: (ScheduleWithSounds) -> Unit,
     onStop: () -> Unit,
@@ -234,6 +235,7 @@ fun ScheduleListScreen(
                         isChanting = nowPlaying.isPlaying,
                         onOpenSettings = onOpenSettings,
                         onOpenStats = onOpenStats,
+                        onOpenSupport = onOpenSupport,
                     )
                     EmptyState(onAdd = onAdd, modifier = Modifier.weight(1f))
                 }
@@ -256,6 +258,7 @@ fun ScheduleListScreen(
                             isChanting = nowPlaying.isPlaying,
                             onOpenSettings = onOpenSettings,
                             onOpenStats = onOpenStats,
+                            onOpenSupport = onOpenSupport,
                         )
                     }
                     if (nextSession != null) {

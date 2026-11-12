@@ -58,6 +58,7 @@ import kotlinx.coroutines.launch
 private const val SCREEN_LIST = -1L
 private const val SCREEN_NEW = 0L
 private const val SCREEN_STATS = -2L
+private const val SCREEN_SUPPORT = -3L
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -246,6 +247,12 @@ class MainActivity : ComponentActivity() {
             when {
                 targetScreen == SCREEN_STATS -> StatsScreen(onBack = { screen = SCREEN_LIST })
 
+                targetScreen == SCREEN_SUPPORT -> com.chantingscheduler.app.ui.SupportScreen(
+                    showTipLink = com.chantingscheduler.app.BuildConfig.SHOW_TIP_LINK,
+                    scheduleCount = schedules.size,
+                    onBack = { screen = SCREEN_LIST },
+                )
+
                 targetScreen == SCREEN_LIST -> ScheduleListScreen(
                     schedules = schedules,
                     nowPlaying = nowPlaying,
@@ -287,6 +294,7 @@ class MainActivity : ComponentActivity() {
                         showSettings = true
                     },
                     onOpenStats = { screen = SCREEN_STATS },
+                    onOpenSupport = { screen = SCREEN_SUPPORT },
                     onToggle = viewModel::setEnabled,
                     deletedItem = lastDeleted,
                     onUndoDelete = viewModel::undoDelete,
@@ -371,6 +379,10 @@ class MainActivity : ComponentActivity() {
                 onReplayIntroduction = {
                     showSettings = false
                     replayOnboarding = true
+                },
+                onOpenSupport = {
+                    showSettings = false
+                    screen = SCREEN_SUPPORT
                 },
                 onExport = { exportLauncher.launch("chanting-buddy-backup.json") },
                 onImport = { importLauncher.launch(arrayOf("application/json", "text/*", "*/*")) },

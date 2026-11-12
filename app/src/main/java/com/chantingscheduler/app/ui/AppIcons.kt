@@ -352,6 +352,21 @@ object AppIcons {
         }.also { _flame = it }
 
     // endregion
+
+    private var _heart: ImageVector? = null
+
+    /** Line-art heart — support & thanks. */
+    val Heart: ImageVector
+        get() = _heart ?: lineIcon("Line.Heart") {
+            moveTo(12f, 20f)
+            curveTo(7f, 16.4f, 3.5f, 13.4f, 3.5f, 9.7f)
+            curveTo(3.5f, 7.1f, 5.5f, 5.1f, 8f, 5.1f)
+            curveTo(9.5f, 5.1f, 11f, 5.8f, 12f, 7f)
+            curveTo(13f, 5.8f, 14.5f, 5.1f, 16f, 5.1f)
+            curveTo(18.5f, 5.1f, 20.5f, 7.1f, 20.5f, 9.7f)
+            curveTo(20.5f, 13.4f, 17f, 16.4f, 12f, 20f)
+            close()
+        }.also { _heart = it }
 }
 
 /** Builds a 24dp line-art icon: 2dp round-capped stroke, no fill. */

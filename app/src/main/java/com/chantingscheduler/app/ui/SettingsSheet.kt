@@ -147,6 +147,7 @@ fun SettingsSheet(
     onUpdateAutoCheckChange: (Boolean) -> Unit,
     onCheckUpdatesNow: () -> Unit,
     onReplayIntroduction: () -> Unit,
+    onOpenSupport: () -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
     onDismiss: () -> Unit,
@@ -410,6 +411,7 @@ fun SettingsSheet(
             SectionOverline(stringResource(R.string.about_section))
             AboutSection(
                 onReplayIntroduction = onReplayIntroduction,
+                onOpenSupport = onOpenSupport,
                 onExport = onExport,
                 onImport = onImport,
                 updateAutoCheck = updateAutoCheck,
@@ -1300,6 +1302,7 @@ private fun StatusRow(
 @Composable
 private fun AboutSection(
     onReplayIntroduction: () -> Unit,
+    onOpenSupport: () -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
     updateAutoCheck: Boolean,
@@ -1353,6 +1356,14 @@ private fun AboutSection(
             statusIsError = false,
             actionLabel = stringResource(R.string.replay),
             onAction = onReplayIntroduction,
+        )
+        StatusRow(
+            icon = AppIcons.Flame,
+            title = stringResource(R.string.support_row),
+            status = "",
+            statusIsError = false,
+            actionLabel = stringResource(R.string.feedback_send),
+            onAction = onOpenSupport,
         )
         StatusRow(
             icon = AppIcons.MusicNote,
