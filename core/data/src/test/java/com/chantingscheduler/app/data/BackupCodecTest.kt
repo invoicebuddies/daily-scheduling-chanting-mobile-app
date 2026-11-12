@@ -26,6 +26,7 @@ class BackupCodecTest {
                 maxDurationMinutes = 20,
                 repeatCount = 3,
                 reminderMinutes = 5,
+                volumePercent = 50,
             ),
             sounds = listOf(
                 SoundItemEntity(id = 1, scheduleId = 7, uri = "content://a.mp3", displayName = "A", position = 0),
@@ -65,6 +66,7 @@ class BackupCodecTest {
         assertEquals(20, parsed.schedule.maxDurationMinutes)
         assertEquals(3, parsed.schedule.repeatCount)
         assertEquals(5, parsed.schedule.reminderMinutes)
+        assertEquals(50, parsed.schedule.volumePercent)
         // Imports become fresh rows.
         assertEquals(0L, parsed.schedule.id)
         assertEquals(2, parsed.sounds.size)
@@ -151,6 +153,43 @@ class BackupCodecTest {
         val parsed = BackupCodec.parse(json) { true }
 
         assertEquals("Music", parsed.schedules[0].sounds[0].displayName)
+    }
+
+    @Test
+    fun `v1 backup without volumePercent imports with null`() {
+        // A backup written by v1.3.x: version 1, no per-schedule volume.
+        val v1Json = """
+            {
+              "version": 1,
+              "app": "chanting-buddy",
+              "schedules": [
+                {
+                  "schedule": {
+                    "label": "Morning",
+                    "hour": 6,
+                    "minute": 30,
+                    "daysOfWeek": 127,
+                    "gapSeconds": 0,
+                    "enabled": true,
+                    "triggerType": "FIXED",
+                    "offsetMinutes": 0,
+                    "maxDurationMinutes": null,
+                    "repeatCount": 1,
+                    "reminderMinutes": null
+                  },
+                  "sounds": [],
+                  "steps": []
+                }
+              ],
+              "sessions": []
+            }
+        """.trimIndent()
+
+        val parsed = BackupCodec.parse(v1Json)
+
+        assertEquals(1, parsed.schedules.size)
+        assertNull(parsed.schedules[0].schedule.volumePercent)
+        assertEquals("Morning", parsed.schedules[0].schedule.label)
     }
 
     @Test

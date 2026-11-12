@@ -16,7 +16,7 @@ import org.json.JSONObject
  */
 object BackupCodec {
 
-    const val VERSION = 1
+    const val VERSION = 2
     const val REPICK_MARKER = "⚠ "
 
     data class Backup(
@@ -127,6 +127,7 @@ object BackupCodec {
         .put("maxDurationMinutes", s.maxDurationMinutes ?: JSONObject.NULL)
         .put("repeatCount", s.repeatCount)
         .put("reminderMinutes", s.reminderMinutes ?: JSONObject.NULL)
+        .put("volumePercent", s.volumePercent ?: JSONObject.NULL)
 
     private fun scheduleFromJson(o: JSONObject): ScheduleEntity = ScheduleEntity(
         id = 0, // imports always become fresh rows
@@ -142,6 +143,9 @@ object BackupCodec {
         maxDurationMinutes = if (o.isNull("maxDurationMinutes")) null else o.optInt("maxDurationMinutes"),
         repeatCount = o.optInt("repeatCount", 1).coerceAtLeast(1),
         reminderMinutes = if (o.isNull("reminderMinutes")) null else o.optInt("reminderMinutes"),
+        // v1 backups predate the per-schedule volume: missing field = null
+        // (follow the global chant volume), never a crash.
+        volumePercent = if (o.isNull("volumePercent")) null else o.optInt("volumePercent"),
     )
 
     private fun soundToJson(s: SoundItemEntity): JSONObject = JSONObject()

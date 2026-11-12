@@ -303,6 +303,7 @@ class MainActivity : ComponentActivity() {
                                 scheduleId = item.schedule.id,
                                 stepUris = item.sortedSteps.map { it.soundUri.orEmpty() },
                                 stepMinutes = item.sortedSteps.map { it.durationMinutes },
+                                volumePercent = item.schedule.volumePercent ?: -1,
                             )
                         } else {
                             PlaybackService.start(
@@ -313,6 +314,7 @@ class MainActivity : ComponentActivity() {
                                 scheduleId = item.schedule.id,
                                 repeatCount = item.schedule.repeatCount,
                                 maxDurationMinutes = item.schedule.maxDurationMinutes ?: -1,
+                                volumePercent = item.schedule.volumePercent ?: -1,
                             )
                         }
                     },
@@ -331,6 +333,7 @@ class MainActivity : ComponentActivity() {
                 targetScreen == SCREEN_NEW || editing != null -> ScheduleEditScreen(
                     initial = editing,
                     location = location,
+                    globalChantVolumePercent = chantVolumePercent,
                     resolveDisplayName = ::resolveDisplayName,
                     onOpenLocationSettings = { showSettings = true },
                     onSave = { schedule, sounds, steps ->

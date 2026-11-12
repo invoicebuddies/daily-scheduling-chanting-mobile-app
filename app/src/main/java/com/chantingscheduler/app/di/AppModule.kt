@@ -33,6 +33,7 @@ class PlaybackSessionStarter @Inject constructor(
             stepMinutes = item.sortedSteps.map { it.durationMinutes },
             repeatCount = item.schedule.repeatCount,
             maxDurationMinutes = item.schedule.maxDurationMinutes ?: -1,
+            volumePercent = item.schedule.volumePercent ?: -1,
         )
         try {
             ContextCompat.startForegroundService(context, playIntent)

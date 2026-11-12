@@ -96,6 +96,11 @@
     <string name="options_stops_at">%1$d 分钟后停止</string>
     <string name="options_repeat">×%1$d</string>
     <string name="auto_stop_after">自动停止</string>
+    <string name="volume_row">音量</string>
+    <string name="volume_default">默认</string>
+    <string name="volume_preview">按此音量试听</string>
+    <string name="content_desc_volume_preview">按此音量试听</string>
+    <string name="options_volume">音量 %1$d%%</string>
     <string name="repeat_playlist">重复播放列表</string>
     <string name="remind_me_before">提前提醒</string>
     <string name="silence_step">静寂</string>

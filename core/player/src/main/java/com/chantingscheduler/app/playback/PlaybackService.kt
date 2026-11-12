@@ -388,7 +388,12 @@ class PlaybackService : MediaSessionService() {
             ?.let { runCatching { SessionSource.valueOf(it) }.getOrNull() }
             ?: SessionSource.MANUAL
         val playbackSettings = PlaybackSettingsStore.get(this)
-        chantVolumeCeiling = playbackSettings.currentChantVolumePercent / 100f
+        // A per-schedule volume replaces the global chant-volume ceiling for
+        // this session; fades ramp to the same ceiling.
+        chantVolumeCeiling = SessionVolume.resolve(
+            scheduleVolumePercent = intent.getIntExtra(EXTRA_VOLUME_PERCENT, -1).takeIf { it > 0 },
+            globalPercent = playbackSettings.currentChantVolumePercent,
+        )
         fadeDurationMs = intent.getIntExtra(EXTRA_FADE_IN_SECONDS, 0) * 1000L
         // Alarm-stream chants startle at full alarm volume when fade-in is off;
         // a short default fade softens the start (only for alarm sessions on
@@ -1108,6 +1113,8 @@ class PlaybackService : MediaSessionService() {
         const val EXTRA_STEP_MINUTES = "step_minutes"
         const val EXTRA_REPEAT_COUNT = "repeat_count"
         const val EXTRA_MAX_DURATION_MINUTES = "max_duration_minutes"
+        /** Per-schedule volume percent (25–100); -1/absent = global chant volume. */
+        const val EXTRA_VOLUME_PERCENT = "volume_percent"
 
         // Must match RingingActivity.EXTRA_SCHEDULE_ID in the app module.
         private const val EXTRA_RINGING_SCHEDULE_ID = "schedule_id"
@@ -1143,12 +1150,13 @@ class PlaybackService : MediaSessionService() {
             stepMinutes: List<Int> = emptyList(),
             repeatCount: Int = 1,
             maxDurationMinutes: Int = -1,
+            volumePercent: Int = -1,
         ) {
             ContextCompat.startForegroundService(
                 context,
                 playIntent(
                     context, uris, gapSeconds, label, scheduleId, fadeInSeconds, source,
-                    stepUris, stepMinutes, repeatCount, maxDurationMinutes,
+                    stepUris, stepMinutes, repeatCount, maxDurationMinutes, volumePercent,
                 ),
             )
         }
@@ -1167,6 +1175,7 @@ class PlaybackService : MediaSessionService() {
             stepMinutes: List<Int> = emptyList(),
             repeatCount: Int = 1,
             maxDurationMinutes: Int = -1,
+            volumePercent: Int = -1,
         ): Intent = Intent(context, PlaybackService::class.java)
             .setAction(ACTION_PLAY)
             .putStringArrayListExtra(EXTRA_URIS, ArrayList(uris))
@@ -1179,6 +1188,7 @@ class PlaybackService : MediaSessionService() {
             .putExtra(EXTRA_STEP_MINUTES, stepMinutes.toIntArray())
             .putExtra(EXTRA_REPEAT_COUNT, repeatCount)
             .putExtra(EXTRA_MAX_DURATION_MINUTES, maxDurationMinutes)
+            .putExtra(EXTRA_VOLUME_PERCENT, volumePercent)
 
         /**
          * Starts the service from contexts that may be in the background

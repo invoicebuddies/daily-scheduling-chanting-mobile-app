@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -127,12 +128,17 @@ private enum class EditMode { PLAYLIST, ROUTINE }
 
 private val AUTO_STOP_OPTIONS = listOf(5, 10, 15, 20, 30, 45, 60)
 private val REPEAT_QUICK_CHOICES = listOf(1, 3, 7, 21, 108)
+private val VOLUME_OPTIONS = listOf(25, 50, 70, 85, 100)
+
+/** Volume previews audition the first sound for this long. */
+private const val VOLUME_PREVIEW_MS = 5_000L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScheduleEditScreen(
     initial: ScheduleWithSounds?,
     location: LatLng?,
+    globalChantVolumePercent: Int = 100,
     resolveDisplayName: (Uri) -> String,
     onOpenLocationSettings: () -> Unit,
     onSave: (ScheduleEntity, List<SoundItemEntity>, List<RoutineStepEntity>) -> Unit,
@@ -152,6 +158,8 @@ fun ScheduleEditScreen(
     var maxDurationMinutes by remember { mutableIntStateOf(initial?.schedule?.maxDurationMinutes ?: -1) }
     var repeatCount by remember { mutableIntStateOf(initial?.schedule?.repeatCount ?: 1) }
     var reminderMinutes by remember { mutableIntStateOf(initial?.schedule?.reminderMinutes ?: -1) }
+    /** Per-schedule chant volume; -1 = Default (follow the global setting). */
+    var volumePercent by remember { mutableIntStateOf(initial?.schedule?.volumePercent ?: -1) }
     var mode by remember { mutableStateOf(if (initial?.isRoutine == true) EditMode.ROUTINE else EditMode.PLAYLIST) }
     var expandedRow by remember { mutableStateOf(EditRow.NONE) }
     val sounds = remember {
@@ -610,7 +618,7 @@ fun ScheduleEditScreen(
                         SettingRow(
                             icon = AppIcons.Sliders,
                             label = stringResource(R.string.options_row),
-                            summary = optionsSummary(gapText, maxDurationMinutes, repeatCount),
+                            summary = optionsSummary(gapText, maxDurationMinutes, repeatCount, volumePercent),
                             summaryColor = MaterialTheme.colorScheme.onSurfaceVariant,
                             expanded = expandedRow == EditRow.OPTIONS,
                             onToggle = { expandedRow = EditRow.OPTIONS.toggleFrom(expandedRow) },
@@ -626,6 +634,79 @@ fun ScheduleEditScreen(
                                     colors = optionsFieldColors(),
                                     modifier = Modifier.fillMaxWidth(),
                                 )
+                                Column {
+                                    Text(
+                                        stringResource(R.string.volume_row),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Spacer(Modifier.height(8.dp))
+                                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        VolumeChip(
+                                            label = stringResource(R.string.volume_default),
+                                            selected = volumePercent < 0,
+                                            onClick = { volumePercent = -1 },
+                                            modifier = Modifier.weight(1.2f),
+                                        )
+                                        VOLUME_OPTIONS.forEach { percent ->
+                                            VolumeChip(
+                                                label = stringResource(R.string.chant_volume_percent, percent),
+                                                selected = volumePercent == percent,
+                                                onClick = { volumePercent = percent },
+                                                modifier = Modifier.weight(1f),
+                                            )
+                                        }
+                                    }
+                                    Spacer(Modifier.height(8.dp))
+                                    val previewUri = sounds.firstOrNull()?.uri
+                                    Surface(
+                                        onClick = {
+                                            val uri = previewUri ?: return@Surface
+                                            if (previewingUri == uri) {
+                                                SoundPreviewPlayer.stop()
+                                            } else {
+                                                // Default follows the global
+                                                // chant volume, like playback.
+                                                SoundPreviewPlayer.toggle(
+                                                    context,
+                                                    uri,
+                                                    volumePercent = volumePercent.takeIf { it > 0 }
+                                                        ?: globalChantVolumePercent,
+                                                    autoStopMs = VOLUME_PREVIEW_MS,
+                                                )
+                                            }
+                                        },
+                                        enabled = previewUri != null,
+                                        shape = RoundedCornerShape(50),
+                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                                    ) {
+                                        Row(
+                                            Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Icon(
+                                                if (previewingUri == previewUri && previewUri != null) {
+                                                    AppIcons.Stop
+                                                } else {
+                                                    Icons.Default.PlayArrow
+                                                },
+                                                contentDescription = stringResource(R.string.content_desc_volume_preview),
+                                                tint = if (previewUri != null) {
+                                                    MaterialTheme.colorScheme.primary
+                                                } else {
+                                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
+                                                },
+                                                modifier = Modifier.size(16.dp),
+                                            )
+                                            Spacer(Modifier.width(6.dp))
+                                            Text(
+                                                stringResource(R.string.volume_preview),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            )
+                                        }
+                                    }
+                                }
                                 Column {
                                     Text(
                                         stringResource(R.string.auto_stop_after),
@@ -714,6 +795,7 @@ fun ScheduleEditScreen(
                         maxDurationMinutes = maxDurationMinutes.takeIf { it > 0 },
                         repeatCount = repeatCount.coerceAtLeast(1),
                         reminderMinutes = reminderMinutes.takeIf { it > 0 },
+                        volumePercent = volumePercent.takeIf { it > 0 },
                     )
                     if (mode == EditMode.PLAYLIST) {
                         onSave(entity, sounds.toList(), emptyList())
@@ -772,6 +854,7 @@ private fun optionsSummary(
     gapText: String,
     maxDurationMinutes: Int,
     repeatCount: Int,
+    volumePercent: Int,
 ): String {
     val parts = mutableListOf<String>()
     gapText.toIntOrNull()?.takeIf { it > 0 }?.let {
@@ -781,6 +864,7 @@ private fun optionsSummary(
         parts.add(stringResource(R.string.options_stops_at, maxDurationMinutes))
     }
     if (repeatCount > 1) parts.add(stringResource(R.string.options_repeat, repeatCount))
+    if (volumePercent > 0) parts.add(stringResource(R.string.options_volume, volumePercent))
     return parts.joinToString(" · ")
         .ifBlank { stringResource(R.string.options_no_gap) }
 }
@@ -915,6 +999,26 @@ private fun AddBuiltinSection(onAdd: (com.chantingscheduler.app.playback.Builtin
 
 @Composable
 private fun AutoStopChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ChipSurface(label, selected, onClick, modifier)
+}
+
+@Composable
+private fun VolumeChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    ChipSurface(label, selected, onClick, modifier)
+}
+
+@Composable
+private fun ChipSurface(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,

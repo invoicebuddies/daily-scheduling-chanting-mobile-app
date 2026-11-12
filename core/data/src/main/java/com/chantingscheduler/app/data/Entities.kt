@@ -31,6 +31,8 @@ data class ScheduleEntity(
     val repeatCount: Int = 1,
     /** Optional pre-session reminder: minutes before the trigger to post a quiet notification. */
     val reminderMinutes: Int? = null,
+    /** Per-schedule loudness ceiling in percent (25–100); null = follow the global chant volume. */
+    val volumePercent: Int? = null,
 )
 
 @Entity(
@@ -88,6 +90,8 @@ data class SessionLogEntity(
     val source: SessionSource,
     /** Actual audio playback time, excluding inter-track gaps; null for old rows. */
     val audioSeconds: Int? = null,
+    /** Optional one-line practice-journal note; null for old rows and when untouched. */
+    val note: String? = null,
 )
 
 /**

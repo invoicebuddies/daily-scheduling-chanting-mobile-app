@@ -96,6 +96,11 @@
     <string name="options_stops_at">Berhenti pada %1$d min</string>
     <string name="options_repeat">×%1$d</string>
     <string name="auto_stop_after">Berhenti automatik selepas</string>
+    <string name="volume_row">Volum</string>
+    <string name="volume_default">Lalai</string>
+    <string name="volume_preview">Pratonton pada volum ini</string>
+    <string name="content_desc_volume_preview">Pratonton pada volum ini</string>
+    <string name="options_volume">Volum %1$d%%</string>
     <string name="repeat_playlist">Ulang senarai main</string>
     <string name="remind_me_before">Ingatkan saya sebelum</string>
     <string name="silence_step">Kesunyian</string>

@@ -99,12 +99,16 @@ class AppDatabaseMigrationTest {
 
         AppDatabase.MIGRATIONS[4].migrate(db) // 5 -> 6
         assertColumnExists(db, "schedules", "reminderMinutes")
+
+        AppDatabase.MIGRATIONS[5].migrate(db) // 6 -> 7
+        assertColumnExists(db, "schedules", "volumePercent")
+        assertColumnExists(db, "session_logs", "note")
         // The migrations were applied manually above (which leaves the user
         // version untouched): mark the file current so Room only validates.
-        db.version = 6
+        db.version = 7
         db.close()
 
-        // Reopen via Room: full schema validation against the v5 entities,
+        // Reopen via Room: full schema validation against the v7 entities,
         // plus proof the original rows survived every migration.
         val roomDb = Room.databaseBuilder(context, AppDatabase::class.java, "migrate-stepwise.db")
             .addMigrations(*AppDatabase.MIGRATIONS.toTypedArray())
@@ -122,6 +126,7 @@ class AppDatabaseMigrationTest {
             assertEquals(0, item.schedule.offsetMinutes)
             assertEquals(1, item.schedule.repeatCount)
             assertEquals(null, item.schedule.maxDurationMinutes)
+            assertEquals(null, item.schedule.volumePercent)
             assertEquals(1, item.sounds.size)
             assertEquals("Chant", item.sounds[0].displayName)
             assertTrue(item.steps.isEmpty())

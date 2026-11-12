@@ -36,7 +36,7 @@ class Converters {
         SessionLogEntity::class,
         RoutineStepEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -123,9 +123,33 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v6 -> v7: per-schedule volume (null = follow the global chant
+         * volume) and the optional practice-journal note on session logs
+         * (both columns ship in one migration to keep every intermediate
+         * schema a valid shipping state).
+         */
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE schedules ADD COLUMN volumePercent INTEGER",
+                )
+                db.execSQL(
+                    "ALTER TABLE session_logs ADD COLUMN note TEXT",
+                )
+            }
+        }
+
         /** All migrations, oldest first — also used by the migration tests. */
         val MIGRATIONS: List<Migration> =
-            listOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+            listOf(
+                MIGRATION_1_2,
+                MIGRATION_2_3,
+                MIGRATION_3_4,
+                MIGRATION_4_5,
+                MIGRATION_5_6,
+                MIGRATION_6_7,
+            )
 
         fun get(context: Context): AppDatabase =
             instance ?: synchronized(this) {

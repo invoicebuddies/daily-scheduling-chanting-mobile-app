@@ -96,6 +96,11 @@
     <string name="options_stops_at">Stops at %1$d min</string>
     <string name="options_repeat">×%1$d</string>
     <string name="auto_stop_after">Auto-stop after</string>
+    <string name="volume_row">Volume</string>
+    <string name="volume_default">Default</string>
+    <string name="volume_preview">Preview at this volume</string>
+    <string name="content_desc_volume_preview">Preview at this volume</string>
+    <string name="options_volume">Vol %1$d%%</string>
     <string name="repeat_playlist">Repeat playlist</string>
     <string name="remind_me_before">Remind me before</string>
     <string name="silence_step">Silence</string>
