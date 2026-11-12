@@ -8,7 +8,7 @@
 
 - Package: `com.chantingscheduler.app` (kept despite rebrand; user-facing name is "Chanting Buddy")
 - minSdk 26 · targetSdk/compileSdk 36
-- Toolchain: Gradle 8.14.3 (wrapper), AGP 8.11.1, Kotlin 2.2.0 + Compose plugin, KSP 2.2.0-2.0.2, Compose BOM **2025.11.01** (material3 1.4.x no longer brings `material-icons-core`, so `material-icons-core:1.7.8` is an explicit dep; the BOM no longer needs to track Rive — kept pinned anyway, downgrading buys nothing), Room 2.7.2 (schema **v6**, real migrations only, `exportSchema = true` → `core/data/schemas/*.json` committed), commons-suncalc 3.11 (sun + moon phases), Media3 1.8.0, Hilt 2.57.2 (KSP), Glance 1.1.1 (widget), Robolectric 4.15.1 (migration/codec tests), JUnit 4
+- Toolchain: Gradle 8.14.3 (wrapper), AGP 8.11.1, Kotlin 2.2.0 + Compose plugin, KSP 2.2.0-2.0.2, Compose BOM **2025.11.01** (material3 1.4.x no longer brings `material-icons-core`, so `material-icons-core:1.7.8` is an explicit dep; the BOM no longer needs to track Rive — kept pinned anyway, downgrading buys nothing), Room 2.7.2 (schema **v7**, real migrations only, `exportSchema = true` → `core/data/schemas/*.json` committed), commons-suncalc 3.11 (sun + moon phases), Media3 1.8.0, Hilt 2.57.2 (KSP), Glance 1.1.1 (widget), Robolectric 4.15.1 (migration/codec tests), JUnit 4
 - **Rive removed** (was ~10 MB native + a mismatched sample asset); the hand-drawn MonkArt is the mascot. Release builds are minified + ABI-split: **~3.7 MB per ABI** (was 37 MB monolithic).
 - Build on this machine with JDK 24 — verified working.
 
@@ -19,7 +19,7 @@
   - Start: `<ANDROID_SDK>/emulator/emulator.exe -avd chanting_test`
   - adb: `<ANDROID_SDK>/platform-tools/adb.exe`
 - Build: `./gradlew assembleDebug` → split APKs under `app/build/outputs/apk/debug/app-<abi>-debug.apk` (install the x86_64 or universal one on the emulator). CI runs `test lintDebug assembleDebug` on JDK 17 via `.github/workflows/android.yml`.
-- Tests: `./gradlew test` — 89 JVM tests (TriggerCalculator 14, StreakCalculator 11+6, RoutinePlan 5, SunTimes 4, VolumeFade 4, BackupCodec 8, PlaylistFailurePolicy 10, AudioFocusRetryPolicy 8, SnoozeRestore 4, ImportBackup 3, VersionComparator 6, UpdatePromptLogic 4, Room migrations 2) · Lint: `./gradlew lintDebug` (0 errors).
+- Tests: `./gradlew test` — 132 JVM tests (TriggerCalculator 14, StreakCalculator 11+6, RoutinePlan 5, SunTimes 4, VolumeFade 4, RingingTimerLabel 6, SessionVolume 3, BackupCodec 10, PlaylistFailurePolicy 10, AudioFocusRetryPolicy 8, SnoozeRestore 4, MissedChantDetector 9, ImportBackup 3, VersionComparator 6, UpdatePromptLogic 4, FeedbackComposer 6, Room migrations 2) · Lint: `./gradlew lintDebug` (0 errors).
 - Release builds are minified + resource-shrunk (R8) and **verified working on the emulator** (v1.3 universal APK, API 36): launch + onboarding, schedule create/edit, alarm armed `window=0` + `Alarm clock:` in dumpsys, alarm fire → receiver → FGS → audio (`dumpsys audio` shows `usage=USAGE_ALARM`), **locked-screen full-screen ringing page auto-launch** (verified twice; a third fire didn't surface it — possibly the API 34+ FSI rate limit), **120 s gap pauses and resumes on time with the screen off** (`event:paused` → `event:started` exactly 120 s later), snooze arm at +10 min (setAlarmClock) + persisted `snooze_1` pref, stats screen, session logging (`session_logs` read back via root). v1.3 verification additions: **silence-first routine holds silence for its full step then chants** (alarm path, after fixing the USAGE_ALARM/audio-focus throw), **built-in sounds intact and playable in release** (all four WAVs at original byte sizes in the APK; morning bell preview plays via the R.raw-id URI), **update prompt**: card appears for an older `versionName`, notes render markdown-stripped, Download hands off to the browser, Skip persists (`skipped_version=v1.2`), airplane-mode check fails silently. NOT re-verified on release: widget/tile clicks and SAF backup picker (unchanged from last round's debug verification; their start path goes through the now-guarded `PlaybackService.tryStart`). Found & fixed during these passes: the inter-track gap never actually paused playback (audit #2), and alarm-stream sessions threw on automatic audio focus, killing alarm-sourced routines via the fallback path (audit #3).
 - Release APKs are additionally **copied** (never renamed in place) to `app/build/outputs/release-named/ChantingBuddy-v<version>-<abi|universal>.apk` by a `copyReleaseApks` task finalized by every `package*Release` task (`VariantOutput.outputFileName` was removed in AGP 8). The originals stay in `build/outputs/apk/release/` for adb/Android Studio; rebuilds can't leave a stale APK under the release name. Release builds keep all four WAVs in `res/raw` at full size (keep.xml + R.raw references).
 - CI (`.github/workflows/android.yml`): `test lintDebug assembleDebug` on JDK 17 for every push/PR; README badge reflects it.
@@ -41,8 +41,13 @@
 12. **Backup/restore** — versioned JSON via `BackupCodec` (unit-tested): SAF export/import in Settings → About. Built-in URIs survive; phone-file URIs are marked "⚠ re-pick" only when the app no longer holds the grant (`persistedUriPermissions` predicate, same-device imports re-attach cleanly). Importing a backup whose schedules already exist is skipped as duplicates ("Imported X, skipped Y duplicates"). Cloud backup + device transfer include the Room DB; dead SAF grants on a restored device are flagged at runtime with a "Re-pick" chip on the list screen.
 13. **Widget + QS tile** — Glance widget (next session + play/stop) refreshed via `WidgetBridge` (package-targeted APPWIDGET_UPDATE broadcast from core:player; the receiver lives in app and is referenced by name). `ChantTileService` QS tile chants the first enabled schedule / stops.
 14. **Update prompt** — anonymous check of the GitHub latest-release API at most once per 24 h on app open (`UpdateStore` throttle, silent on every failure; a generic `ChantingBuddy/<version>` user agent, no identifiers). A calm card on the list offers Download (ABI-matched asset → universal → release page via `ACTION_VIEW`; no install permission), Later, and Skip this version. `VersionComparator` (numeric, part-by-part, unit-tested) compares the `vX.Y` tag against `versionName`; malformed tags never prompt. Settings → About has the auto-check toggle (default on) and a "Check for updates now" button. Everything is gated on `BuildConfig.GITHUB_UPDATE_CHECK` so a future Play build can switch it off.
-14. **i18n** — all user-facing strings in resources, translated to Simplified Chinese (`zh-rCN`) and Malay (`ms`), including core module strings. Verified zh UI on emulator via per-app locales.
+14. **i18n** — all user-facing strings in resources, translated to Simplified Chinese (`zh-rCN`), Malay (`ms`), Thai (`th`), Burmese (`my`), and Sinhala (`si`), including core module strings. th/my/si are machine-assisted and invite native review (see TRANSLATIONS.md; corrections land via the feedback form's "Translation issue" topic). Verified zh/th/my/si UI on emulator via per-app locales; Android's font fallback renders all scripts with no tofu or clipping.
 15. **Reliability UX** — Settings → Alarms & reliability: exact-alarm status, battery optimization, full-screen-intent permission (Android 14+), test sound. FGS-start refusals (tile/widget on Android 12+) route through `PlaybackService.tryStart`, which falls back to a high-priority "Time to chant" tap-to-start notification (channel `playback_fallback`, `getForegroundService` PendingIntent).
+16. **Missed-chant detection** — `AlarmLedgerStore` (prefs) records what `AlarmScheduler` armed (`expected_<id>`) and what `AlarmReceiver` fired (`fired_<id>`, written synchronously first). `MissedChantDetector` (pure, unit-tested) reports a miss when the schedule is still enabled, the expectation is 10 min–7 days past, and no fire landed at/after it (60 s early-skew tolerance). `rearmAll` detects BEFORE re-arming (re-arm would overwrite the evidence); each miss is reported once via a gentle list card ("Your 6:00 Morning chant didn't play on Tue." / "2 chants didn't play this week.") with Fix reliability (deep-links Settings → Alarms & reliability, scrolling + highlighting) and Dismiss. Disable/delete/edit all flow through `cancel()` → ledger clear, so stale entries can't outlive their schedule.
+17. **Ringing page fixes** — timer pill chosen by pure `RingingTimerLabel.resolve` (routine: "Step x of n · mm:ss left"; auto-stop: countdown; else elapsed). `PlaybackState` publishes step/auto-stop wall-clock deadlines, and a `EndedSession` (only for self-ends: completion, auto-stop, permanent focus loss — never user Stop/Snooze) that switches the page to a calm "Session complete" state: elapsed minutes, optional journal note, Done. Auto-closes after 60 s without interaction (typing resets it), or immediately when the screen is off/locked.
+18. **Per-schedule volume** — `schedules.volumePercent` (Room v7; null = global). Edit screen Options row: Default/25/50/70/85/100 chips + 5 s preview at the chosen volume. `SessionVolume.resolve` (pure) makes it replace the global chant-volume ceiling for that session; fades ramp to it. In BackupCodec v2.
+19. **Practice journal** — `session_logs.note` (Room v7, carried by the same migration). Optional one-line note (200 chars) on the ringing page's complete state (saved on Done via the `EndedSession.logId`) or per history row in Stats (tap to add/edit/clear; shown as a muted line). Never prompted. In BackupCodec v3.
+20. **Support screen** — heart icon in the list header + Settings → About row. Ko-fi card (warm zero-pressure copy, ACTION_VIEW hand-off) gated on `BuildConfig.SHOW_TIP_LINK` (Play can flip it off). Feedback form: topic dropdown, 10–2000-char message, optional validated reply email, diagnostics checkbox (default on) with exact expandable preview (app/Android version, device, language, alarm/battery/FSI states, schedule count — never labels/URIs/notes/history), `FeedbackComposer` (pure, unit-tested; topic stays English; constant subject "Daily Chanting App - Bug Report") hands off via ACTION_SENDTO mailto:, with a copy-to-clipboard fallback dialog when no email app exists. Strict no-nag: reachable only from this screen.
 
 ## UI/UX (current design system)
 
@@ -59,21 +64,27 @@
 Multi-module. **Packages were deliberately NOT renamed** (`com.chantingscheduler.app.data` etc.) — module membership ≠ package. Namespaces differ per module and matter only for each module's R class (relevant now with i18n: library strings are referenced via `com.chantingscheduler.app.core.<module>.R` from app code).
 
 ```
-app            – activities, ui/, ui/widget/, tile/, di/, ChantingApp (channels, re-arm)
-core:data      – Room v6 + migrations + schemas, repositories, stores (Location/Theme/
-                 Onboarding/PlaybackSettings/Motion), BackupCodec, StreakCalculator,
-                 BuiltinSounds live in core:player
+app            – activities, ui/ (list/edit/settings/stats/onboarding/dial/support/
+                 FeedbackComposer/Components/Motion…), ui/widget/, tile/, di/,
+                 ChantingApp (channels, re-arm)
+core:data      – Room v7 + migrations + schemas, repositories, stores (Location/Theme/
+                 Onboarding/PlaybackSettings/Motion/AlarmLedger), BackupCodec (v3),
+                 StreakCalculator; BuiltinSounds live in core:player
 core:scheduling– TriggerCalculator (pure), AlarmScheduler (setAlarmClock for alarms/snooze +
-                 setExactAndAllowWhileIdle for reminders + snooze persistence/restore),
-                 AlarmReceiver, RescheduleReceiver, ReminderReceiver, SnoozeRestore
-                 (pure, unit-tested), SunTimesCalculator, SessionStarter seam
+                 setExactAndAllowWhileIdle for reminders + snooze persistence/restore +
+                 alarm ledger + missed-chant detection), AlarmReceiver,
+                 RescheduleReceiver, ReminderReceiver, SnoozeRestore
+                 (pure, unit-tested), MissedChantDetector (pure, unit-tested),
+                 SunTimesCalculator, SessionStarter seam
 core:player    – PlaybackService (playlist + routine + auto-stop + fade + fallback chime +
-                 alarm-stream attributes + audio-focus retry + gap wake lock),
-                 PlaybackState, RoutinePlan, PlaylistFailurePolicy (per-URI failure
+                 alarm-stream attributes + audio-focus retry + gap wake lock +
+                 per-session volume ceiling), PlaybackState (incl. EndedSession),
+                 RoutinePlan, RingingTimerLabel (pure, unit-tested), SessionVolume
+                 (pure, unit-tested), PlaylistFailurePolicy (per-URI failure
                  decisions, unit-tested), AudioFocusRetryPolicy (60 s/30 s/5 min
-                 retry-then-give-up, unit-tested), SoundPreviewPlayer, VolumeFade,
-                 WidgetBridge, BuiltinSounds, raw/ chime WAVs, notification
-                 strings/drawables
+                 retry-then-give-up, unit-tested), SoundPreviewPlayer (volume +
+                 timed stop), VolumeFade, WidgetBridge, BuiltinSounds, raw/ chime
+                 WAVs, notification strings/drawables
 ```
 
 Dependency direction: `app → core:player → core:scheduling → core:data` (app also depends on the other two). Boundary seams:
@@ -95,19 +106,22 @@ app/src/main/java/com/chantingscheduler/app/
   tile/ChantTileService.kt  – QS tile toggle
   ui/                       – list/edit/settings/stats/onboarding/dial/Components/Motion…
   ui/widget/NextSessionWidget.kt – Glance widget + PlayToggleCallback
-core/data/.../data/         – Entities (v6), AppDatabase + MIGRATIONS 1..5, schemas JSONs,
-                              Daos, ScheduleRepository (save/import/snapshot), stores,
-                              BackupCodec, StreakCalculator, MotionStore
-core/scheduling/.../        – TriggerCalculator, AlarmScheduler, AlarmReceiver,
-                              RescheduleReceiver, ReminderReceiver, SunTimesCalculator
-core/player/.../playback/   – PlaybackService, PlaybackState, RoutinePlan, BuiltinSounds,
+core/data/.../data/         – Entities (v7), AppDatabase + MIGRATIONS 1..6, schemas JSONs,
+                              Daos, ScheduleRepository (save/import/snapshot, session
+                              notes), stores (incl. AlarmLedgerStore), BackupCodec (v3),
+                              StreakCalculator, MotionStore
+core/scheduling/.../        – TriggerCalculator, AlarmScheduler (ledger + missed-chant
+                              detection), AlarmReceiver, RescheduleReceiver,
+                              ReminderReceiver, MissedChantDetector, SunTimesCalculator
+core/player/.../playback/   – PlaybackService, PlaybackState (+ EndedSession), RoutinePlan,
+                              RingingTimerLabel, SessionVolume, BuiltinSounds,
                               SoundPreviewPlayer, VolumeFade, WidgetBridge
 ```
 
 ## Continuity notes for the next session
 
-- **Current release**: versionCode 7 / v1.3.3 — project licensed **GPL-3.0** (`LICENSE`); `pauseInternally()` now arms `suppressUserPauseOnce` only when `playWhenReady` is true (pausing an already-paused player fires no callback, so the marker used to linger and could swallow the next real user pause).
-- **Previous release**: versionCode 6 / v1.3.2 — audit round 5 (follow-up to manual alarm-stream focus): every automatic play() (gap end, routine step, fallback chime, failure seek, retry) gates on `AlarmAudioFocusPolicy.mayStart` via `canStartAudio()` — no audio over a call that starts mid-gap; permanent `AUDIOFOCUS_LOSS` (user started other audio) maps to a new `Action.Stop` instead of zombie-pausing. **Found by instrumented emulator test**: ExoPlayer delivers `onPlayWhenReadyChanged` *asynchronously* even for main-thread `pause()` calls, so the v1.3 `internalPause` flag window was always cleared at callback time — every gap-hold pause latched `userPaused=true` at the first gap (harmless until the v1.3.2 gating made it fatal: session silent forever after gap 1). Fixed with a consume-once `suppressUserPauseOnce` marker set by `pauseInternally()`. Verified: gap-end-mid-call stays silent till hangup then resumes (focus event log: LOSS_TRANSIENT→GAIN, playlist completes); YouTube mid-chant → session ends + notification clears; published assets verify as cert `e11a9c95…23ab`. Earlier rounds: v1.3.1 shipped after v1.3's unsigned APKs (secrets missing + gitignored `keystore/` broke decode) — `release.yml` now gates on the four signing secrets and verifies `EXPECTED_CERT_SHA256` before/after the build; unsigned CI copies carry `-UNSIGNED` and are never offered as downloads. `RELEASING.md` has the full checklist.
+- **Current release**: versionCode 8 / v1.4 — ringing-page timer pill (pure `RingingTimerLabel`) + calm "Session complete" state with practice-journal note (`PlaybackState.EndedSession`, published only for self-ends); missed-chant detection (`AlarmLedgerStore` + pure `MissedChantDetector`, detect-before-rearm in `rearmAll`, one-time list card with reliability deep-link); per-schedule volume (`SessionVolume`, Room v7 `volumePercent`, backup v2); practice journal (`session_logs.note`, backup v3, Stats row dialog); Support screen (Ko-fi card behind `SHOW_TIP_LINK` + email feedback form via pure `FeedbackComposer`, copy-to-clipboard fallback); Thai/Burmese/Sinhala locales (machine-assisted, see TRANSLATIONS.md). 132 JVM tests.
+- **Previous release**: versionCode 7 / v1.3.3 — project licensed **GPL-3.0** (`LICENSE`); `pauseInternally()` arms `suppressUserPauseOnce` only when `playWhenReady` is true (pausing an already-paused player fires no callback, so the marker used to linger and could swallow the next real user pause).
 - **Release discipline**: full checklist in **RELEASING.md** (bump → commit → tag `vX.Y` matching `versionName` exactly → push → green Release workflow → spot-verify cert → install-over-previous → publish draft). `release.yml` fails up front without the four signing secrets, verifies the decoded keystore's cert against the repo variable `EXPECTED_CERT_SHA256` (`e11a9c95…23ab`) before building, and apksigner-verifies every APK in `release-named/` against the same hash before attaching anything. Unsigned copies keep an `-UNSIGNED` suffix and `UpdatePromptLogic.assetAbi` never matches them. Every release MUST be signed with the same keystore as v1.0–v1.2 — Android refuses to install over a different key, and **losing the keystore means users must uninstall and lose their data** (back up `keystore/` + `keystore.properties`, owner-only).
 - **Quota**: the 5-hour usage limit has interrupted work repeatedly; commit early and often (this doc now reflects a fully committed state).
 - **Design verification loop**: install (`adb install -r .../app-x86_64-debug.apk`), screenshot (`adb exec-out screencap -p > x.png`), inspect, fix. Per-app locales: `adb shell cmd locale set-app-locales <pkg> --locales zh-Hans-CN`. Toggle dark/light: `adb shell cmd uimode night yes|no`.
@@ -124,7 +138,9 @@ core/player/.../playback/   – PlaybackService, PlaybackState, RoutinePlan, Bui
 - Imported phone-file URIs are marked "⚠ re-pick" only when the grant is dead; the list screen shows a "Re-pick" chip for schedules with missing `content://` URIs, and playback falls back to the bundled chime meanwhile.
 - Widget updates rely on explicit `WidgetBridge` broadcasts + the 30-min system period (no content-observer).
 - Session-log `audioSeconds` counts rendered-audio time via `onIsPlayingChanged`; a crash mid-session can still drop one record (fire-and-forget insert).
-- Ringing-page quirks (pre-existing, cosmetic): the timer pill shows a nonsense value for playlist sessions (it formats a step-duration source that doesn't exist), and RingingActivity doesn't finish itself when the session ends on its own — it sits there with a stale timer until closed.
+- Missed-chant card appears only when the app next opens (detection runs in `rearmAll`, which the app-start path triggers); the 10-min grace means an alarm that fired very late is not reported, by design.
+- Ringing-page complete state shows after *self*-ends only; a user Stop/Snooze closes the page as before. If the process dies with the page open, it simply closes (no state survives).
+- th/my/si translations are machine-assisted — unnatural phrasing is expected; native corrections welcome (TRANSLATIONS.md).
 - Snooze alarms skip playback if the schedule was disabled in the meantime; fresh playback cancels pending snoozes.
 - Geocoder address search needs network + a backend (google_apis image OK).
 - Variable-font weights may synthesize on API 26–27.
@@ -136,5 +152,6 @@ core/player/.../playback/   – PlaybackService, PlaybackState, RoutinePlan, Bui
 - Widget: multiple sizes / direct schedule picking
 - Wear OS tile / complication
 - Silence-step ambient tone option
-- Per-schedule volume
-- Multi-language expansion (Burmese, Thai, Pali terms)
+- Per-schedule fade-in (today fade-in is global)
+- Pali/romanized chant text display on the ringing page
+- More languages (Khmer, Lao, Vietnamese) — same machine-assisted + native-review flow as TRANSLATIONS.md

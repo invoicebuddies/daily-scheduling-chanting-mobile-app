@@ -54,6 +54,7 @@ The app ships with built-in bell sounds, so it can ring before you've picked any
 - Optional pre-session reminder, 5 or 10 minutes before
 - Alarms survive reboot, app updates, clock and timezone changes
 - Snooze for 5, 10, or 15 minutes, from the ringing screen or the notification
+- **If a scheduled chant didn't play** (phone off, battery saver), the app tells you the next time you open it and links straight to the reliability fixes
 
 **Sound**
 - Built-in bell and singing-bowl sounds — works out of the box
@@ -61,6 +62,7 @@ The app ships with built-in bell sounds, so it can ring before you've picked any
 - Gap between tracks, repeat the playlist ×1 to ×108, or auto-stop after 5–60 minutes
 - Routines: ordered practice sessions — each sound (or a silence) is held for a set number of minutes, step by step
 - Gentle volume fade-in (off, 30 s, 1, 2, or 5 minutes)
+- **Per-schedule volume** — keep one chant soft and another full, or follow the global setting
 - Lock-screen and Bluetooth media controls via the playback notification
 - If a file was deleted, the app falls back to a built-in chime and tells you to fix the schedule
 
@@ -69,14 +71,15 @@ The app ships with built-in bell sounds, so it can ring before you've picked any
 - Streaks (current and longest), mindful minutes, this week / all time
 - Monthly calendar view coloured by practice time
 - Recent history list with how each session ended
+- **Practice journal**: an optional one-line note after a session (on the "Session complete" screen) or on any history row
 - Undo delete (5 seconds to change your mind)
 
 **Look & feel**
 - Light, dark, or follow-the-system theme
 - Calm onboarding you can replay any time
 - Home-screen widget with the next session and a play/stop button; Quick Settings tile for "chant now"
-- Backup & restore of schedules and history as a JSON file
-- English, 简体中文, and Bahasa Melayu
+- Backup & restore of schedules, journal notes, and history as a JSON file
+- English, 简体中文, Bahasa Melayu, ไทย, မြန်မာဘာသာ, සිංහල — see [TRANSLATIONS.md](TRANSLATIONS.md)
 - "Reduce motion" option for calmer screens
 
 ## Permissions
@@ -113,7 +116,7 @@ Everything — schedules, sounds, history, settings — is stored on your device
 
 ## Support the project
 
-If Chanting Buddy has become part of your daily practice and you'd like to say thanks, you're welcome to buy me a coffee: https://ko-fi.com/xia0da. No pressure at all — the app is free either way.
+**Support screen** (heart icon on the home screen, or Settings → About): send feedback or report a bug straight from the app — it opens your own email app with everything filled in (an optional app/device info block, nothing personal). There's also a zero-pressure "buy me a coffee" card if you'd like to say thanks: https://ko-fi.com/xia0da. No pressure at all — the app is free either way.
 
 ## For developers
 
