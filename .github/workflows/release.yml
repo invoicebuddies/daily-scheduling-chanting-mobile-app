@@ -150,8 +150,23 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Every asset carries a human label (shown under its name on the
+          # release page), so the download list reads without guessing.
+          args=()
+          for apk in app/build/outputs/release-named/*.apk; do
+            name=$(basename "$apk")
+            case "$name" in
+              *-UNSIGNED.apk)   label="Not signed — cannot be installed (CI debug copy only)" ;;
+              *-arm64-v8a.apk)  label="Most modern phones — pick this one" ;;
+              *-armeabi-v7a.apk) label="Older 32-bit phones" ;;
+              *-x86_64.apk)     label="x86_64 emulators and rare x86 devices" ;;
+              *-universal.apk)  label="Works on every phone — pick this if unsure" ;;
+              *)                label="Android APK" ;;
+            esac
+            args+=("$apk#$label")
+          done
           gh release create "$GITHUB_REF_NAME" \
             --draft \
-            --title "Chanting Buddy ${GITHUB_REF_NAME#v}" \
+            --title "Chanting Buddy $GITHUB_REF_NAME" \
             --generate-notes \
-            app/build/outputs/release-named/*.apk
+            "${args[@]}"

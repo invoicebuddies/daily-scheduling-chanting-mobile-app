@@ -39,6 +39,9 @@ safety nets that keep a broken release from shipping.
   be offered as a download.
 - Releases are created as **drafts** — a human reviews before anything goes
   public.
+- Every APK asset carries a **human-readable label** (shown under its name in
+  the Assets section), e.g. "Most modern phones — pick this one" for
+  arm64-v8a — the download list should never require guessing.
 
 ## Required GitHub configuration
 
