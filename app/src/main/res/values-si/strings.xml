@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chanting Buddy</string>
+    <string name="channel_playback">ගාථා වාදනය</string>
+
+    <!-- Common -->
+    <string name="back">ආපසු</string>
+    <string name="close">වසන්න</string>
+    <string name="cancel">අවලංගු කරන්න</string>
+    <string name="save">සුරකින්න</string>
+    <string name="delete">මකන්න</string>
+    <string name="edit">සංස්කරණය</string>
+    <string name="stop">නවත්වන්න</string>
+    <string name="play">වාදනය කරන්න</string>
+    <string name="on">ක්‍රියාත්මක</string>
+    <string name="off">ක්‍රියාවිරහිත</string>
+    <string name="fix">නිවැරදි කරන්න</string>
+    <string name="undo">අහෝසි කරන්න</string>
+    <string name="today">අද</string>
+    <string name="tomorrow">හෙට</string>
+    <string name="min_short">විනාඩි</string>
+    <string name="not_set">සකසා නැත</string>
+
+    <!-- Greeting / header -->
+    <string name="good_morning">සුභ උදෑසනක්</string>
+    <string name="good_afternoon">සුභ දහවලක්</string>
+    <string name="good_evening">සුභ සන්ධ්‍යාවක්</string>
+    <string name="header_subtitle">ඔබේ ගාථා උපලේඛනය · %1$s</string>
+    <string name="content_desc_stats">සංඛ්‍යාලේඛන</string>
+    <string name="content_desc_settings">සැකසුම්</string>
+
+    <!-- List screen -->
+    <string name="next_session_overline">මීළඟ සැසිය</string>
+    <string name="no_schedules_title">උපලේඛන නැත</string>
+    <string name="no_schedules_body">අලුයම, සන්ධ්‍යාව හෝ ඕනෑම වේලාවක ගාථා සැලසුම් කරන්න.</string>
+    <string name="create_schedule">උපලේඛනයක් සාදන්න</string>
+    <string name="add_schedule">උපලේඛනය එක් කරන්න</string>
+    <string name="location_needed_title">ස්ථානය අවශ්‍යයි</string>
+    <string name="location_needed_body">හිරු උදා/හිරු බැස යාමේ උපලේඛන ස්ථානය සකසන තෙක් ක්‍රියාත්මක නොවේ. සැකසීමට තට්ටු කරන්න.</string>
+    <string name="sound_count">ශබ්ද %1$d ක්</string>
+    <string name="repick_sounds_chip">ශබ්ද ගොනුවක් නැවත තේරීමට අවශ්‍යයි — නිවැරදි කිරීමට තට්ටු කරන්න</string>
+    <string name="update_available_title">Chanting Buddy %1$s ලබා ගත හැක</string>
+    <string name="update_download">බාගන්න</string>
+    <string name="update_later">පසුව</string>
+    <string name="update_skip">මෙම අනුවාදය මඟහරින්න</string>
+    <string name="update_up_to_date">ඔබ යාවත්කාලීනව සිටී.</string>
+    <string name="update_auto_check_title">යාවත්කාලීන කිරීම් ස්වයංක්‍රීයව පරීක්ෂා කරන්න</string>
+    <string name="update_auto_check_body">දිනකට වරක් පමණක්, යෙදුම GitHub අසයි (නොනම්) අලුත් අනුවාදයක් තිබේද කියා. පුද්ගලික දත්ත නොයවයි.</string>
+    <string name="update_check_now_title">දැන් පරීක්ෂා කරන්න</string>
+    <string name="update_check_now_action">පරීක්ෂා</string>
+    <string name="gap_seconds">තත්පර %1$d ක් බැඳි</string>
+    <string name="play_now">දැන් වාදනය කරන්න</string>
+    <string name="stop_playback">වාදනය නවත්වන්න</string>
+    <string name="track_status">ඛණ්ඩය %1$d / %2$d</string>
+    <string name="missed_chant_single">%3$s දින %1$s ඔබේ %2$s ගාථාව වාදනය නොවුණි.</string>
+    <string name="missed_chant_multiple">මේ සතියේ ගාථා %1$d ක් වාදනය නොවුණි.</string>
+    <string name="missed_chant_body">දුරකථනය වසා තිබුණ හෝ බැටරි සැකසුම් එය අවහිර කළ හැක.</string>
+    <string name="missed_chant_fix">විශ්වසනීයත්වය සකසන්න</string>
+    <string name="missed_chant_dismiss">හරි</string>
+    <string name="deleted_snackbar">“%1$s” මකා දැමුවා</string>
+    <string name="default_schedule_name">උපලේඛනය</string>
+    <string name="default_session_name">ගාථා සැසිය</string>
+
+    <!-- Trigger types -->
+    <string name="trigger_fixed">ස්ථාවර වේලාව</string>
+    <string name="trigger_sunrise">හිරු උදාව</string>
+    <string name="trigger_sunset">හිරු බැස යාම</string>
+    <string name="trigger_full_moon">පුර පසළොස්වක</string>
+    <string name="trigger_new_moon">අමාවක්</string>
+    <string name="trigger_fixed_time">ස්ථාවර වේලාව</string>
+
+    <!-- Edit screen -->
+    <string name="set_schedule_title">උපලේඛනය සකසන්න</string>
+    <string name="mode_playlist">වාදන ලැයිස්තුව</string>
+    <string name="mode_routine">චාරිත්‍රාව</string>
+    <string name="repeat_row">පුනරාවර්තනය</string>
+    <string name="sounds_row">ශබ්ද</string>
+    <string name="steps_row">පියවර</string>
+    <string name="label_row">ලේබලය</string>
+    <string name="options_row">විකල්ප</string>
+    <string name="sound_count_summary">ශබ්ද %1$d ක්</string>
+    <string name="step_count_summary">පියවර %1$d ක්</string>
+    <string name="no_sounds_yet">ශබ්ද එක් කර නැත</string>
+    <string name="add_sounds">ශබ්ද එක් කරන්න</string>
+    <string name="add_sound_step">ශබ්ද පියවරක් එක් කරන්න</string>
+    <string name="add_silence_step">නිශ්ශබ්ද පියවරක් එක් කරන්න</string>
+    <string name="built_in_sounds">ව්‍යවස්ථාපිත ශබ්ද</string>
+    <string name="pick_from_phone">දුරකථනයෙන් තේරීම…</string>
+    <string name="add_sound_dialog_title">ශබ්ද පියවරක් එක් කරන්න</string>
+    <string name="need_sound_to_save">මෙම උපලේඛනය සුරැකීමට අවම වශයෙන් ශබ්දයක් එක් කරන්න.</string>
+    <string name="need_step_to_save">මෙම චාරිත්‍රය සුරැකීමට අවම වශයෙන් පියවරක් එක් කරන්න.</string>
+    <string name="schedule_name_hint">උපලේඛන නම (විකල්ප)</string>
+    <string name="gap_label">ශබ්ද අතර පරතරය (තත්පර)</string>
+    <string name="options_no_gap">පරතරයක් නැත</string>
+    <string name="options_gap">තත්පර %1$d ක්</string>
+    <string name="options_stops_at">විනාඩි %1$d දී නවතී</string>
+    <string name="options_repeat">×%1$d</string>
+    <string name="auto_stop_after">ස්වයංක්‍රීය නවතින වේලාව</string>
+    <string name="volume_row">ශබ්ද මට්ටම</string>
+    <string name="volume_default">සාමාන්‍ය</string>
+    <string name="volume_preview">මෙම ශබ්ද මට්ටමින් උත්සාහ කරන්න</string>
+    <string name="content_desc_volume_preview">මෙම ශබ්ද මට්ටමින් උත්සාහ කරන්න</string>
+    <string name="options_volume">ශබ්ද %1$d%%</string>
+    <string name="repeat_playlist">වාදන ලැයිස්තුව පුනරාවර්තනය</string>
+    <string name="remind_me_before">කලින් මට මතක් කරන්න</string>
+    <string name="silence_step">නිශ්ශබ්දය</string>
+    <string name="duration_label">කාලසීමාව</string>
+    <string name="duration_minutes">විනාඩි %1$d</string>
+    <string name="content_desc_preview">උත්සාහ කරන්න</string>
+    <string name="content_desc_stop_preview">උත්සාහය නවත්වන්න</string>
+    <string name="content_desc_move_up">උඩට ගෙනයන්න</string>
+    <string name="content_desc_move_down">යටට ගෙනයන්න</string>
+    <string name="content_desc_remove">ඉවත් කරන්න</string>
+    <string name="content_desc_schedule_options">උපලේඛන විකල්ප</string>
+    <string name="delete_schedule_menu">උපලේඛනය මකන්න</string>
+    <string name="delete_schedule_title">මෙම උපලේඛනය මකන්නද?</string>
+    <string name="delete_schedule_body">මෙය ආපසු අඩු කළ නොහැක.</string>
+    <string name="decrease_offset">අඩු කරන්න</string>
+    <string name="increase_offset">වැඩි කරන්න</string>
+    <string name="at_sun_time">%1$s වේලාවේ</string>
+    <string name="offset_before">%2$sට විනාඩි %1$d ක් පෙර</string>
+    <string name="offset_after">%2$sට පසු විනාඩි %1$d</string>
+    <string name="offset_negative">−විනාඩි %1$d</string>
+    <string name="offset_positive">+විනාඩි %1$d</string>
+    <string name="set_location_for_sun">%1$s වේලා ගණනයට ස්ථානය සකසන්න</string>
+    <string name="today_at">අද: %1$s</string>
+
+    <!-- Repeat summaries -->
+    <string name="repeat_never">කවදාවත් නැත</string>
+    <string name="repeat_every_day">සෑම දිනම</string>
+    <string name="repeat_mon_fri">සඳුදා–සිකුරාදා</string>
+    <string name="repeat_weekends">සති අන්තය</string>
+
+    <!-- Ringing screen -->
+    <string name="ringing_default_label">ගාථා වේලාව</string>
+    <string name="step_status">පියවර %1$d / %2$d</string>
+    <string name="snooze_button">විනාඩි %1$d ක් පසුව</string>
+    <string name="stop_button">නවත්වන්න</string>
+    <string name="content_desc_alarm_ringing">අලාම්වල හඬ</string>
+    <string name="ringing_step_time_left">පියවර %1$d / %2$d · ඉතිරි %3$s</string>
+    <string name="ringing_time_left">ඉතිරි %1$s</string>
+    <string name="session_complete_title">සැසිය සම්පූර්ණයි</string>
+    <string name="session_complete_minutes">විනාඩි %1$d</string>
+    <string name="done_button">අවසන්</string>
+    <string name="session_note_hint">අද පුහුණුව කොහොමද? (විකල්ප)</string>
+
+    <!-- Time picker -->
+    <string name="am">AM</string>
+    <string name="pm">PM</string>
+    <string name="hours_label">පැය</string>
+    <string name="minutes_label">විනාඩි</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">මඟ හරින්න</string>
+    <string name="onboarding_next">ඊළඟ</string>
+    <string name="onboarding_get_started">ආරම්භ කරන්න</string>
+    <string name="onboarding_1_title">Chanting Buddy වෙත සාදරයෙන් පිළිගනිමු</string>
+    <string name="onboarding_1_body">නිවැරදි වේලාවටම ඔබේ ගාථා ශබ්ද ස්වයංක්‍රීයව වාදනය වේ — ඔබ වාදන බොත්තම ඔබන්න අවශ්‍ය නැත.</string>
+    <string name="onboarding_2_title">එක වරක් සකසන්න</string>
+    <string name="onboarding_2_body">වේලාවන්, දින, හිරු උදා හෝ බැස යාම පවා තෝරන්න. ඔබේ ගාථා දිනපතා ස්වයංක්‍රීයව වාදනය වේ.</string>
+    <string name="onboarding_3_title">ඔබේ සැසි ගොඩනගන්න</string>
+    <string name="onboarding_3_body">දුරකථනයෙන් ශබ්ද තෝරා, මෘදු පරතර සහිත ලැයිස්තුවක් සාදා, සුරැකීමට පෙර උත්සාහ කරන්න.</string>
+
+    <!-- Main activity dialogs / backup -->
+    <string name="exact_alarm_dialog_title">නිවැරදි අලාම්</string>
+    <string name="exact_alarm_dialog_body">නිවැරදි වේලාවන්හිදී ගාථා ආරම්භ කිරීමට, පද්ධති සැකසුම්වල මෙම යෙදුමට \"අලාම් සහ මතක් කිරීම්\" සක්‍රීය කරන්න.</string>
+    <string name="open_settings">සැකසුම් විවෘත කරන්න</string>
+    <string name="later">පසුව</string>
+    <string name="backup_exported">උපස්ථය නිකුත් කළා.</string>
+    <string name="backup_export_failed">නිකුතුව අසාර්ථකයි.</string>
+    <string name="backup_imported">උපස්ථය ආයාත කළා.</string>
+    <string name="backup_imported_full">උපලේඛන %1$d ක් සහ සැසි %2$d ක් ආයාත කළා.</string>
+    <string name="backup_imported_counts">උපලේඛන %1$d (%3$d නව සැසි), අනුපිටපත් %2$d උපලේඛන සහ %4$d සැසි මඟ හරින ලදී.</string>
+    <string name="backup_import_failed">ආයාතය අසාර්ථකයි — වලංගු උපස්ථ ගොනුවක් නොවේ.</string>
+
+    <!-- Stats -->
+    <string name="stats_title">ඔබේ පුහුණුව</string>
+    <string name="stats_empty_title">සැසි නැත</string>
+    <string name="stats_empty_body">සම්පූර්ණ වූ ගාථා සැසි මෙහි ඔබේ ඉතිහාසය ගොඩනගයි.</string>
+    <string name="stats_day_in_a_row">දින පේළිය</string>
+    <string name="stats_days_in_a_row">දින පේළිය</string>
+    <string name="stats_this_week">මේ සතිය</string>
+    <string name="stats_all_time">සියලුම කාලය</string>
+    <string name="stats_longest_streak">වැඩිම පේළිය</string>
+    <string name="stats_mindful_min">සිහිකැඳවුම් විනාඩි</string>
+    <string name="stats_history_title">ඉතිහාසය</string>
+    <string name="stats_note_dialog_title">පුහුණු සටහන</string>
+    <string name="stats_history_date_format">d MMM</string>
+    <string name="stats_history_with_label">%1$s · %2$s · විනාඩි %3$d · %4$s</string>
+    <string name="stats_history_no_label">%1$s · විනාඩි %2$d · %3$s</string>
+    <string name="end_reason_completed">සම්පූර්ණයි</string>
+    <string name="end_reason_stopped">නවත්වන ලදී</string>
+    <string name="end_reason_snoozed">පසුවට දමන ලදී</string>
+
+    <!-- Settings -->
+    <string name="settings_title">සැකසුම්</string>
+    <string name="appearance_section">පෙනුම</string>
+    <string name="theme_auto">ස්වයං</string>
+    <string name="theme_light">ආලෝක</string>
+    <string name="theme_dark">අඳුරු</string>
+    <string name="location_section">ස්ථානය</string>
+    <string name="use_device_location">දුරකථන ස්ථානය භාවිත කරන්න</string>
+    <string name="locating">සොයමින්…</string>
+    <string name="location_set">දුරකථන ස්ථානයෙන් සකසන ලදී.</string>
+    <string name="location_failed">දුරකථන ස්ථානය ලබා ගත නොහැක — පහතින් ඇතුළත් කරන්න.</string>
+    <string name="location_denied">ස්ථාන අවසරය ප්‍රතික්ෂේප විය — පහතින් ඇතුළත් කරන්න.</string>
+    <string name="enter_manually">අතින් ඇතුළත් කරන්න</string>
+    <string name="search_for_place">ස්ථානයක් සොයන්න</string>
+    <string name="search_unavailable">සෙවීම නොමැත — පහතින් ඛණ්ඩාංක ඇතුළත් කරන්න.</string>
+    <string name="latitude">අක්ෂාංශය</string>
+    <string name="longitude">දේශාංශය</string>
+    <string name="save_location">ස්ථානය සුරකින්න</string>
+    <string name="clear">මකන්න</string>
+    <string name="no_location_set">ස්ථානය සකසා නැත</string>
+    <string name="no_location_body">හිරු උදා/බැස යාමේ උපලේඛන සඳහා ස්ථානය අවශ්‍යයි.</string>
+    <string name="sunrise_label">හිරු උදාව</string>
+    <string name="sunset_label">හිරු බැස යාම</string>
+    <string name="playback_section">වාදනය</string>
+    <string name="volume_fade_in">ශබ්දය ක්‍රමයෙන් වැඩිවීම</string>
+    <string name="volume_fade_in_body">අලාමය ආරම්භ වන විට ශබ්දයෙන් මෘදුව ඉහළ යයි.</string>
+    <string name="snooze_length">නිදිගෙන යාමේ කාලය</string>
+    <string name="snooze_length_body">ගාථාව නැවත නාද වීමට කෙතරම් රැඳී සිටිය යුතුද.</string>
+    <string name="snooze_minutes">විනාඩි %1$d</string>
+    <string name="alarm_volume_title">නියමිත ගාථා අලාම් ශබ්දයෙන් වාදනය කරන්න</string>
+    <string name="alarm_volume_body">අලාම් මූලාශ්‍ය සැසි අලාම් මාර්ගයෙන් නාද වන නිසා මීඩියා ශබ්දය අඩුවූ විට හෝ නොරිස්සුම් ආකාරයේදී වුවත් ඇසේ. අතින් වාදනය මීඩියා ශබ්දයෙන්ය.</string>
+    <string name="chant_volume_title">ගාථා ශබ්ද මට්ටම</string>
+    <string name="chant_volume_body">ගාථා නාද වන උපරිම ශබ්දය සීමා කරයි. අලාම් ශබ්දය සක්‍රීය වී මෘදු වැඩිවීම අක්‍රීය නම්, සැසිය තත්පර 15 තුළ මෘදුව ඉහළ යයි.</string>
+    <string name="chant_volume_percent">%1$d%%</string>
+    <string name="fade_minutes">විනාඩි %1$d</string>
+    <string name="fade_seconds">තත්පර %1$d</string>
+    <string name="reliability_section">අලාම් සහ විශ්වසනීයත්වය</string>
+    <string name="exact_alarms_row">නිවැරදි අලාම්</string>
+    <string name="status_allowed">අවසර ඇත</string>
+    <string name="status_needed">අවශ්‍යයි</string>
+    <string name="battery_row">බැටරි ප්‍රශස්තිකරණය</string>
+    <string name="status_unrestricted">සීමාවකින් තොර</string>
+    <string name="status_restricted">සීමා කළ</string>
+    <string name="full_screen_row">පූර්ණ තිර අලාම්</string>
+    <string name="reliability_hint">උපකරණය නිදාගෙන සිටියදීත් ගාථා නියම වේලාවට නාද වේ — විහාරස්ථාන භාවිතයට වැදගත්.</string>
+    <string name="test_sound_row">පරීක්ෂණ ශබ්දය</string>
+    <string name="test_sound_status">තත්පර 3 ක උත්සාහය</string>
+    <string name="test_sound_playing">වාදනය වෙමින්…</string>
+    <string name="test_sound_stop">නවත්වන්න</string>
+    <string name="test_sound_play">වාදනය</string>
+    <string name="about_section">පිළිබඳව</string>
+    <string name="replay_introduction">හැඳින්වීම නැවත බලන්න</string>
+    <string name="replay">නැවත</string>
+    <string name="export_row">උපලේඛන සහ ඉතිහාසය නිකුත් කරන්න</string>
+    <string name="export_status">JSON</string>
+    <string name="export_action">නිකුත්</string>
+    <string name="import_row">උපස්ථය ආයාත කරන්න</string>
+    <string name="import_status">සම්බන්ධ</string>
+    <string name="import_action">ආයාත</string>
+    <string name="version_line">Chanting Buddy · v%1$s</string>
+    <string name="collapse">හකුළන්න</string>
+    <string name="expand">විවෘත කරන්න</string>
+
+    <!-- Support -->
+    <string name="support_title">සහාය</string>
+    <string name="content_desc_support">සහාය</string>
+    <string name="support_row">සහාය සහ අදහස්</string>
+    <string name="support_tip_title">Chanting Buddy නොමිලේය, සෑමවිටම නොමිලේම වේ.</string>
+    <string name="support_tip_body">වෙළඳ දැන්වීම් නැත, ගිණුම් නැත, ට්‍රැකර් නැත — ඔබේ දෛනික පුහුණුව පමණි. එය ඔබට සුළු සැනසීමක් ගෙන දුන්නේ නම් සහ ස්තුති කිරීමට අවශ්‍ය නම්, ඔබට මට කෝපි කෝප්පයක් ගන්නට පුළුවන්. එය සම්පූර්ණයෙන්ම විකල්පයකි, සහාය කළත් නොකළත් යෙදුම හරියටම එලෙසම වැඩ කරයි. 🙏</string>
+    <string name="support_tip_button">Ko-fi හරහා කෝපි ගන්න</string>
+    <string name="support_feedback_title">උදව් සහ අදහස්</string>
+    <string name="feedback_topic_label">මාතෘකාව</string>
+    <string name="feedback_topic_bug">දෝෂයක් වාර්තා කරන්න</string>
+    <string name="feedback_topic_feature">විශේෂාංගයක් යෝජනා කරන්න</string>
+    <string name="feedback_topic_question">භාවිතය ගැන ප්‍රශ්නයක්</string>
+    <string name="feedback_topic_translation">පරිවර්තන ගැටළුවක්</string>
+    <string name="feedback_topic_other">වෙනත් දෙයක්</string>
+    <string name="feedback_message_label">පණිවිඩය</string>
+    <string name="feedback_char_count">%1$d/%2$d</string>
+    <string name="feedback_email_label">ඔබේ විද්‍යුත් තැපෑල (විකල්ප)</string>
+    <string name="feedback_email_invalid">එම ඊමේල් ලිපිනය හරි නැහැ වගේ පෙනේ.</string>
+    <string name="feedback_include_diagnostics">යෙදුම සහ උපකරණ තොරතුරු ඇතුළත් කරන්න (දෝෂ සූදානමට උදව් වේ)</string>
+    <string name="feedback_preview_show">හරියටම මොනවද ඇතුළත් වෙනවද බලන්න</string>
+    <string name="feedback_preview_hide">විස්තර සඟවන්න</string>
+    <string name="feedback_send">යවන්න</string>
+    <string name="feedback_send_hint">මෙය ඔබේ ඊමේල් යෙදුම සියල්ල පුරවා විවෘත කරයි — එහි ඔබ යවන්න ඔබන තුරු කිසිවක් යවන්නේ නැත.</string>
+    <string name="feedback_no_email_title">ඊමේල් යෙදුමක් හමු නොවුණි</string>
+    <string name="feedback_no_email_body">ඔබේ පණිවිඩය පිටපත් කර, කැමති ආකාරයකින් %1$s වෙත යවන්න.</string>
+    <string name="feedback_copy">පසුරුපුවරුවට පිටපත් කරන්න</string>
+
+    <!-- Widget / tile -->
+    <string name="widget_description">මීළඟ සැසිය සහ වාදන/නවතන බොත්තම</string>
+    <string name="widget_no_session">ඉදිරි සැසි නැත</string>
+    <string name="widget_chant_now">දැන් ගාථා කියන්න</string>
+    <string name="tile_chant_now">දැන් ගාථා කියන්න</string>
+    <string name="tile_stop_chanting">ගාථා නවත්වන්න</string>
+    <string name="type_time">වේලාව ටයිප් කරන්න</string>
+    <string name="enter_time_title">වේලාව ඇතුළත් කරන්න</string>
+    <string name="ok">හරි</string>
+    <string name="a11y_hour">පැය</string>
+    <string name="a11y_minute">විනාඩි</string>
+    <string name="a11y_dial_value">%1$s, %2$s</string>
+    <string name="reduce_motion">චලනය අඩු කරන්න</string>
+    <string name="reduce_motion_body">හුස්ම ගැනීමේ සහ රිද්ම චලන නවතයි.</string>
+    <string name="content_desc_day_template">%1$s (දිනය)</string>
+    <string name="day_mon">සඳුදා</string>
+    <string name="day_tue">අඟහරුවාදා</string>
+    <string name="day_wed">බදාදා</string>
+    <string name="day_thu">බ්‍රහස්පතින්දා</string>
+    <string name="day_fri">සිකුරාදා</string>
+    <string name="day_sat">සෙනසුරාදා</string>
+    <string name="day_sun">ඉරිදා</string>
+</resources>

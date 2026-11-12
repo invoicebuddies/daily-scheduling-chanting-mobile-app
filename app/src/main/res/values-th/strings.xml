@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chanting Buddy</string>
+    <string name="channel_playback">การเล่นสวดมนต์</string>
+
+    <!-- Common -->
+    <string name="back">กลับ</string>
+    <string name="close">ปิด</string>
+    <string name="cancel">ยกเลิก</string>
+    <string name="save">บันทึก</string>
+    <string name="delete">ลบ</string>
+    <string name="edit">แก้ไข</string>
+    <string name="stop">หยุด</string>
+    <string name="play">เล่น</string>
+    <string name="on">เปิด</string>
+    <string name="off">ปิด</string>
+    <string name="fix">แก้ไข</string>
+    <string name="undo">เลิกทำ</string>
+    <string name="today">วันนี้</string>
+    <string name="tomorrow">พรุ่งนี้</string>
+    <string name="min_short">นาที</string>
+    <string name="not_set">ยังไม่ได้ตั้ง</string>
+
+    <!-- Greeting / header -->
+    <string name="good_morning">สวัสดีตอนเช้า</string>
+    <string name="good_afternoon">สวัสดีตอนบ่าย</string>
+    <string name="good_evening">สวัสดีตอนเย็น</string>
+    <string name="header_subtitle">ตารางสวดมนต์ของคุณ · %1$s</string>
+    <string name="content_desc_stats">สถิติ</string>
+    <string name="content_desc_settings">การตั้งค่า</string>
+
+    <!-- List screen -->
+    <string name="next_session_overline">การสวดครั้งถัดไป</string>
+    <string name="no_schedules_title">ยังไม่มีตารางสวดมนต์</string>
+    <string name="no_schedules_body">กำหนดเวลาสวดมนต์ยามรุ่งอรุณ พลบค่ำ หรือทุกช่วงเวลา</string>
+    <string name="create_schedule">สร้างตาราง</string>
+    <string name="add_schedule">เพิ่มตาราง</string>
+    <string name="location_needed_title">ต้องระบุตำแหน่งที่ตั้ง</string>
+    <string name="location_needed_body">ตารางพระอาทิตย์ขึ้น/ตกจะไม่สามารถเริ่มได้จนกว่าคุณจะตั้งค่าตำแหน่ง แตะเพื่อตั้งค่า</string>
+    <string name="sound_count">%1$d เสียง</string>
+    <string name="repick_sounds_chip">ไฟล์เสียงต้องเลือกใหม่ — แตะเพื่อแก้ไข</string>
+    <string name="update_available_title">Chanting Buddy %1$s พร้อมใช้งานแล้ว</string>
+    <string name="update_download">ดาวน์โหลด</string>
+    <string name="update_later">ภายหลัง</string>
+    <string name="update_skip">ข้ามเวอร์ชันนี้</string>
+    <string name="update_up_to_date">คุณใช้เวอร์ชันล่าสุดแล้ว</string>
+    <string name="update_auto_check_title">ตรวจสอบอัปเดตอัตโนมัติ</string>
+    <string name="update_auto_check_body">สูงสุดวันละครั้ง แอปจะถาม GitHub แบบไม่ระบุตัวตนว่ามีเวอร์ชันใหม่หรือไม่ ไม่มีการส่งข้อมูลส่วนบุคคล</string>
+    <string name="update_check_now_title">ตรวจสอบอัปเดตตอนนี้</string>
+    <string name="update_check_now_action">ตรวจสอบ</string>
+    <string name="gap_seconds">ห่าง %1$d วินาที</string>
+    <string name="play_now">เล่นตอนนี้</string>
+    <string name="stop_playback">หยุดการเล่น</string>
+    <string name="track_status">เสียงที่ %1$d จาก %2$d</string>
+    <string name="missed_chant_single">การสวดมนต์ %2$s เวลา %1$s ของวัน%3$s ไม่ได้เล่น</string>
+    <string name="missed_chant_multiple">การสวด %1$d ครั้งในสัปดาห์นี้ไม่ได้เล่น</string>
+    <string name="missed_chant_body">โทรศัพท์อาจปิดอยู่ หรือการตั้งค่าแบตเตอรี่บล็อกปลุก</string>
+    <string name="missed_chant_fix">แก้ไขความน่าเชื่อถือ</string>
+    <string name="missed_chant_dismiss">รับทราบ</string>
+    <string name="deleted_snackbar">ลบ “%1$s” แล้ว</string>
+    <string name="default_schedule_name">ตารางสวดมนต์</string>
+    <string name="default_session_name">ช่วงสวดมนต์</string>
+
+    <!-- Trigger types -->
+    <string name="trigger_fixed">ตามเวลา</string>
+    <string name="trigger_sunrise">พระอาทิตย์ขึ้น</string>
+    <string name="trigger_sunset">พระอาทิตย์ตก</string>
+    <string name="trigger_full_moon">วันเพ็ญ</string>
+    <string name="trigger_new_moon">วันดับจันทร์</string>
+    <string name="trigger_fixed_time">ตามเวลา</string>
+
+    <!-- Edit screen -->
+    <string name="set_schedule_title">ตั้งค่าตาราง</string>
+    <string name="mode_playlist">เพลย์ลิสต์</string>
+    <string name="mode_routine">บทสวด</string>
+    <string name="repeat_row">ทำซ้ำ</string>
+    <string name="sounds_row">เสียง</string>
+    <string name="steps_row">ขั้นตอน</string>
+    <string name="label_row">ป้ายชื่อ</string>
+    <string name="options_row">ตัวเลือก</string>
+    <string name="sound_count_summary">%1$d เสียง</string>
+    <string name="step_count_summary">%1$d ขั้นตอน</string>
+    <string name="no_sounds_yet">ยังไม่ได้เพิ่มเสียง</string>
+    <string name="add_sounds">เพิ่มเสียง</string>
+    <string name="add_sound_step">เพิ่มขั้นตอนเสียง</string>
+    <string name="add_silence_step">เพิ่มช่วงเงียบ</string>
+    <string name="built_in_sounds">เสียงในตัวเครื่อง</string>
+    <string name="pick_from_phone">เลือกจากโทรศัพท์…</string>
+    <string name="add_sound_dialog_title">เพิ่มขั้นตอนเสียง</string>
+    <string name="need_sound_to_save">เพิ่มอย่างน้อยหนึ่งเสียงเพื่อบันทึกตารางนี้</string>
+    <string name="need_step_to_save">เพิ่มอย่างน้อยหนึ่งขั้นตอนเพื่อบันทึกบทสวดนี้</string>
+    <string name="schedule_name_hint">ชื่อตาราง (ไม่บังคับ)</string>
+    <string name="gap_label">ช่วงห่างระหว่างเสียง (วินาที)</string>
+    <string name="options_no_gap">ไม่มีช่วงห่าง</string>
+    <string name="options_gap">ห่าง %1$d วินาที</string>
+    <string name="options_stops_at">หยุดที่ %1$d นาที</string>
+    <string name="options_repeat">×%1$d</string>
+    <string name="auto_stop_after">หยุดอัตโนมัติหลัง</string>
+    <string name="volume_row">ระดับเสียง</string>
+    <string name="volume_default">ค่าเริ่มต้น</string>
+    <string name="volume_preview">ทดลองฟังที่ระดับเสียงนี้</string>
+    <string name="content_desc_volume_preview">ทดลองฟังที่ระดับเสียงนี้</string>
+    <string name="options_volume">เสียง %1$d%%</string>
+    <string name="repeat_playlist">เล่นเพลย์ลิสต์ซ้ำ</string>
+    <string name="remind_me_before">แจ้งเตือนก่อน</string>
+    <string name="silence_step">เงียบ</string>
+    <string name="duration_label">ระยะเวลา</string>
+    <string name="duration_minutes">%1$d นาที</string>
+    <string name="content_desc_preview">ทดลองฟัง</string>
+    <string name="content_desc_stop_preview">หยุดทดลองฟัง</string>
+    <string name="content_desc_move_up">เลื่อนขึ้น</string>
+    <string name="content_desc_move_down">เลื่อนลง</string>
+    <string name="content_desc_remove">ลบ</string>
+    <string name="content_desc_schedule_options">ตัวเลือกตาราง</string>
+    <string name="delete_schedule_menu">ลบตาราง</string>
+    <string name="delete_schedule_title">ลบตารางนี้?</string>
+    <string name="delete_schedule_body">ไม่สามารถย้อนกลับได้</string>
+    <string name="decrease_offset">ลดระยะเวลา</string>
+    <string name="increase_offset">เพิ่มระยะเวลา</string>
+    <string name="at_sun_time">ที่ %1$s</string>
+    <string name="offset_before">%1$d นาทีก่อน%2$s</string>
+    <string name="offset_after">%1$d นาทีหลัง%2$s</string>
+    <string name="offset_negative">−%1$d นาที</string>
+    <string name="offset_positive">+%1$d นาที</string>
+    <string name="set_location_for_sun">ตั้งค่าตำแหน่งเพื่อคำนวณเวลา%1$s</string>
+    <string name="today_at">วันนี้: %1$s</string>
+
+    <!-- Repeat summaries -->
+    <string name="repeat_never">ไม่เลย</string>
+    <string name="repeat_every_day">ทุกวัน</string>
+    <string name="repeat_mon_fri">จันทร์–ศุกร์</string>
+    <string name="repeat_weekends">วันหยุดสุดสัปดาห์</string>
+
+    <!-- Ringing screen -->
+    <string name="ringing_default_label">ถึงเวลาสวดมนต์</string>
+    <string name="step_status">ขั้นตอนที่ %1$d จาก %2$d</string>
+    <string name="snooze_button">เลื่อน %1$d นาที</string>
+    <string name="stop_button">หยุด</string>
+    <string name="content_desc_alarm_ringing">ปลุกกำลังดัง</string>
+    <string name="ringing_step_time_left">ขั้นตอนที่ %1$d จาก %2$d · เหลือ %3$s</string>
+    <string name="ringing_time_left">เหลือ %1$s</string>
+    <string name="session_complete_title">สวดมนต์เสร็จสมบูรณ์</string>
+    <string name="session_complete_minutes">%1$d นาที</string>
+    <string name="done_button">เสร็จแล้ว</string>
+    <string name="session_note_hint">วันนี้ปฏิบัติเป็นอย่างไร? (ไม่บังคับ)</string>
+
+    <!-- Time picker -->
+    <string name="am">AM</string>
+    <string name="pm">PM</string>
+    <string name="hours_label">ชั่วโมง</string>
+    <string name="minutes_label">นาที</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">ข้าม</string>
+    <string name="onboarding_next">ถัดไป</string>
+    <string name="onboarding_get_started">เริ่มใช้งาน</string>
+    <string name="onboarding_1_title">ยินดีต้อนรับสู่ Chanting Buddy</string>
+    <string name="onboarding_1_body">กำหนดให้เสียงสวดมนต์เล่นโดยอัตโนมัติในเวลาที่พอดี ไม่ต้องกดเล่นเอง</string>
+    <string name="onboarding_2_title">ตั้งครั้งเดียว</string>
+    <string name="onboarding_2_body">เลือกเวลา วันในสัปดาห์ หรือแม้แต่พระอาทิตย์ขึ้น/ตก การสวดของคุณจะเล่นอัตโนมัติทุกวัน</string>
+    <string name="onboarding_3_title">จัดบทสวดของคุณ</string>
+    <string name="onboarding_3_body">เลือกเสียงจากอุปกรณ์ เรียงเป็นเพลย์ลิสต์พร้อมช่วงห่างอันนุ่มนวล และทดลองฟังก่อนบันทึก</string>
+
+    <!-- Main activity dialogs / backup -->
+    <string name="exact_alarm_dialog_title">นาฬิกาปลุกที่แม่นยำ</string>
+    <string name="exact_alarm_dialog_body">หากต้องการให้สวดมนต์เริ่มตรงเวลา โปรดอนุญาต \"นาฬิกาปลุกและการแจ้งเตือน\" สำหรับแอปนี้ในการตั้งค่าระบบ</string>
+    <string name="open_settings">เปิดการตั้งค่า</string>
+    <string name="later">ภายหลัง</string>
+    <string name="backup_exported">ส่งออกสำรองข้อมูลแล้ว</string>
+    <string name="backup_export_failed">การส่งออกล้มเหลว</string>
+    <string name="backup_imported">นำเข้าสำรองข้อมูลแล้ว</string>
+    <string name="backup_imported_full">นำเข้า %1$d ตารางและ %2$d รายการแล้ว</string>
+    <string name="backup_imported_counts">นำเข้า %1$d ตาราง (%3$d รายการใหม่) ข้าม %2$d ตารางที่ซ้ำและ %4$d รายการที่ซ้ำ</string>
+    <string name="backup_import_failed">การนำเข้าล้มเหลว — ไม่ใช่ไฟล์สำรองข้อมูลที่ถูกต้อง</string>
+
+    <!-- Stats -->
+    <string name="stats_title">การปฏิบัติของคุณ</string>
+    <string name="stats_empty_title">ยังไม่มีรายการ</string>
+    <string name="stats_empty_body">ช่วงสวดมนต์ที่เสร็จสมบูรณ์จะสะสมเป็นประวัติที่นี่</string>
+    <string name="stats_day_in_a_row">วันติดต่อกัน</string>
+    <string name="stats_days_in_a_row">วันติดต่อกัน</string>
+    <string name="stats_this_week">สัปดาห์นี้</string>
+    <string name="stats_all_time">ตลอดกาล</string>
+    <string name="stats_longest_streak">ต่อเนื่องนานที่สุด</string>
+    <string name="stats_mindful_min">นาทีแห่งสติ</string>
+    <string name="stats_history_title">ประวัติ</string>
+    <string name="stats_note_dialog_title">บันทึกการปฏิบัติ</string>
+    <string name="stats_history_date_format">d MMM</string>
+    <string name="stats_history_with_label">%1$s · %2$s · %3$d นาที · %4$s</string>
+    <string name="stats_history_no_label">%1$s · %2$d นาที · %3$s</string>
+    <string name="end_reason_completed">เสร็จสมบูรณ์</string>
+    <string name="end_reason_stopped">หยุดแล้ว</string>
+    <string name="end_reason_snoozed">เลื่อนแล้ว</string>
+
+    <!-- Settings -->
+    <string name="settings_title">การตั้งค่า</string>
+    <string name="appearance_section">รูปลักษณ์</string>
+    <string name="theme_auto">อัตโนมัติ</string>
+    <string name="theme_light">สว่าง</string>
+    <string name="theme_dark">มืด</string>
+    <string name="location_section">ตำแหน่งที่ตั้ง</string>
+    <string name="use_device_location">ใช้ตำแหน่งของอุปกรณ์</string>
+    <string name="locating">กำลังระบุตำแหน่ง…</string>
+    <string name="location_set">ตั้งตำแหน่งจากอุปกรณ์แล้ว</string>
+    <string name="location_failed">ไม่สามารถรับตำแหน่งของอุปกรณ์ได้ — กรุณาป้อนด้านล่าง</string>
+    <string name="location_denied">การอนุญาตเข้าถึงตำแหน่งถูกปฏิเสธ — กรุณาป้อนด้านล่าง</string>
+    <string name="enter_manually">ป้อนด้วยตนเอง</string>
+    <string name="search_for_place">ค้นหาสถานที่</string>
+    <string name="search_unavailable">การค้นหาไม่พร้อมใช้งาน — กรุณาป้อนพิกัดด้านล่าง</string>
+    <string name="latitude">ละติจูด</string>
+    <string name="longitude">ลองจิจูด</string>
+    <string name="save_location">บันทึกตำแหน่ง</string>
+    <string name="clear">ล้าง</string>
+    <string name="no_location_set">ยังไม่ได้ตั้งตำแหน่ง</string>
+    <string name="no_location_body">ตารางพระอาทิตย์ขึ้น/ตกต้องการตำแหน่งที่ตั้ง</string>
+    <string name="sunrise_label">พระอาทิตย์ขึ้น</string>
+    <string name="sunset_label">พระอาทิตย์ตก</string>
+    <string name="playback_section">การเล่น</string>
+    <string name="volume_fade_in">เสียงค่อยๆ ดังขึ้น</string>
+    <string name="volume_fade_in_body">ค่อยๆ เพิ่มระดับเสียงเมื่อปลุกเริ่มทำงาน</string>
+    <string name="snooze_length">ระยะเวลาเลื่อน</string>
+    <string name="snooze_length_body">รอนานแค่ไหนก่อนที่การสวดจะดังอีกครั้ง</string>
+    <string name="snooze_minutes">%1$d นาที</string>
+    <string name="alarm_volume_title">เล่นการสวดตามเวลาด้วยเสียงปลุก</string>
+    <string name="alarm_volume_body">การสวดจากปลุกจะใช้ช่องสัญญาณปลุก จึงดังได้แม้เสียงสื่อต่ำหรือเปิดโหมดห้ามรบกวน การเล่นด้วยตนเองยังใช้เสียงสื่อ</string>
+    <string name="chant_volume_title">ระดับเสียงสวดมนต์</string>
+    <string name="chant_volume_body">จำกัดความดังของการสวด เมื่อเปิดเสียงปลุกและปิดการค่อยๆ ดัง การสวดจะดังขึ้นอย่างนุ่มนวลภายใน 15 วินาที</string>
+    <string name="chant_volume_percent">%1$d%%</string>
+    <string name="fade_minutes">%1$d นาที</string>
+    <string name="fade_seconds">%1$d วินาที</string>
+    <string name="reliability_section">ปลุกและความน่าเชื่อถือ</string>
+    <string name="exact_alarms_row">นาฬิกาปลุกที่แม่นยำ</string>
+    <string name="status_allowed">อนุญาตแล้ว</string>
+    <string name="status_needed">ต้องเปิด</string>
+    <string name="battery_row">การประหยัดแบตเตอรี่</string>
+    <string name="status_unrestricted">ไม่จำกัด</string>
+    <string name="status_restricted">จำกัดแล้ว</string>
+    <string name="full_screen_row">ปลุกเต็มจอ</string>
+    <string name="reliability_hint">ทำให้การสวดดังตรงเวลาแม้อุปกรณ์สลีป — สำคัญสำหรับการปฏิบัติในวัด</string>
+    <string name="test_sound_row">เสียงทดสอบ</string>
+    <string name="test_sound_status">ทดลอง 3 วินาที</string>
+    <string name="test_sound_playing">กำลังเล่น…</string>
+    <string name="test_sound_stop">หยุด</string>
+    <string name="test_sound_play">เล่น</string>
+    <string name="about_section">เกี่ยวกับ</string>
+    <string name="replay_introduction">เล่นการแนะนำอีกครั้ง</string>
+    <string name="replay">เล่นอีกครั้ง</string>
+    <string name="export_row">ส่งออกตารางและประวัติ</string>
+    <string name="export_status">JSON</string>
+    <string name="export_action">ส่งออก</string>
+    <string name="import_row">นำเข้าสำรองข้อมูล</string>
+    <string name="import_status">ผสาน</string>
+    <string name="import_action">นำเข้า</string>
+    <string name="version_line">Chanting Buddy · v%1$s</string>
+    <string name="collapse">ยุบ</string>
+    <string name="expand">ขยาย</string>
+
+    <!-- Support -->
+    <string name="support_title">สนับสนุน</string>
+    <string name="content_desc_support">สนับสนุน</string>
+    <string name="support_row">สนับสนุนและข้อเสนอแนะ</string>
+    <string name="support_tip_title">Chanting Buddy ฟรี และจะฟรีตลอดไป</string>
+    <string name="support_tip_body">ไม่มีโฆษณา ไม่มีบัญชี ไม่มีการติดตาม — มีเพียงการปฏิบัติประจำวันของคุณ หากแอปนี้มอบความสงบเล็กๆ ให้แก่คุณ และคุณอยากขอบคุณ คุณสามารถเลี้ยงกาแฟฉันได้ เป็นไปโดยสมัครใจทั้งหมด และแอปทำงานเหมือนเดิมไม่ว่าจะสนับสนุนหรือไม่ 🙏</string>
+    <string name="support_tip_button">เลี้ยงกาแฟฉันบน Ko-fi</string>
+    <string name="support_feedback_title">ช่วยเหลือและข้อเสนอแนะ</string>
+    <string name="feedback_topic_label">หัวข้อ</string>
+    <string name="feedback_topic_bug">รายงานปัญหา</string>
+    <string name="feedback_topic_feature">เสนอแนะคุณสมบัติ</string>
+    <string name="feedback_topic_question">คำถามเกี่ยวกับการใช้งาน</string>
+    <string name="feedback_topic_translation">ปัญหาการแปล</string>
+    <string name="feedback_topic_other">อื่นๆ</string>
+    <string name="feedback_message_label">ข้อความ</string>
+    <string name="feedback_char_count">%1$d/%2$d</string>
+    <string name="feedback_email_label">อีเมลของคุณ (ไม่บังคับ)</string>
+    <string name="feedback_email_invalid">อีเมลนี้ดูไม่ถูกต้อง</string>
+    <string name="feedback_include_diagnostics">รวมข้อมูลแอปและอุปกรณ์ (ช่วยแก้ปัญหา)</string>
+    <string name="feedback_preview_show">ดูว่าจะรวมข้อมูลอะไรบ้าง</string>
+    <string name="feedback_preview_hide">ซ่อนรายละเอียด</string>
+    <string name="feedback_send">ส่ง</string>
+    <string name="feedback_send_hint">การกระทำนี้จะเปิดแอปอีเมลของคุณพร้อมข้อมูลที่กรอกไว้แล้ว — ไม่มีอะไรถูกส่งจนกว่าคุณจะกดส่งในแอปนั้น</string>
+    <string name="feedback_no_email_title">ไม่พบแอปอีเมล</string>
+    <string name="feedback_no_email_body">คัดลอกข้อความของคุณและส่งไปที่ %1$s ด้วยวิธีใดก็ได้</string>
+    <string name="feedback_copy">คัดลอกไปยังคลิปบอร์ด</string>
+
+    <!-- Widget / tile -->
+    <string name="widget_description">การสวดครั้งถัดไปพร้อมปุ่มเล่น/หยุด</string>
+    <string name="widget_no_session">ไม่มีการสวดที่จะมาถึง</string>
+    <string name="widget_chant_now">สวดตอนนี้</string>
+    <string name="tile_chant_now">สวดตอนนี้</string>
+    <string name="tile_stop_chanting">หยุดสวดมนต์</string>
+    <string name="type_time">พิมพ์เวลา</string>
+    <string name="enter_time_title">ใส่เวลา</string>
+    <string name="ok">ตกลง</string>
+    <string name="a11y_hour">ชั่วโมง</string>
+    <string name="a11y_minute">นาที</string>
+    <string name="a11y_dial_value">%1$s, %2$s</string>
+    <string name="reduce_motion">ลดการเคลื่อนไหว</string>
+    <string name="reduce_motion_body">หยุดภาพเคลื่อนไหวการหายใจและการเต้น</string>
+    <string name="content_desc_day_template">%1$s (วันในสัปดาห์)</string>
+    <string name="day_mon">วันจันทร์</string>
+    <string name="day_tue">วันอังคาร</string>
+    <string name="day_wed">วันพุธ</string>
+    <string name="day_thu">วันพฤหัสบดี</string>
+    <string name="day_fri">วันศุกร์</string>
+    <string name="day_sat">วันเสาร์</string>
+    <string name="day_sun">วันอาทิตย์</string>
+</resources>

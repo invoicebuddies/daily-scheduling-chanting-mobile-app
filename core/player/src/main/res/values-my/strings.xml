@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chanting Buddy</string>
+    <string name="builtin_morning_bell">Morning bell</string>
+    <string name="builtin_temple_bell">Temple bell</string>
+    <string name="builtin_singing_bowl">Singing bowl</string>
+    <string name="playing">ဖွင့်နေပါသည်…</string>
+    <string name="stop">ရပ်</string>
+    <string name="snooze">နောက်ကျ</string>
+    <string name="channel_fallback">နားထိန်နာရီ</string>
+    <string name="channel_alarm">နားထိန်သတိပေးချက်များ</string>
+    <string name="alarm_volume_muted_title">သင်၏နားထိန်အသံပိတ်ထားပါသည်</string>
+    <string name="alarm_volume_muted_text">ပရိတ်တိတိဖြစ်နိုင်ပါသည် — နားထိန်အသံတိုးပါ၊ သို့မဟုတ် ဆက်တင်များ၌ \"သတ်မှတ်ချိန်ပရိတ်ကို နားထိန်အသံနှင့် ဖွင့်\" ကိုပိတ်ပါ။</string>
+    <string name="missed_chant_title">%1$s အချိန်ပရိတ်ကို လွန်ဆုံး</string>
+    <string name="missed_chant_text">ယခုဖွင့်ရန် ထိုပါ။</string>
+    <string name="time_to_chant_title">ပရိတ်ရွတ်ချိန်</string>
+    <string name="time_to_chant_text">သင်၏ပရိတ်စဉ်စတင်ရန် ထိုပါ။</string>
+    <string name="routine_step_status">အဆင့် %1$d / %2$d</string>
+    <string name="gap_pausing">ပရိတ်ကြားနားနေပါသည်…</string>
+    <string name="sounds_broken_title">အသံများကို မဖွင့်နိုင်ပါ</string>
+    <string name="sounds_broken_text">file ဖျက်ခံရပြီး သို့မဟုတ် ခွင့်ပြုချက်ရုပ်သိမ်းခံရပြီ — ဇယားချိန်ရန် အက်ပ်ဖွင့်ပါ။</string>
+</resources>

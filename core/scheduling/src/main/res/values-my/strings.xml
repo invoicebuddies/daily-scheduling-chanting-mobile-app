@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reminder_channel">သတိပေးချက်များ</string>
+    <string name="reminder_title">လာမယ့်ပရိတ်ရွတ်စဉ်</string>
+    <string name="reminder_text">%1$s သည် မိနစ် %2$d အတွင်းစတင်ပါလိမ့်မည်။</string>
+    <string name="reminder_default_label">သင်၏ပရိတ်</string>
+</resources>

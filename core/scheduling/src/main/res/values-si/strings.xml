@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reminder_channel">මතක් කිරීම්</string>
+    <string name="reminder_title">එළඹෙන ගාථා සැසිය</string>
+    <string name="reminder_text">%1$s විනාඩි %2$d තුළ ආරම්භ වේ.</string>
+    <string name="reminder_default_label">ඔබේ ගාථාව</string>
+</resources>

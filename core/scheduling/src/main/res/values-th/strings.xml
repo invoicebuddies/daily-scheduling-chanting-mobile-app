@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="reminder_channel">การแจ้งเตือน</string>
+    <string name="reminder_title">การสวดมนต์ที่จะมาถึง</string>
+    <string name="reminder_text">%1$s จะเริ่มในอีก %2$d นาที</string>
+    <string name="reminder_default_label">การสวดของคุณ</string>
+</resources>

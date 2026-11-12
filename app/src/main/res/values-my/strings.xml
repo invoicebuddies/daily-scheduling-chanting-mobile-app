@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chanting Buddy</string>
+    <string name="channel_playback">ဘုရားရှိခိုးသံ ဖွင့်နေပါသည်</string>
+
+    <!-- Common -->
+    <string name="back">နောက်သို့</string>
+    <string name="close">ပိတ်ရန်</string>
+    <string name="cancel">မလုပ်တော့ပါ</string>
+    <string name="save">သိမ်းရန်</string>
+    <string name="delete">ဖျက်ရန်</string>
+    <string name="edit">ပြင်ဆင်ရန်</string>
+    <string name="stop">ရပ်ရန်</string>
+    <string name="play">ဖွင့်ရန်</string>
+    <string name="on">ဖွင့်ထား</string>
+    <string name="off">ပိတ်ထား</string>
+    <string name="fix">ချိန်ရန်</string>
+    <string name="undo">ပြန်ပြင်</string>
+    <string name="today">ယနေ့</string>
+    <string name="tomorrow">မနက်ဖြန်</string>
+    <string name="min_short">မိနစ်</string>
+    <string name="not_set">မသတ်မှတ်ရသေးပါ</string>
+
+    <!-- Greeting / header -->
+    <string name="good_morning">မင်္ဂလာနံနက်ခင်းပါ</string>
+    <string name="good_afternoon">မင်္ဂလာနေ့ခင်းပါ</string>
+    <string name="good_evening">မင်္ဂလာညနေခင်းပါ</string>
+    <string name="header_subtitle">သင်၏ပရိတ်ရွတ်စဉ်ဇယား · %1$s</string>
+    <string name="content_desc_stats">ကိန်းဂဏန်းများ</string>
+    <string name="content_desc_settings">ဆက်တင်များ</string>
+
+    <!-- List screen -->
+    <string name="next_session_overline">နောက်ထပ်ရွတ်ဖွယ်အချိန်</string>
+    <string name="no_schedules_title">ဇယားမရှိသေးပါ</string>
+    <string name="no_schedules_body">မနက်အာရုံ၊ နေဝင်ချိန် သို့မဟုတ် အချိန်တိုင်း၌ ပရိတ်ရွတ်ပါ။</string>
+    <string name="create_schedule">ဇယားပြုလုပ်ရန်</string>
+    <string name="add_schedule">ဇယားထည့်ရန်</string>
+    <string name="location_needed_title">တည်နေရာလိုအပ်ပါသည်</string>
+    <string name="location_needed_body">နေထွက်/နေဝင်ဇယားများသည် တည်နေရာမသတ်မှတ်မှ မလုပ်ဆောင်နိုင်ပါ။ ချိန်ရန် ထိုပါ။</string>
+    <string name="sound_count">အသံ %1$d ခု</string>
+    <string name="repick_sounds_chip">အသံ file ကို ပြန်ရွေးရန်လိုပါသည် — ချိန်ရန် ထိုပါ။</string>
+    <string name="update_available_title">Chanting Buddy %1$s ရပြီပါပြီ</string>
+    <string name="update_download">ဒေါင်းလုပ်</string>
+    <string name="update_later">နောက်မှ</string>
+    <string name="update_skip">ဤversionကို ကျော်ပါ</string>
+    <string name="update_up_to_date">သင်အသစ်ဆုံးဖြစ်ပါပြီ။</string>
+    <string name="update_auto_check_title">အဆင့်မြှင့်တင်မှုကို အလိုအလျောက် စစ်ဆေးပါ</string>
+    <string name="update_auto_check_body">နေ့စဉ်တစ်ကြိမ်အထိ အက်ပ်က အမည်မဖော်ဘဲ GitHub ကို အသစ်ထွက်ရှိမထားမေးပါသည်။ ကိုယ်ရေးကိုယ်တာ မပို့ပါ။</string>
+    <string name="update_check_now_title">ယခုစစ်ဆေးရန်</string>
+    <string name="update_check_now_action">စစ်ဆေးရန်</string>
+    <string name="gap_seconds">ကွာခြောက် %1$d စက္ကန့်</string>
+    <string name="play_now">ယခုဖွင့်ရန်</string>
+    <string name="stop_playback">ဖွင့်နေမှုရပ်ရန်</string>
+    <string name="track_status">အသံ %1$d / %2$d</string>
+    <string name="missed_chant_single">%3$s နေ့ %1$s ၌ %2$s ပရိတ်မဖွင့်နိုင်ပါ။</string>
+    <string name="missed_chant_multiple">ဤအပတ်တွင် ပရိတ် %1$d ခါ မဖွင့်နိုင်ပါ။</string>
+    <string name="missed_chant_body">ဖုန်းပိတ်နေနိုင်ပါသည်၊ သို့မဟုတ် ဘက်ထရီဆက်တင်က နားထိန်နာရီကိုတားဆီးနိုင်ပါသည်။</string>
+    <string name="missed_chant_fix">ယုံကြည်စိတ်ချမှုကို ချိန်ပါ</string>
+    <string name="missed_chant_dismiss">သိပါပြီ</string>
+    <string name="deleted_snackbar">“%1$s” ကို ဖျက်လိုက်ပါပြီ</string>
+    <string name="default_schedule_name">ဇယား</string>
+    <string name="default_session_name">ပရိတ်ရွတ်စဉ်</string>
+
+    <!-- Trigger types -->
+    <string name="trigger_fixed">သတ်မှတ်ချိန်</string>
+    <string name="trigger_sunrise">နေထွက်</string>
+    <string name="trigger_sunset">နေဝင်</string>
+    <string name="trigger_full_moon">လပြည့်</string>
+    <string name="trigger_new_moon">လကွယ်</string>
+    <string name="trigger_fixed_time">သတ်မှတ်ချိန်</string>
+
+    <!-- Edit screen -->
+    <string name="set_schedule_title">ဇယားသတ်မှတ်ရန်</string>
+    <string name="mode_playlist">ဖွင့်စာရင်း</string>
+    <string name="mode_routine">ဓာတ်စဉ်</string>
+    <string name="repeat_row">ပြန်လုပ်ရန်</string>
+    <string name="sounds_row">အသံများ</string>
+    <string name="steps_row">အဆင့်များ</string>
+    <string name="label_row">အမည်</string>
+    <string name="options_row">ရွေးစရာများ</string>
+    <string name="sound_count_summary">အသံ %1$d ခု</string>
+    <string name="step_count_summary">အဆင့် %1$d ခု</string>
+    <string name="no_sounds_yet">အသံမထည့်ရသေးပါ</string>
+    <string name="add_sounds">အသံထည့်ရန်</string>
+    <string name="add_sound_step">အသံအဆင့်ထည့်ရန်</string>
+    <string name="add_silence_step">ဆိတ်ငြိမ်အဆင့်ထည့်ရန်</string>
+    <string name="built_in_sounds">တစ်သမတ်ထဲ အသံများ</string>
+    <string name="pick_from_phone">ဖုန်းမှ ရွေးရန်…</string>
+    <string name="add_sound_dialog_title">အသံအဆင့်ထည့်ရန်</string>
+    <string name="need_sound_to_save">ဤဇယားကိုသိမ်းရန် အသံတစ်ခုခု ထည့်ပါ။</string>
+    <string name="need_step_to_save">ဤဓာတ်စဉ်ကိုသိမ်းရန် အဆင့်တစ်ခုခု ထည့်ပါ။</string>
+    <string name="schedule_name_hint">ဇယားအမည် (ရွေးချယ်နိုင်)</string>
+    <string name="gap_label">အသံများကြားကွာခြောက် (စက္ကန့်)</string>
+    <string name="options_no_gap">ကွာခြောက်မရှိ</string>
+    <string name="options_gap">ကွာခြောက် %1$d စက္ကန့်</string>
+    <string name="options_stops_at">%1$d မိနစ်တွင် ရပ်</string>
+    <string name="options_repeat">×%1$d</string>
+    <string name="auto_stop_after">အလိုအလျောက် ရပ်နောက်မှ</string>
+    <string name="volume_row">အသံအတိုးအကျယ်</string>
+    <string name="volume_default">မူလချိန်</string>
+    <string name="volume_preview">ဤအသံနှင့် စမ်းကြည့်ရန်</string>
+    <string name="content_desc_volume_preview">ဤအသံနှင့် စမ်းကြည့်ရန်</string>
+    <string name="options_volume">အသံ %1$d%%</string>
+    <string name="repeat_playlist">ဖွင့်စာရင်းပြန်လုပ်</string>
+    <string name="remind_me_before">မတိုင်မီ သတိပေးရန်</string>
+    <string name="silence_step">ဆိတ်ငြိမ်</string>
+    <string name="duration_label">ကြာမြင့်ချိန်</string>
+    <string name="duration_minutes">%1$d မိနစ်</string>
+    <string name="content_desc_preview">စမ်းကြည့်ရန်</string>
+    <string name="content_desc_stop_preview">စမ်းသပ်ဖွင့်ချက်ရပ်</string>
+    <string name="content_desc_move_up">အပေါ်သို့ရွှေ့</string>
+    <string name="content_desc_move_down">အောက်သို့ရွှေ့</string>
+    <string name="content_desc_remove">ဖယ်ရှား</string>
+    <string name="content_desc_schedule_options">ဇယားရွေးစရာများ</string>
+    <string name="delete_schedule_menu">ဇယားဖျက်ရန်</string>
+    <string name="delete_schedule_title">ဤဇယားကိုဖျက်မလား?</string>
+    <string name="delete_schedule_body">ဒါကို ပြန်မလုပ်နိုင်ပါ။</string>
+    <string name="decrease_offset">လျှော့ချရန်</string>
+    <string name="increase_offset">တိုးရန်</string>
+    <string name="at_sun_time">%1$s ၌</string>
+    <string name="offset_before">%2$s မတိုင်ခင် %1$d မိနစ်</string>
+    <string name="offset_after">%2$s ပြီးနောက် %1$d မိနစ်</string>
+    <string name="offset_negative">−%1$d မိနစ်</string>
+    <string name="offset_positive">+%1$d မိနစ်</string>
+    <string name="set_location_for_sun">%1$s အချိန်တွက်ရန် တည်နေရာသတ်မှတ်ပါ</string>
+    <string name="today_at">ယနေ့: %1$s</string>
+
+    <!-- Repeat summaries -->
+    <string name="repeat_never">ဘယ်တော့မှ</string>
+    <string name="repeat_every_day">နေ့တိုင်း</string>
+    <string name="repeat_mon_fri">တနင်္လာ–သောကြာ</string>
+    <string name="repeat_weekends">စနေ–တနင်္ဂနွေ</string>
+
+    <!-- Ringing screen -->
+    <string name="ringing_default_label">ပရိတ်ရွတ်ချိန်</string>
+    <string name="step_status">အဆင့် %1$d / %2$d</string>
+    <string name="snooze_button">%1$d မိနစ်​နောက်ကျ</string>
+    <string name="stop_button">ရပ်</string>
+    <string name="content_desc_alarm_ringing">နားထိန်နာရီအသံ</string>
+    <string name="ringing_step_time_left">အဆင့် %1$d / %2$d · %3$s ကျန်</string>
+    <string name="ringing_time_left">%1$s ကျန်</string>
+    <string name="session_complete_title">ပရိတ်ရွတ်မှု ပြီးဆုံး</string>
+    <string name="session_complete_minutes">%1$d မိနစ်</string>
+    <string name="done_button">ပြီးပါပြီ</string>
+    <string name="session_note_hint">ယနေ့ပရိတ်ရွတ်မှုကောင်သလား? (ရွေးချယ်နိုင်)</string>
+
+    <!-- Time picker -->
+    <string name="am">AM</string>
+    <string name="pm">PM</string>
+    <string name="hours_label">နာရီ</string>
+    <string name="minutes_label">မိနစ်</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">ကျော်ပါ</string>
+    <string name="onboarding_next">ရှေ့</string>
+    <string name="onboarding_get_started">စတင်ပါ</string>
+    <string name="onboarding_1_title">Chanting Buddy ကိုကြိုဆိုပါသည်</string>
+    <string name="onboarding_1_body">အချိန်မှန်မှန်ကျသော အခါ သင်၏ပရိတ်သံများ အလိုအလျောက် ဖွင့်လာမည် — ကိုယ်တိုင်ဖွင့်စရာမလို။</string>
+    <string name="onboarding_2_title">တစ်ခါသတ်မှတ်</string>
+    <string name="onboarding_2_body">အချိန်၊ ရက်များ၊ နေထွက်/နေဝင်အထိ ရွေးပါ။ သင်၏ပရိတ်က နေ့တိုင်း အလိုအလျောက်ဖွင့်ပါလိမ့်မယ်။</string>
+    <string name="onboarding_3_title">သင်၏အစီအစဉ်ပြုလုပ်ပါ</string>
+    <string name="onboarding_3_body">ဖုန်းမှအသံများ ရွေးပြီး နူးညံ့သောကွာခြောက်များနဲ့ စာရင်းတစ်ခုပြုလုပ်၊ သိမ်းမီ စမ်းကြည့်ပါ။</string>
+
+    <!-- Main activity dialogs / backup -->
+    <string name="exact_alarm_dialog_title">တိတိကျတဲ့နားထိန်နာရီများ</string>
+    <string name="exact_alarm_dialog_body">တိတိကျသောအချိန်များ၌ ပရိတ်စတင်ရန်၊ စနစ်ဆက်တင်များ၌ ဤအက်ပ်အတွက် \"နားထိန်နာရီများနှင့် သတိပေးချက်များ\" ကို ခွင့်ပြုပါ။</string>
+    <string name="open_settings">ဆက်တင်များဖွင့်ရန်</string>
+    <string name="later">နောက်မှ</string>
+    <string name="backup_exported">ဘာသာပြန်ချက် ထွက်ရှိပါပြီ။</string>
+    <string name="backup_export_failed">ထုတ်ယူမှုမအောင်မြင်ပါ။</string>
+    <string name="backup_imported">သိမ်းဆည်းချက် သွင်းပြီးပါပြီ။</string>
+    <string name="backup_imported_full">ဇယား %1$d ခုနဲ့ မှတ်တမ်း %2$d ခု သွင်းပြီးပါပြီ။</string>
+    <string name="backup_imported_counts">ဇယား %1$d ခု (%3$d မှတ်တမ်းအသစ်)၊ ဇယားထပ်နေ %2$d ခုနဲ့ မှတ်တမ်းထပ်နေ %4$d ခု ကျော်ပါ။</string>
+    <string name="backup_import_failed">သွင်းယူမှုမအောင်မြင်ပါ — မှန်ကန်သောသိမ်းဆည်းမှု file မဟုတ်ပါ။</string>
+
+    <!-- Stats -->
+    <string name="stats_title">သင်၏ပရိတ်ရွတ်မှု</string>
+    <string name="stats_empty_title">မှတ်တမ်းမရှိသေးပါ</string>
+    <string name="stats_empty_body">ပြီးဆုံးသောပရိတ်ရွတ်မှုများက ဤ၌ သင်၏မှတ်တမ်းကို တည်ဆောက်ပါလိမ့်မည်။</string>
+    <string name="stats_day_in_a_row">နေ့ဆက်တိုက်</string>
+    <string name="stats_days_in_a_row">နေ့ဆက်တိုက်</string>
+    <string name="stats_this_week">ဤအပတ်</string>
+    <string name="stats_all_time">စုစုပေါင်း</string>
+    <string name="stats_longest_streak">အရှည်ဆက်တိုက်</string>
+    <string name="stats_mindful_min">သိမ်မွေ့သောမိနစ်</string>
+    <string name="stats_history_title">မှတ်တမ်း</string>
+    <string name="stats_note_dialog_title">ပရိတ်စာတမ်း</string>
+    <string name="stats_history_date_format">d MMM</string>
+    <string name="stats_history_with_label">%1$s · %2$s · %3$d မိနစ် · %4$s</string>
+    <string name="stats_history_no_label">%1$s · %2$d မိနစ် · %3$s</string>
+    <string name="end_reason_completed">ပြီးဆုံး</string>
+    <string name="end_reason_stopped">ရပ်</string>
+    <string name="end_reason_snoozed">နောက်ကျ</string>
+
+    <!-- Settings -->
+    <string name="settings_title">ဆက်တင်များ</string>
+    <string name="appearance_section">အသွင်အပြင်</string>
+    <string name="theme_auto">အလိုအလျောက်</string>
+    <string name="theme_light">အလင်း</string>
+    <string name="theme_dark">အမှောင်</string>
+    <string name="location_section">တည်နေရာ</string>
+    <string name="use_device_location">ဖုန်းတည်နေရာသုံးရန်</string>
+    <string name="locating">ရှာနေပါသည်…</string>
+    <string name="location_set">ဖုန်းတည်နေရာမှ သတ်မှတ်ပြီးပါပြီ။</string>
+    <string name="location_failed">ဖုန်းတည်နေရာ မရနိုင်ပါ — အောက်တွင် ကိုယ်တိုင်ထည့်ပါ။</string>
+    <string name="location_denied">တည်နေရာခွင့်ပြုချက် ငြင်းဆိုခံရပါသည် — အောက်တွင် ကိုယ်တိုင်ထည့်ပါ။</string>
+    <string name="enter_manually">ကိုယ်တိုင်ထည့်ရန်</string>
+    <string name="search_for_place">နေရာရှာရန်</string>
+    <string name="search_unavailable">ရှာဖွေမှု မရနိုင်ပါ — အောက်တွင် ကိုဩဒိန့်ထည့်ပါ။</string>
+    <string name="latitude">လတ္တီကျူ</string>
+    <string name="longitude">လောင်းကျီ</string>
+    <string name="save_location">တည်နေရာသိမ်း</string>
+    <string name="clear">ရှင်းရန်</string>
+    <string name="no_location_set">တည်နေရာမသတ်မှတ်ရသေးပါ</string>
+    <string name="no_location_body">နေထွက်/နေဝင်ဇယားများအတွက် တည်နေရာလိုအပ်ပါသည်။</string>
+    <string name="sunrise_label">နေထွက်</string>
+    <string name="sunset_label">နေဝင်</string>
+    <string name="playback_section">ဖွင့်နေမှု</string>
+    <string name="volume_fade_in">အသံတဖြည်းဖြည်းတိုး</string>
+    <string name="volume_fade_in_body">နားထိန်နာရီစတင်ချိန်၌ အသံတိုးလာပါသည်။</string>
+    <string name="snooze_length">နောက်ကျမြင့်ချိန်</string>
+    <string name="snooze_length_body">ပရိတ်ပြန်ဖွင့်ခံရန် မည်မျှစောင့်ရမည်။</string>
+    <string name="snooze_minutes">%1$d မိနစ်</string>
+    <string name="alarm_volume_title">သတ်မှတ်ချိန်ပရိတ်ကို နားထိန်အသံနှင့် ဖွင့်</string>
+    <string name="alarm_volume_body">နားထိန်နာရီမှ ပရိတ်များက နားထိန်လိုင်းသုံးသောကြောင့် မီဒီယာအသံနိမ့်နေစဉ် သို့မဟုတ် မရချက်ထားချိန်တွင်လည်း ကြားနိုင်ပါသည်။ ကိုယ်တိုင်ဖွင့်မှုက မီဒီယာအသံသုံးပါသည်။</string>
+    <string name="chant_volume_title">ပရိတ်အသံ</string>
+    <string name="chant_volume_body">ပရိတ်အသံတိုးသတ်မှတ်။ နားထိန်အသံဖွင့်ထားပြီး တိုးချိန်ပိတ်ထားလျှင် ပရိတ်က ၁၅ စက္ကန့်အတွင်း နူးညံ့စွာတိုးလာပါလိမ့်မည်။</string>
+    <string name="chant_volume_percent">%1$d%%</string>
+    <string name="fade_minutes">%1$d မိနစ်</string>
+    <string name="fade_seconds">%1$d စက္ကန့်</string>
+    <string name="reliability_section">နားထိန်နာရီများနဲ့ယုံကြည်စိတ်ချမှု</string>
+    <string name="exact_alarms_row">တိတိကျတဲ့နားထိန်နာရီများ</string>
+    <string name="status_allowed">ခွင့်ပြုပြီး</string>
+    <string name="status_needed">လိုအပ်ပါသည်</string>
+    <string name="battery_row">ဘက်ထရီစီမံချက်</string>
+    <string name="status_unrestricted">မကန့်သတ်</string>
+    <string name="status_restricted">ကန့်သတ်ထား</string>
+    <string name="full_screen_row">မျက်နှာပြင်ပြည့်နားထိန်</string>
+    <string name="reliability_hint">ဖုန်းအိပ်နေချိန်တွင်လည်း ပရိတ် အချိန်မှန်မှန်ဖွင့်စေဖို့ အရေးကြီး — ကျောင်းဂါထာသုံးရန် အထူးအရေးကြီး။</string>
+    <string name="test_sound_row">အသံစမ်းပါ</string>
+    <string name="test_sound_status">၃ စက္ကန့်စမ်း</string>
+    <string name="test_sound_playing">ဖွင့်နေပါသည်…</string>
+    <string name="test_sound_stop">ရပ်</string>
+    <string name="test_sound_play">ဖွင့်</string>
+    <string name="about_section">အကြောင်းအရာ</string>
+    <string name="replay_introduction">မိတ်ဆက်ကို ပြန်ကြည့်ရန်</string>
+    <string name="replay">ပြန်ဖွင့်</string>
+    <string name="export_row">ဇယားနဲ့မှတ်တမ်း ထုတ်ယူရန်</string>
+    <string name="export_status">JSON</string>
+    <string name="export_action">ထုတ်ယူ</string>
+    <string name="import_row">သိမ်းဆည်းမှု သွင်းရန်</string>
+    <string name="import_status">ရောစပ်</string>
+    <string name="import_action">သွင်းရန်</string>
+    <string name="version_line">Chanting Buddy · v%1$s</string>
+    <string name="collapse">ပိတ်</string>
+    <string name="expand">ဖွင့်</string>
+
+    <!-- Support -->
+    <string name="support_title">အထောက်အပံ့</string>
+    <string name="content_desc_support">အထောက်အပံ့</string>
+    <string name="support_row">အထောက်အပံ့နဲ့ အကြံဉာဏ်</string>
+    <string name="support_tip_title">Chanting Buddy အခမဲ့ပါ၊ အမြဲအခမဲ့ဖြစ်ပါလိမ့်မည်။</string>
+    <string name="support_tip_body">ကြော်ငြာမရှိ၊ အကောင့်မရှိ၊ ခြေရာခံမှုမရှိ — သင်၏နေ့စဉ်ပရိတ်ရွတ်မှုသာ။ ဤအက်ပ်က သင့်ကို စိတ်အေးချမ်းလေးပေးခဲ့လျှင် ကျေးဇူးတင်ချင်ပါက ကော်ဖီတစ်ခွက် ကျွေးနိုင်ပါတယ်။ အလုံးစုံအလိုအလျောက်ဖြစ်ပြီး ထောက်ပံ့လည်း အက်ပ်လုပ်ဆောင်ချက်က တူညီနေပါလိမ့်မည်။ 🙏</string>
+    <string name="support_tip_button">Ko-fi ၌ကော်ဖီကျွေးရန်</string>
+    <string name="support_feedback_title">အကူအညီနဲ့ အကြံဉာဏ်</string>
+    <string name="feedback_topic_label">ခေါင်းစဉ်</string>
+    <string name="feedback_topic_bug">ပြဿနာတိုင်ကြားရန်</string>
+    <string name="feedback_topic_feature">ဝန်ဆောင်မှုအသစ် အဆိုပြုရန်</string>
+    <string name="feedback_topic_question">အသုံးပြုပုံ မေးခွန်း</string>
+    <string name="feedback_topic_translation">ဘာသာပြန်ပြဿနာ</string>
+    <string name="feedback_topic_other">အခြား</string>
+    <string name="feedback_message_label">စာသား</string>
+    <string name="feedback_char_count">%1$d/%2$d</string>
+    <string name="feedback_email_label">သင်၏အီးမေး (ရွေးချယ်နိုင်)</string>
+    <string name="feedback_email_invalid">အီးမေးလိပ်စာမမှန်ပါ။</string>
+    <string name="feedback_include_diagnostics">အက်ပ်နဲ့စက်ပိုင်းဆိုင်ရာ အချက်အလက်ထည့်ပါ (ပြင်ဆင်ရန်ကူညီ)</string>
+    <string name="feedback_preview_show">ဘာတွေပါဝင်မယ်ဆိုတာ ကြည့်ရန်</string>
+    <string name="feedback_preview_hide">ဖျောက်ရန်</string>
+    <string name="feedback_send">ပို့ရန်</string>
+    <string name="feedback_send_hint">သင်၏အီးမေးအက်ပ်ကို အချက်အလက်များ ပြည့်စုံမှုနဲ့ ဖွင့်ပါလိမ့်မည် — သင်အဲဒါ၌ ပို့မှာမဟုတ်သေးပါဘူး။</string>
+    <string name="feedback_no_email_title">အီးမေးအက်ပ် မတွေ့ပါ</string>
+    <string name="feedback_no_email_body">သင်၏စာသားကိုကူးပြီး %1$s သို့ အချိန်တိုင်ပို့ပါ။</string>
+    <string name="feedback_copy">ကလစ်ဘုတ်သို့ကူးရန်</string>
+
+    <!-- Widget / tile -->
+    <string name="widget_description">နောက်ထပ်ပရိတ်အချိန်နဲ့ ဖွင့်/ရပ်ခလုပ်</string>
+    <string name="widget_no_session">လာမယ့်ပရိတ်မရှိပါ</string>
+    <string name="widget_chant_now">ယခုပရိတ်ရွတ်</string>
+    <string name="tile_chant_now">ယခုပရိတ်ရွတ်</string>
+    <string name="tile_stop_chanting">ပရိတ်ရွတ်မှု ရပ်</string>
+    <string name="type_time">အချိန်ရိုက်ရန်</string>
+    <string name="enter_time_title">အချိန်ထည့်ရန်</string>
+    <string name="ok">OK</string>
+    <string name="a11y_hour">နာရီ</string>
+    <string name="a11y_minute">မိနစ်</string>
+    <string name="a11y_dial_value">%1$s၊ %2$s</string>
+    <string name="reduce_motion">အရွေ့လျှော့ချရန်</string>
+    <string name="reduce_motion_body">ရှူသွင်းလှုပ်ရှားမှုများ ရပ်ပါ။</string>
+    <string name="content_desc_day_template">%1$s (ရက်စွဲ)</string>
+    <string name="day_mon">တနင်္လာနေ့</string>
+    <string name="day_tue">အင်္ဂါနေ့</string>
+    <string name="day_wed">ဗုဒ္ဓဟူးနေ့</string>
+    <string name="day_thu">ကြာသပတေးနေ့</string>
+    <string name="day_fri">သောကြာနေ့</string>
+    <string name="day_sat">စနေနေ့</string>
+    <string name="day_sun">တနင်္ဂနွေနေ့</string>
+</resources>

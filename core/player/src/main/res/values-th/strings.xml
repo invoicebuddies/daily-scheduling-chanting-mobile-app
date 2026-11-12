@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chanting Buddy</string>
+    <string name="builtin_morning_bell">Morning bell</string>
+    <string name="builtin_temple_bell">Temple bell</string>
+    <string name="builtin_singing_bowl">Singing bowl</string>
+    <string name="playing">กำลังเล่น…</string>
+    <string name="stop">หยุด</string>
+    <string name="snooze">เลื่อนเวลา</string>
+    <string name="channel_fallback">ปลุก</string>
+    <string name="channel_alarm">การแจ้งเตือนปลุก</string>
+    <string name="alarm_volume_muted_title">ระดับเสียงปลุกของคุณถูกปิด</string>
+    <string name="alarm_volume_muted_text">การสวดอาจเล่นอย่างเงียบสนิท — เพิ่มระดับเสียงปลุก หรือปิด \"เล่นการสวดตามเวลาด้วยเสียงปลุก\" ในการตั้งค่า</string>
+    <string name="missed_chant_title">การสวดเวลา %1$s ถูกพลาด</string>
+    <string name="missed_chant_text">แตะเพื่อเล่นตอนนี้</string>
+    <string name="time_to_chant_title">ถึงเวลาสวดมนต์</string>
+    <string name="time_to_chant_text">แตะเพื่อเริ่มการสวดมนต์ของคุณ</string>
+    <string name="routine_step_status">ขั้นตอนที่ %1$d จาก %2$d</string>
+    <string name="gap_pausing">หยุดพักระหว่างการสวด…</string>
+    <string name="sounds_broken_title">บางเสียงไม่สามารถเล่นได้</string>
+    <string name="sounds_broken_text">ไฟล์อาจถูกลบหรือการอนุญาตถูกเพิกถอน — เปิดแอปเพื่อแก้ไขตาราง</string>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chanting Buddy</string>
+    <string name="builtin_morning_bell">Morning bell</string>
+    <string name="builtin_temple_bell">Temple bell</string>
+    <string name="builtin_singing_bowl">Singing bowl</string>
+    <string name="playing">වාදනය වෙමින්…</string>
+    <string name="stop">නවත්වන්න</string>
+    <string name="snooze">නිදිගෙන යන්න</string>
+    <string name="channel_fallback">අලාම්</string>
+    <string name="channel_alarm">අලාම් දැනුම්දීම්</string>
+    <string name="alarm_volume_muted_title">ඔබේ අලාම් ශබ්දය නිහඬ කළේය</string>
+    <string name="alarm_volume_muted_text">ගාථාව නිහඬව වාදනය විය හැක — අලාම් ශබ්දය වැඩි කරන්න, හෝ සැකසුම්වල \"නියමිත ගාථා අලාම් ශබ්දයෙන් වාදනය කරන්න\" අක්‍රීය කරන්න.</string>
+    <string name="missed_chant_title">%1$s ගාථාව මඟ හැරුණි</string>
+    <string name="missed_chant_text">දැන් වාදනයට තට්ටු කරන්න.</string>
+    <string name="time_to_chant_title">ගාථා වේලාව</string>
+    <string name="time_to_chant_text">ඔබේ සැසිය ආරම්භ කිරීමට තට්ටු කරන්න.</string>
+    <string name="routine_step_status">පියවර %1$d / %2$d</string>
+    <string name="gap_pausing">ගාථා අතර විවේකය…</string>
+    <string name="sounds_broken_title">සමහර ශබ්ද වාදනය කළ නොහැක</string>
+    <string name="sounds_broken_text">ගොනුව මකා දමා හෝ අවසරය ඉවත් කළ හැක — උපලේඛනය නිවැරදි කිරීමට යෙදුම විවෘත කරන්න.</string>
+</resources>
