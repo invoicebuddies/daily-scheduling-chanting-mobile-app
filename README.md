@@ -139,7 +139,9 @@ Issues and pull requests are welcome. Please run `./gradlew test lintDebug` befo
 
 ## License
 
-License: not yet specified. (See [LICENSES.md](LICENSES.md) for third-party asset attribution.)
+Chanting Buddy is free software, licensed under the [GNU General Public License v3.0](LICENSE). You may use, study, share, and modify it; if you distribute a modified version, it must also be released under GPL-3.0 with its source code available.
+
+Third-party assets (fonts, sounds) keep their own licenses — see [LICENSES.md](LICENSES.md).
 
 ---
 

@@ -552,10 +552,16 @@ class PlaybackService : MediaSessionService() {
         getSystemService(AudioManager::class.java)?.abandonAudioFocusRequest(request)
     }
 
-    /** Internal pause that onPlayWhenReadyChanged must not read as a user pause. */
+    /**
+     * Internal pause that onPlayWhenReadyChanged must not read as a user pause.
+     * The marker is only armed when the player is actually playing: pausing an
+     * already-paused player fires no callback, so an unconditional marker would
+     * linger and swallow the user's next real pause.
+     */
     private fun pauseInternally() {
-        suppressUserPauseOnce = true
-        player?.pause()
+        val p = player ?: return
+        if (p.playWhenReady) suppressUserPauseOnce = true
+        p.pause()
     }
 
     /**
