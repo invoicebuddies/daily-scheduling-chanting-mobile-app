@@ -118,7 +118,7 @@ fun SceneArt(
     scene: ArtScene,
     phase: DayPhase,
     modifier: Modifier = Modifier,
-    animate: Boolean = true,
+    animate: Boolean = rememberAmbientActive(),
     contentDescription: String? = null,
 ) {
     val palette = scenePalette(phase)

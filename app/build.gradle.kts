@@ -110,6 +110,11 @@ android {
         compose = true
         buildConfig = true
     }
+
+    testOptions {
+        // Robolectric Compose tests need merged resources.
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 kotlin {
@@ -137,5 +142,8 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
     debugImplementation(libs.compose.ui.tooling)
 }
