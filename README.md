@@ -7,11 +7,14 @@
 [![CI](https://github.com/invoicebuddies/daily-scheduling-chanting-mobile-app/actions/workflows/android.yml/badge.svg)](https://github.com/invoicebuddies/daily-scheduling-chanting-mobile-app/actions/workflows/android.yml)
 
 <p align="center">
+  <img src="docs/media/chanting-buddy-v1.4.2.gif" width="200" alt="Chanting Buddy v1.4.2 promo">
   <img src="docs/screenshots/home.png" width="200" alt="Home screen">
   <img src="docs/screenshots/edit.png" width="200" alt="Edit schedule">
   <img src="docs/screenshots/ringing.png" width="200" alt="Ringing screen">
   <img src="docs/screenshots/stats.png" width="200" alt="Stats">
 </p>
+
+*(Promo clip source in [promo/](promo/) — Remotion; MP4 in [docs/media/](docs/media/chanting-buddy-v1.4.2.mp4).)*
 
 ## Why Chanting Buddy
 
