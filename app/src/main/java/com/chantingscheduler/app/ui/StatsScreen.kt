@@ -36,6 +36,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -186,6 +188,7 @@ private fun EmptyStats() {
 
 @Composable
 private fun StreakCard(value: Int, label: String) {
+    val displayValue = com.chantingscheduler.app.ui.motion.rememberCountUp(value)
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
@@ -212,7 +215,7 @@ private fun StreakCard(value: Int, label: String) {
             Spacer(Modifier.size(16.dp))
             Column {
                 Text(
-                    "$value",
+                    "$displayValue",
                     fontFamily = UrbanistFamily,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 36.sp,
@@ -355,6 +358,7 @@ private const val NOTE_MAX_LENGTH = 200
 
 @Composable
 private fun MinutesCard(label: String, minutes: Int, modifier: Modifier = Modifier) {
+    val displayMinutes = com.chantingscheduler.app.ui.motion.rememberCountUp(minutes)
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
@@ -368,7 +372,7 @@ private fun MinutesCard(label: String, minutes: Int, modifier: Modifier = Modifi
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                "$minutes",
+                "$displayMinutes",
                 fontFamily = UrbanistFamily,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 28.sp,
@@ -418,10 +422,28 @@ private fun MonthCalendarCard(minutesByDay: Map<LocalDate, Int>) {
             Spacer(Modifier.height(8.dp))
             val cells = firstOffset + daysInMonth
             val rows = (cells + 6) / 7
+            val level = com.chantingscheduler.app.ui.motion.LocalMotion.current
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 repeat(rows) { row ->
+                    // Calendar week rows fade in, top row first.
+                    val rowAlpha = if (level == com.chantingscheduler.app.ui.motion.MotionLevel.CALM) {
+                        val a by androidx.compose.animation.core.animateFloatAsState(
+                            targetValue = 1f,
+                            animationSpec = com.chantingscheduler.app.ui.motion.MotionTokens.enterTween(
+                                level,
+                                com.chantingscheduler.app.ui.motion.MotionTokens.DurationShort,
+                                row * 60,
+                            ),
+                            label = "weekRow",
+                        )
+                        a
+                    } else {
+                        1f
+                    }
                     Row(
-                        Modifier.fillMaxWidth(),
+                        Modifier
+                            .fillMaxWidth()
+                            .graphicsLayer { alpha = rowAlpha },
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         repeat(7) { column ->

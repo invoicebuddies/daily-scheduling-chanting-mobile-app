@@ -4,16 +4,17 @@ import com.chantingscheduler.app.R
 import android.text.format.DateFormat
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -56,6 +57,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -77,6 +81,10 @@ import com.chantingscheduler.app.data.ScheduleEntity
 import com.chantingscheduler.app.data.ScheduleWithSounds
 import com.chantingscheduler.app.data.TriggerType
 import com.chantingscheduler.app.playback.NowPlaying
+import com.chantingscheduler.app.ui.motion.MotionTokens
+import com.chantingscheduler.app.ui.motion.LocalMotion
+import com.chantingscheduler.app.ui.motion.MotionLevel
+import com.chantingscheduler.app.ui.motion.rememberAmbientFloat
 import com.chantingscheduler.app.scheduling.AlarmScheduler
 import com.chantingscheduler.app.scheduling.SunTimesCalculator
 import com.chantingscheduler.app.ui.theme.UrbanistFamily
@@ -240,6 +248,31 @@ fun ScheduleListScreen(
                     EmptyState(onAdd = onAdd, modifier = Modifier.weight(1f))
                 }
             } else {
+                val level = LocalMotion.current
+                // Cards leaving the list (delete) keep composing until their
+                // exit fade finishes; undo re-inserts the id and the ghost
+                // yields to the real card, which re-expands in place.
+                var previousSchedules by remember { mutableStateOf(schedules) }
+                val exiting = remember {
+                    mutableStateMapOf<Long, Pair<ScheduleWithSounds, MutableTransitionState<Boolean>>>()
+                }
+                LaunchedEffect(schedules) {
+                    val old = previousSchedules
+                    if (old !== schedules) {
+                        val currentIds = schedules.map { it.schedule.id }.toSet()
+                        old.filter { prev -> prev.schedule.id !in currentIds }
+                            .forEach { gone ->
+                                exiting[gone.schedule.id] = gone to MutableTransitionState(true)
+                                    .apply { targetState = false }
+                            }
+                        // Undo (or a same-id re-add): drop the ghost.
+                        exiting.keys.retainAll(currentIds)
+                        previousSchedules = schedules
+                    }
+                }
+                val ghostItems = exiting.values
+                    .map { it.first }
+                    .filter { ghost -> schedules.none { it.schedule.id == ghost.schedule.id } }
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -261,28 +294,35 @@ fun ScheduleListScreen(
                             onOpenSupport = onOpenSupport,
                         )
                     }
-                    if (nextSession != null) {
-                        item(key = "hero") {
-                            NextSessionHero(
-                                item = nextSession.first,
-                                triggerAt = nextSession.second,
-                                onClick = { onEdit(nextSession.first.schedule.id) },
-                            )
+                    item(key = "hero") {
+                        // The hero crossfades when the next session changes.
+                        Crossfade(
+                            targetState = nextSession,
+                            animationSpec = MotionTokens.fadeTween(level, MotionTokens.DurationMedium),
+                            label = "heroSwap",
+                        ) { session ->
+                            if (session != null) {
+                                NextSessionHero(
+                                    item = session.first,
+                                    triggerAt = session.second,
+                                    onClick = { onEdit(session.first.schedule.id) },
+                                )
+                            }
                         }
                     }
-                    if (missedChantCard != null) {
+                    missedChantCard?.let { card ->
                         item(key = "missed-chant") {
                             MissedChantBanner(
-                                card = missedChantCard,
+                                card = card,
                                 onFixReliability = onOpenReliability,
                                 onDismiss = onDismissMissed,
                             )
                         }
                     }
-                    if (updateCard != null) {
+                    updateCard?.let { card ->
                         item(key = "update-card") {
                             UpdateCardBanner(
-                                card = updateCard,
+                                card = card,
                                 onDownload = onUpdateDownload,
                                 onLater = onUpdateLater,
                                 onSkip = onUpdateSkip,
@@ -294,17 +334,48 @@ fun ScheduleListScreen(
                             LocationWarningBanner(onClick = onOpenSettings)
                         }
                     }
-                    items(schedules, key = { it.schedule.id }) { item ->
-                        ScheduleCard(
-                            item = item,
-                            isPlayingThis = nowPlaying.isPlayingSchedule(item.schedule.id),
-                            location = location,
-                            hasMissingSounds = item.sortedSounds.any { it.uri in missingSoundUris } ||
-                                item.sortedSteps.any { it.soundUri in missingSoundUris },
-                            onClick = { onEdit(item.schedule.id) },
-                            onToggle = { onToggle(item, it) },
-                            onPlayToggle = { onPlayToggle(item) },
-                        )
+                    items(
+                        schedules + ghostItems,
+                        key = { it.schedule.id },
+                        contentType = { "schedule" },
+                    ) { item ->
+                        // Staggered entrance (40 ms steps, first six only) —
+                        // decorative; input is never blocked.
+                        val index = (schedules + ghostItems).indexOfFirst { it.schedule.id == item.schedule.id }
+                        val startDelay = (index.coerceAtMost(MotionTokens.StaggerMaxItems) *
+                            MotionTokens.StaggerStepMs)
+                        val visibleState = exiting[item.schedule.id]?.second
+                        val enter: EnterTransition = if (level == MotionLevel.CALM) {
+                            fadeIn(MotionTokens.enterTween(level, MotionTokens.DurationMedium, startDelay))
+                        } else {
+                            fadeIn(MotionTokens.enterTween(level, MotionTokens.DurationShort, startDelay / 2))
+                        }
+                        val content: @Composable () -> Unit = {
+                            ScheduleCard(
+                                item = item,
+                                isPlayingThis = nowPlaying.isPlayingSchedule(item.schedule.id),
+                                location = location,
+                                hasMissingSounds = item.sortedSounds.any { it.uri in missingSoundUris } ||
+                                    item.sortedSteps.any { it.soundUri in missingSoundUris },
+                                onClick = { onEdit(item.schedule.id) },
+                                onToggle = { onToggle(item, it) },
+                                onPlayToggle = { onPlayToggle(item) },
+                                modifier = Modifier.animateItem(),
+                            )
+                        }
+                        if (visibleState != null) {
+                            AnimatedVisibility(
+                                visibleState = visibleState,
+                                enter = enter,
+                                exit = fadeOut(MotionTokens.exitTween(level)) +
+                                    shrinkVertically(MotionTokens.exitTween(level)),
+                            ) { content() }
+                        } else {
+                            AnimatedVisibility(
+                                visible = true,
+                                enter = enter,
+                            ) { content() }
+                        }
                     }
                 }
             }
@@ -354,6 +425,34 @@ data class MissedChantUi(
  */
 @Composable
 private fun MissedChantBanner(
+    card: MissedChantUi,
+    onFixReliability: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    // Enter slides down; dismiss slides back up and only then unloads.
+    val level = LocalMotion.current
+    val visibility = remember { MutableTransitionState(false) }
+    LaunchedEffect(Unit) { visibility.targetState = true }
+    AnimatedVisibility(
+        visibleState = visibility,
+        enter = slideInVertically(MotionTokens.enterTween(level, MotionTokens.DurationMedium)) { -it / 2 } +
+            fadeIn(MotionTokens.enterTween(level, MotionTokens.DurationMedium)),
+        exit = slideOutVertically(MotionTokens.exitTween(level)) { -it / 2 } +
+            fadeOut(MotionTokens.exitTween(level)),
+    ) {
+        MissedChantBannerContent(
+            card = card,
+            onFixReliability = onFixReliability,
+            onDismiss = { visibility.targetState = false },
+        )
+    }
+    if (visibility.isIdle && !visibility.currentState) {
+        LaunchedEffect(Unit) { onDismiss() }
+    }
+}
+
+@Composable
+private fun MissedChantBannerContent(
     card: MissedChantUi,
     onFixReliability: () -> Unit,
     onDismiss: () -> Unit,
@@ -425,6 +524,38 @@ private fun UpdateCardBanner(
     onLater: () -> Unit,
     onSkip: () -> Unit,
 ) {
+    val level = LocalMotion.current
+    val visibility = remember { MutableTransitionState(false) }
+    LaunchedEffect(Unit) { visibility.targetState = true }
+    AnimatedVisibility(
+        visibleState = visibility,
+        enter = slideInVertically(MotionTokens.enterTween(level, MotionTokens.DurationMedium)) { -it / 2 } +
+            fadeIn(MotionTokens.enterTween(level, MotionTokens.DurationMedium)),
+        exit = slideOutVertically(MotionTokens.exitTween(level)) { -it / 2 } +
+            fadeOut(MotionTokens.exitTween(level)),
+    ) {
+        UpdateCardBannerContent(
+            card = card,
+            onDownload = onDownload,
+            onLater = {
+                visibility.targetState = false
+                onLater()
+            },
+            onSkip = {
+                visibility.targetState = false
+                onSkip()
+            },
+        )
+    }
+}
+
+@Composable
+private fun UpdateCardBannerContent(
+    card: UpdateCardUi,
+    onDownload: () -> Unit,
+    onLater: () -> Unit,
+    onSkip: () -> Unit,
+) {
     val haptics = LocalHapticFeedback.current
     Surface(
         shape = RoundedCornerShape(24.dp),
@@ -490,17 +621,7 @@ private fun NextSessionHero(    item: ScheduleWithSounds,
     val is24Hour = DateFormat.is24HourFormat(LocalContext.current)
     val zdt = Instant.ofEpochMilli(triggerAt).atZone(ZoneId.systemDefault())
     // Gentle breathing pulse on the glow behind the time.
-    val reduceMotion = rememberReduceMotion()
-    val glowTransition = rememberInfiniteTransition(label = "heroGlow")
-    val glowAlpha by glowTransition.animateFloat(
-        initialValue = 0.2f,
-        targetValue = 0.35f,
-        animationSpec = if (reduceMotion) infiniteRepeatable(tween(0)) else infiniteRepeatable(
-            animation = tween(3000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "heroGlowAlpha",
-    )
+    val glowAlpha by rememberAmbientFloat(0.2f, 0.35f, MotionTokens.AmbientPulseMs, "heroGlowAlpha")
     val caption = run {
         val date = zdt.toLocalDate()
         val today = LocalDate.now()
@@ -638,17 +759,7 @@ private fun AddScheduleButton(onClick: () -> Unit, modifier: Modifier = Modifier
 @Composable
 private fun EmptyState(onAdd: () -> Unit, modifier: Modifier = Modifier) {
     // Slow floating drift on the decorative icon.
-    val reduceMotion = rememberReduceMotion()
-    val floatTransition = rememberInfiniteTransition(label = "emptyFloat")
-    val floatY by floatTransition.animateFloat(
-        initialValue = -4f,
-        targetValue = 4f,
-        animationSpec = if (reduceMotion) infiniteRepeatable(tween(0)) else infiniteRepeatable(
-            animation = tween(2400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "emptyFloatY",
-    )
+    val floatY by rememberAmbientFloat(-4f, 4f, MotionTokens.AmbientPulseMs, "emptyFloatY")
     val interactionSource = remember { MutableInteractionSource() }
     Column(
         modifier = modifier
@@ -737,6 +848,7 @@ private fun ScheduleCard(
     onClick: () -> Unit,
     onToggle: (Boolean) -> Unit,
     onPlayToggle: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val schedule = item.schedule
     val is24Hour = DateFormat.is24HourFormat(LocalContext.current)
@@ -745,7 +857,7 @@ private fun ScheduleCard(
     }
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
@@ -904,9 +1016,13 @@ private fun PlayToggle(isPlaying: Boolean, enabled: Boolean, onClick: () -> Unit
             .accentGlow(CircleShape, enabled = isPlaying && enabled),
     ) {
         Box(contentAlignment = Alignment.Center) {
+            val level = LocalMotion.current
             AnimatedContent(
                 targetState = isPlaying,
-                transitionSpec = { fadeIn(tween(180)) togetherWith fadeOut(tween(180)) },
+                transitionSpec = {
+                    fadeIn(MotionTokens.fadeTween(level, MotionTokens.DurationMicro)) togetherWith
+                        fadeOut(MotionTokens.fadeTween(level, MotionTokens.DurationMicro))
+                },
                 label = "playStopIcon",
             ) { playing ->
                 Icon(
@@ -932,17 +1048,7 @@ private fun NowPlayingPill(
     modifier: Modifier = Modifier,
 ) {
     // Pulsing accent ring marks the active session.
-    val reduceMotion = rememberReduceMotion()
-    val ringTransition = rememberInfiniteTransition(label = "ringingRing")
-    val ringAlpha by ringTransition.animateFloat(
-        initialValue = 0.35f,
-        targetValue = 1f,
-        animationSpec = if (reduceMotion) infiniteRepeatable(tween(0)) else infiniteRepeatable(
-            animation = tween(1200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "ringAlpha",
-    )
+    val ringAlpha by rememberAmbientFloat(0.35f, 1f, MotionTokens.AmbientPulseMs, "ringAlpha")
     Surface(
         onClick = onOpen,
         modifier = modifier.fillMaxWidth(),
@@ -998,17 +1104,7 @@ private fun NowPlayingPill(
 
 @Composable
 private fun PulsingDot() {
-    val reduceMotion = rememberReduceMotion()
-    val transition = rememberInfiniteTransition(label = "pulse")
-    val alpha by transition.animateFloat(
-        initialValue = 0.25f,
-        targetValue = 1f,
-        animationSpec = if (reduceMotion) infiniteRepeatable(tween(0)) else infiniteRepeatable(
-            animation = tween(650, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "dot",
-    )
+    val alpha by rememberAmbientFloat(0.25f, 1f, MotionTokens.AmbientPulseMs, "dot")
     Box(
         Modifier
             .size(10.dp)

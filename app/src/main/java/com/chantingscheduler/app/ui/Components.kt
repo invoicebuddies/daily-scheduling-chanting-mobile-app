@@ -3,8 +3,8 @@ package com.chantingscheduler.app.ui
 import com.chantingscheduler.app.R
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import com.chantingscheduler.app.ui.motion.LocalMotion
+import com.chantingscheduler.app.ui.motion.MotionTokens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.InteractionSource
@@ -76,15 +76,17 @@ fun Modifier.accentGlow(shape: Shape, enabled: Boolean = true): Modifier =
     }
 
 /**
- * Subtle scale-down while a component is pressed. graphicsLayer-only, so it
- * costs no layout passes. Pass the same [interactionSource] to the clickable.
+ * Shared press feedback: subtle scale-down while pressed, graphicsLayer-only
+ * (no layout passes). The one place the app defines press depth
+ * ([MotionTokens.PressScale]). Pass the same [interactionSource] to the
+ * clickable.
  */
 @Composable
 fun Modifier.pressScale(interactionSource: InteractionSource): Modifier {
     val pressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (pressed) 0.97f else 1f,
-        animationSpec = spring(),
+        targetValue = if (pressed) MotionTokens.PressScale else 1f,
+        animationSpec = MotionTokens.springToggle(),
         label = "pressScale",
     )
     return this.graphicsLayer {
@@ -126,7 +128,7 @@ fun DayChip(
         } else {
             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         },
-        animationSpec = tween(250),
+        animationSpec = MotionTokens.enterTween(LocalMotion.current, MotionTokens.DurationShort),
         label = "dayChipBackground",
     )
     val contentColor by animateColorAsState(
@@ -135,12 +137,12 @@ fun DayChip(
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
-        animationSpec = tween(250),
+        animationSpec = MotionTokens.enterTween(LocalMotion.current, MotionTokens.DurationShort),
         label = "dayChipContent",
     )
     val scale by animateFloatAsState(
         targetValue = if (active) 1.08f else 1f,
-        animationSpec = spring(),
+        animationSpec = MotionTokens.springToggle(),
         label = "dayChipScale",
     )
     Box(

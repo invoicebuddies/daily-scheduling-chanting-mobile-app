@@ -67,7 +67,7 @@ fun LivingHeader(
     val phase = rememberDayPhase(location)
     val level = LocalMotion.current
     val ambient = rememberAmbientActive()
-    val scene = rememberUserScene()
+    val scene = com.chantingscheduler.app.ui.motion.rememberArtScene()
 
     // Text ink follows backdrop brightness, so contrast holds in every
     // phase × theme combination (AA over the scrim below).
@@ -169,14 +169,6 @@ fun LivingHeader(
             }
         }
     }
-}
-
-/** The user's scene choice (defaults to MONK). */
-@Composable
-private fun rememberUserScene(): ArtScene {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val stored by MotionStore.get(context).scene.collectAsStateWithLifecycle()
-    return remember(stored) { ArtScene.fromStored(stored) }
 }
 
 @Composable

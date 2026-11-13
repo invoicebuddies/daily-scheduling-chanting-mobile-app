@@ -39,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -164,6 +165,9 @@ class MainActivity : ComponentActivity() {
             com.chantingscheduler.app.ui.motion.MotionPolicy.levelFromStored(storedMotionLevel),
             animatorScale,
         )
+        val slidePx = with(androidx.compose.ui.platform.LocalDensity.current) {
+            com.chantingscheduler.app.ui.motion.MotionTokens.SlideDistanceDp.dp.roundToPx()
+        }
 
         val scope = rememberCoroutineScope()
         var backupMessage by remember { mutableStateOf<String?>(null) }
@@ -256,14 +260,28 @@ class MainActivity : ComponentActivity() {
         AnimatedContent(
             targetState = screen,
             transitionSpec = {
+                // Shared-axis horizontal: forward slides content left by
+                // 24 dp + fade; back reverses the direction. Exits run faster
+                // than entrances. `density` comes from the transition scope.
+                val level = motionLevel
                 if (targetState == SCREEN_LIST) {
-                    // Navigating back to the list: slide in from the left.
-                    (slideInHorizontally { -it / 3 } + fadeIn()) togetherWith
-                        (slideOutHorizontally { it / 3 } + fadeOut())
+                    (slideInHorizontally(
+                        com.chantingscheduler.app.ui.motion.MotionTokens.enterTween(level, com.chantingscheduler.app.ui.motion.MotionTokens.DurationLong),
+                    ) { slidePx } + fadeIn(
+                        com.chantingscheduler.app.ui.motion.MotionTokens.enterTween(level, com.chantingscheduler.app.ui.motion.MotionTokens.DurationMedium),
+                    )) togetherWith
+                        (slideOutHorizontally(
+                            com.chantingscheduler.app.ui.motion.MotionTokens.exitTween(level),
+                        ) { -slidePx } + fadeOut(com.chantingscheduler.app.ui.motion.MotionTokens.exitTween(level)))
                 } else {
-                    // Navigating forward to the editor: slide in from the right.
-                    (slideInHorizontally { it / 3 } + fadeIn()) togetherWith
-                        (slideOutHorizontally { -it / 3 } + fadeOut())
+                    (slideInHorizontally(
+                        com.chantingscheduler.app.ui.motion.MotionTokens.enterTween(level, com.chantingscheduler.app.ui.motion.MotionTokens.DurationLong),
+                    ) { -slidePx } + fadeIn(
+                        com.chantingscheduler.app.ui.motion.MotionTokens.enterTween(level, com.chantingscheduler.app.ui.motion.MotionTokens.DurationMedium),
+                    )) togetherWith
+                        (slideOutHorizontally(
+                            com.chantingscheduler.app.ui.motion.MotionTokens.exitTween(level),
+                        ) { slidePx } + fadeOut(com.chantingscheduler.app.ui.motion.MotionTokens.exitTween(level)))
                 }
             },
             label = "screenTransition",

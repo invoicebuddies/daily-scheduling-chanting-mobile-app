@@ -7,9 +7,11 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -99,6 +101,8 @@ import com.chantingscheduler.app.data.TriggerType
 import com.chantingscheduler.app.playback.BuiltinSounds
 import com.chantingscheduler.app.playback.SoundPreviewPlayer
 import com.chantingscheduler.app.scheduling.SunTimesCalculator
+import com.chantingscheduler.app.ui.motion.LocalMotion
+import com.chantingscheduler.app.ui.motion.MotionTokens
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -412,7 +416,8 @@ fun ScheduleEditScreen(
                 ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
             ) {
-                Column {
+                // Smooth height when the mode switch changes the content.
+                Column(Modifier.animateContentSize(animationSpec = MotionTokens.springSlide())) {
                     if (mode == EditMode.PLAYLIST) {
                         if (!triggerType.isLunar) {
                             SettingRow(
@@ -889,45 +894,56 @@ private fun ModeSelector(
     mode: EditMode,
     onSelect: (EditMode) -> Unit,
 ) {
-    Row(
+    val level = LocalMotion.current
+    val options = EditMode.entries
+    val selectedIndex = options.indexOf(mode)
+    BoxWithConstraints(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(50))
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
             .padding(4.dp),
     ) {
-        EditMode.entries.forEach { option ->
-            val isSelected = mode == option
-            val container by animateColorAsState(
-                targetValue = if (isSelected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    Color.Transparent
-                },
-                label = "modeContainer",
-            )
-            val content by animateColorAsState(
-                targetValue = if (isSelected) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                label = "modeContent",
-            )
-            Box(
-                Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(50))
-                    .background(container)
-                    .clickable { onSelect(option) }
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    if (option == EditMode.PLAYLIST) stringResource(R.string.mode_playlist) else stringResource(R.string.mode_routine),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = content,
+        val itemWidth = maxWidth / options.size
+        // The indicator pill slides between options on a spring.
+        val indicatorOffset by animateDpAsState(
+            targetValue = itemWidth * selectedIndex,
+            animationSpec = MotionTokens.springSlide(),
+            label = "modeIndicator",
+        )
+        Box(
+            Modifier
+                .graphicsLayer { translationX = indicatorOffset.toPx() }
+                .width(itemWidth)
+                .height(40.dp)
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.primary),
+        )
+        Row {
+            options.forEach { option ->
+                val isSelected = mode == option
+                val content by animateColorAsState(
+                    targetValue = if (isSelected) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    animationSpec = MotionTokens.enterTween(level, MotionTokens.DurationShort),
+                    label = "modeContent",
                 )
+                Box(
+                    Modifier
+                        .width(itemWidth)
+                        .clickable { onSelect(option) }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        if (option == EditMode.PLAYLIST) stringResource(R.string.mode_playlist) else stringResource(R.string.mode_routine),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = content,
+                    )
+                }
             }
         }
     }
@@ -1050,6 +1066,7 @@ private fun ChipSurface(
 
 @Composable
 private fun StepDraftRow(
+    modifier: Modifier = Modifier,
     index: Int,
     step: StepDraft,
     isPreviewing: Boolean,
@@ -1062,7 +1079,7 @@ private fun StepDraftRow(
     onRemove: () -> Unit,
 ) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 64.dp),
         shape = RoundedCornerShape(16.dp),
@@ -1251,11 +1268,11 @@ private fun SettingRow(
         AnimatedVisibility(
             visible = expanded,
             enter = expandVertically(
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-            ) + fadeIn(),
+                animationSpec = MotionTokens.springSlide(),
+            ) + fadeIn(MotionTokens.enterTween(LocalMotion.current, MotionTokens.DurationShort)),
             exit = shrinkVertically(
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-            ) + fadeOut(),
+                animationSpec = MotionTokens.springSlide(),
+            ) + fadeOut(MotionTokens.exitTween(LocalMotion.current)),
         ) {
             Box(
                 Modifier
@@ -1290,50 +1307,52 @@ private fun TriggerTypeSelector(
         TriggerType.FULL_MOON to stringResource(R.string.trigger_full_moon),
         TriggerType.NEW_MOON to stringResource(R.string.trigger_new_moon),
     )
-    Row(
+    val level = LocalMotion.current
+    BoxWithConstraints(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(50))
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
             .padding(4.dp),
     ) {
-        options.forEach { (type, text) ->
-            val isSelected = selected == type
-            val container by animateColorAsState(
-                targetValue = if (isSelected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    Color.Transparent
-                },
-                label = "segmentContainer",
-            )
-            val content by animateColorAsState(
-                targetValue = if (isSelected) {
-                    MaterialTheme.colorScheme.onPrimary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                label = "segmentContent",
-            )
-            val scale by animateFloatAsState(
-                targetValue = if (isSelected) 1f else 0.95f,
-                animationSpec = spring(),
-                label = "segmentScale",
-            )
-            Box(
-                Modifier
-                    .weight(1f)
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                    }
-                    .clip(RoundedCornerShape(50))
-                    .background(container)
-                    .clickable { onSelect(type) }
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(text, style = MaterialTheme.typography.labelLarge, color = content)
+        val itemWidth = maxWidth / options.size
+        val selectedIndex = options.indexOfFirst { it.first == selected }.coerceAtLeast(0)
+        // The indicator pill slides between options on a spring.
+        val indicatorOffset by animateDpAsState(
+            targetValue = itemWidth * selectedIndex,
+            animationSpec = MotionTokens.springSlide(),
+            label = "triggerIndicator",
+        )
+        Box(
+            Modifier
+                .graphicsLayer { translationX = indicatorOffset.toPx() }
+                .width(itemWidth)
+                .height(40.dp)
+                .clip(RoundedCornerShape(50))
+                .background(MaterialTheme.colorScheme.primary),
+        )
+        Row {
+            options.forEach { (type, text) ->
+                val isSelected = selected == type
+                val content by animateColorAsState(
+                    targetValue = if (isSelected) {
+                        MaterialTheme.colorScheme.onPrimary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    animationSpec = MotionTokens.enterTween(level, MotionTokens.DurationShort),
+                    label = "segmentContent",
+                )
+                Box(
+                    Modifier
+                        .width(itemWidth)
+                        .clip(RoundedCornerShape(50))
+                        .clickable { onSelect(type) }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text, style = MaterialTheme.typography.labelLarge, color = content)
+                }
             }
         }
     }
@@ -1470,6 +1489,7 @@ private fun StepperButton(
 
 @Composable
 private fun SoundItemRow(
+    modifier: Modifier = Modifier,
     index: Int,
     sound: SoundItemEntity,
     isPreviewing: Boolean,
@@ -1481,7 +1501,7 @@ private fun SoundItemRow(
     onRemove: () -> Unit,
 ) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 64.dp),
         shape = RoundedCornerShape(16.dp),

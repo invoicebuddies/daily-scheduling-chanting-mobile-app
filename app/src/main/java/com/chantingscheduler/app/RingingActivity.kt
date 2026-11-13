@@ -6,13 +6,17 @@ import android.os.PowerManager
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.Crossfade
+import com.chantingscheduler.app.ui.motion.DayPhase
+import com.chantingscheduler.app.ui.motion.LocalMotion
+import com.chantingscheduler.app.ui.motion.MotionTokens
+import com.chantingscheduler.app.ui.motion.SceneArt
+import com.chantingscheduler.app.ui.motion.rememberAmbientActive
+import com.chantingscheduler.app.ui.motion.rememberAmbientFloat
+import com.chantingscheduler.app.ui.motion.rememberArtScene
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -43,9 +47,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -247,6 +255,15 @@ private fun RingingScreen(
         startedAtMs = startedAtMillis,
     )
 
+    val level = LocalMotion.current
+    val scene = rememberArtScene()
+    val ambient = rememberAmbientActive()
+    val scenePhase = when (triggerType) {
+        TriggerType.SUNRISE -> DayPhase.DAWN
+        TriggerType.SUNSET -> DayPhase.DUSK
+        TriggerType.FIXED, TriggerType.FULL_MOON, TriggerType.NEW_MOON -> DayPhase.NIGHT
+    }
+
     Box(Modifier.fillMaxSize()) {
         when (triggerType) {
             TriggerType.SUNRISE -> DawnBackground()
@@ -254,18 +271,64 @@ private fun RingingScreen(
             TriggerType.FIXED, TriggerType.FULL_MOON, TriggerType.NEW_MOON -> NightBackground()
         }
 
-        val ended = complete
-        if (ended != null) {
-            SessionCompleteContent(
-                ended = ended,
-                noteText = noteText,
-                onNoteChange = onNoteChange,
-                onDone = onDone,
-            )
-            return@Box
-        }
+        // The chosen scene breathes on the 5.5 s cycle while ringing and
+        // settles to still once the session completes.
+        SceneArt(
+            scene = scene,
+            phase = scenePhase,
+            animate = ambient && complete == null,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(280.dp),
+        )
 
-        Column(
+        // Slow crossfade into the complete state; the scene stays still there.
+        Crossfade(
+            targetState = complete != null,
+            animationSpec = MotionTokens.enterTween(level, MotionTokens.DurationLong),
+            label = "ringingCrossfade",
+        ) { isComplete ->
+            if (isComplete && complete != null) {
+                SessionCompleteContent(
+                    ended = complete!!,
+                    noteText = noteText,
+                    onNoteChange = onNoteChange,
+                    onDone = onDone,
+                )
+            } else {
+                RingingContent(
+                    label = label,
+                    currentTrack = currentTrack,
+                    totalTracks = totalTracks,
+                    currentStep = currentStep,
+                    totalSteps = totalSteps,
+                    timer = timer,
+                    snoozeMinutes = snoozeMinutes,
+                    onSnooze = onSnooze,
+                    onStop = onStop,
+                )
+            }
+        }
+    }
+}
+
+/** The ringing state itself: label, status, timer pill with the breath-synced
+ * pulse ring, and SNOOZE + STOP. */
+@Composable
+private fun RingingContent(
+    label: String,
+    currentTrack: Int,
+    totalTracks: Int,
+    currentStep: Int,
+    totalSteps: Int,
+    timer: RingingTimer,
+    snoozeMinutes: Int,
+    onSnooze: () -> Unit,
+    onStop: () -> Unit,
+) {
+    // Soft ring around the timer pulses in sync with the scene breath.
+    val breathPulse by rememberAmbientFloat(0f, 1f, MotionTokens.BreathCycleMs, "timerPulse")
+    Column(
             modifier = Modifier
                 .fillMaxSize()
                 .navigationBarsPadding()
@@ -297,16 +360,30 @@ private fun RingingScreen(
                 )
             }
             Spacer(Modifier.height(20.dp))
-            Surface(
-                shape = RoundedCornerShape(50),
-                color = Color.White.copy(alpha = 0.16f),
+            // Soft ring around the timer, pulsing in sync with the scene breath.
+            Box(
+                Modifier.drawBehind {
+                    val inflate = 10.dp.toPx()
+                    drawRoundRect(
+                        color = Color.White.copy(alpha = 0.08f + 0.16f * breathPulse),
+                        topLeft = Offset(-inflate, -inflate),
+                        size = Size(size.width + inflate * 2, size.height + inflate * 2),
+                        cornerRadius = CornerRadius((size.height + inflate * 2) / 2),
+                        style = Stroke(width = 1.5.dp.toPx()),
+                    )
+                },
             ) {
-                Text(
-                    timerText(timer),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
-                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp),
-                )
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = Color.White.copy(alpha = 0.16f),
+                ) {
+                    Text(
+                        timerText(timer),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp),
+                    )
+                }
             }
             Spacer(Modifier.weight(1f))
             Row(
@@ -362,7 +439,6 @@ private fun RingingScreen(
             }
             Spacer(Modifier.height(32.dp))
         }
-    }
 }
 
 /** Pill text for the resolved timer: "Step x of n · mm:ss left", "mm:ss left", or "mm:ss". */
@@ -391,6 +467,17 @@ private fun SessionCompleteContent(
     val minutes = ((ended.endedAtMillis - ended.startedAtMillis) / 60_000L)
         .toInt()
         .coerceAtLeast(1)
+    // The scene settles to still behind the complete state.
+    Box(Modifier.fillMaxSize()) {
+        SceneArt(
+            scene = rememberArtScene(),
+            phase = DayPhase.NIGHT,
+            animate = false,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .size(260.dp),
+        )
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -465,20 +552,8 @@ private fun SessionCompleteContent(
 
 /** Slow ambient animation clock shared by the backdrops. */
 @Composable
-private fun ambientClock(): Float {
-    val reduceMotion = rememberReduceMotion()
-    val transition = rememberInfiniteTransition(label = "ambient")
-    val t by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = if (reduceMotion) infiniteRepeatable(tween(0)) else infiniteRepeatable(
-            animation = tween(12000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
-        ),
-        label = "ambientT",
-    )
-    return t
-}
+private fun ambientClock(): Float =
+    rememberAmbientFloat(0f, 1f, MotionTokens.AmbientDriftMs, "ambientT").value
 
 /** Fixed-time: deep indigo night, drifting clouds, twinkling stars, crescent. */
 @Composable
@@ -549,17 +624,7 @@ private fun NightBackground() {
 /** Sunrise trigger: dawn gradient with a warm glow slowly rising. */
 @Composable
 private fun DawnBackground() {
-    val reduceMotion = rememberReduceMotion()
-    val transition = rememberInfiniteTransition(label = "dawn")
-    val rise by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = if (reduceMotion) infiniteRepeatable(tween(0)) else infiniteRepeatable(
-            animation = tween(9000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "dawnRise",
-    )
+    val rise by rememberAmbientFloat(0f, 1f, MotionTokens.AmbientDriftMs, "dawnRise")
     Box(
         Modifier
             .fillMaxSize()
@@ -594,17 +659,7 @@ private fun DawnBackground() {
 /** Sunset trigger: dusk gradient with a glow slowly sinking. */
 @Composable
 private fun DuskBackground() {
-    val reduceMotion = rememberReduceMotion()
-    val transition = rememberInfiniteTransition(label = "dusk")
-    val sink by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = if (reduceMotion) infiniteRepeatable(tween(0)) else infiniteRepeatable(
-            animation = tween(9000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "duskSink",
-    )
+    val sink by rememberAmbientFloat(0f, 1f, MotionTokens.AmbientDriftMs, "duskSink")
     Box(
         Modifier
             .fillMaxSize()

@@ -2,7 +2,7 @@ package com.chantingscheduler.app.ui
 
 import android.text.format.DateFormat
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.spring
+import com.chantingscheduler.app.ui.motion.MotionTokens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -255,7 +255,7 @@ private fun ArcDial(
                     scope.launch {
                         position.animateTo(
                             targetValue = position.value.roundToInt().toFloat(),
-                            animationSpec = spring(),
+                            animationSpec = MotionTokens.springSlide(),
                         )
                     }
                 },

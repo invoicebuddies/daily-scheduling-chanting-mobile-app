@@ -23,7 +23,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -98,6 +97,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import androidx.core.content.ContextCompat
 import com.chantingscheduler.app.BuildConfig
+import com.chantingscheduler.app.ui.motion.LocalMotion
+import com.chantingscheduler.app.ui.motion.MotionTokens
 import com.chantingscheduler.app.data.AppTheme
 import com.chantingscheduler.app.data.LatLng
 import com.chantingscheduler.app.data.PlaybackSettingsStore
@@ -420,11 +421,12 @@ private fun ThemeCard(
         } else {
             MaterialTheme.colorScheme.outlineVariant
         },
+        animationSpec = MotionTokens.enterTween(LocalMotion.current, MotionTokens.DurationShort),
         label = "themeCardBorder",
     )
     val scale by animateFloatAsState(
         targetValue = if (selected) 1.03f else 1f,
-        animationSpec = spring(),
+        animationSpec = MotionTokens.springToggle(),
         label = "themeCardScale",
     )
     Surface(
@@ -727,7 +729,8 @@ private fun ManualEntrySection(
 
     val chevronRotation by animateFloatAsState(
         targetValue = if (expanded) 180f else 0f,
-        label = "manualChevron",
+        animationSpec = MotionTokens.springToggle(),
+        label = "chevronRotation",
     )
     Column(Modifier.fillMaxWidth()) {
         Row(
@@ -764,11 +767,11 @@ private fun ManualEntrySection(
         AnimatedVisibility(
             visible = expanded,
             enter = expandVertically(
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-            ) + fadeIn(),
+                animationSpec = MotionTokens.springSlide(),
+            ) + fadeIn(MotionTokens.enterTween(LocalMotion.current, MotionTokens.DurationShort)),
             exit = shrinkVertically(
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-            ) + fadeOut(),
+                animationSpec = MotionTokens.springSlide(),
+            ) + fadeOut(MotionTokens.exitTween(LocalMotion.current)),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(

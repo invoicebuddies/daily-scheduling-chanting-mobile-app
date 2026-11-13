@@ -1,15 +1,20 @@
 package com.chantingscheduler.app.ui.motion
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -102,16 +107,28 @@ object MotionTokens {
     // region Specs by level
 
     /** Entrance tween for [level]; instant at OFF. */
-    fun <T> enterTween(level: MotionLevel, duration: Int = DurationMedium) =
-        if (level == MotionLevel.OFF) snap<T>() else tween<T>(duration, easing = EmphasizedDecelerate)
+    fun <T> enterTween(level: MotionLevel, duration: Int = DurationMedium, delay: Int = 0) =
+        if (level == MotionLevel.OFF) {
+            snap<T>()
+        } else {
+            tween<T>(durationMillis = duration, delayMillis = delay, easing = EmphasizedDecelerate)
+        }
 
     /** Exit tween for [level]; faster than its entrance; instant at OFF. */
-    fun <T> exitTween(level: MotionLevel, duration: Int = DurationShort) =
-        if (level == MotionLevel.OFF) snap<T>() else tween<T>(duration, easing = StandardAccelerate)
+    fun <T> exitTween(level: MotionLevel, duration: Int = DurationShort, delay: Int = 0) =
+        if (level == MotionLevel.OFF) {
+            snap<T>()
+        } else {
+            tween<T>(durationMillis = duration, delayMillis = delay, easing = StandardAccelerate)
+        }
 
     /** Short fade for Minimal-level UI transitions. */
-    fun <T> fadeTween(level: MotionLevel, duration: Int = DurationShort) =
-        if (level == MotionLevel.OFF) snap<T>() else tween<T>(duration, easing = EaseInOutSine)
+    fun <T> fadeTween(level: MotionLevel, duration: Int = DurationShort, delay: Int = 0) =
+        if (level == MotionLevel.OFF) {
+            snap<T>()
+        } else {
+            tween<T>(durationMillis = duration, delayMillis = delay, easing = EaseInOutSine)
+        }
 
     /** Ambient loop tween (only ever called at CALM). */
     fun <T> ambientTween(duration: Int, reverse: Boolean = true) =
@@ -204,7 +221,24 @@ fun trackAmbient(animate: Boolean, label: String = "ambient") {
 }
 
 /**
- * Pure breath-cycle math: maps loop progress (0..1) to a smooth 0..1 value
+ * One-shot count-up for stats numbers (600 ms), running only at CALM —
+ * Minimal/Off show the final value immediately.
+ */
+@Composable
+fun rememberCountUp(target: Int, durationMs: Int = MotionTokens.DurationCountUp): Int {
+    val level = LocalMotion.current
+    if (level != MotionLevel.CALM || target <= 0) return target
+    val animated = remember { Animatable(0f) }
+    LaunchedEffect(target) {
+        animated.animateTo(
+            targetValue = target.toFloat(),
+            animationSpec = tween(durationMillis = durationMs, easing = MotionTokens.EmphasizedDecelerate),
+        )
+    }
+    return animated.value.toInt()
+}
+
+/** Pure breath-cycle math: maps loop progress (0..1) to a smooth 0..1 value
  * that rises and falls like an inhale/exhale (raised-cosine). One
  * [MotionTokens.BreathCycleMs] loop = one full breath.
  */
@@ -213,4 +247,36 @@ object BreathCurve {
         val p = progress - progress.toInt()
         return 0.5 - 0.5 * kotlin.math.cos(2.0 * Math.PI * p)
     }
+}
+
+/**
+ * Ambient float for breathing/drift loops. Composes an infinite transition
+ * ONLY while ambient motion is allowed (CALM, foreground, not covered);
+ * otherwise it returns a static mid value and no transition exists at all,
+ * so Minimal/Off/background cost nothing and [MotionDebug] stays at zero.
+ */
+@Composable
+fun rememberAmbientFloat(
+    initialValue: Float,
+    targetValue: Float,
+    durationMs: Int,
+    label: String,
+): androidx.compose.runtime.State<Float> {
+    val animate = rememberAmbientActive()
+    val value: androidx.compose.runtime.State<Float> = if (animate) {
+        val transition = androidx.compose.animation.core.rememberInfiniteTransition(label = label)
+        transition.animateFloat(
+            initialValue = initialValue,
+            targetValue = targetValue,
+            animationSpec = androidx.compose.animation.core.infiniteRepeatable(
+                animation = MotionTokens.ambientTween(durationMs),
+                repeatMode = androidx.compose.animation.core.RepeatMode.Reverse,
+            ),
+            label = label,
+        )
+    } else {
+        remember { mutableStateOf((initialValue + targetValue) / 2f) }
+    }
+    trackAmbient(animate, label)
+    return value
 }

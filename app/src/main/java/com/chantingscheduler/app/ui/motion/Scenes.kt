@@ -18,10 +18,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.chantingscheduler.app.data.MotionStore
 import com.chantingscheduler.app.R
 import com.chantingscheduler.app.ui.MonkArt
 import com.chantingscheduler.app.ui.isDarkThemeActive
@@ -174,6 +177,14 @@ fun SceneArt(
             ArtScene.MONK -> Unit
         }
     }
+}
+
+/** The user's scene choice, as a composable-read flow (defaults to MONK). */
+@Composable
+fun rememberArtScene(): ArtScene {
+    val context = LocalContext.current
+    val stored by remember { MotionStore.get(context) }.scene.collectAsStateWithLifecycle()
+    return remember(stored) { ArtScene.fromStored(stored) }
 }
 
 /** Accessible description for a scene, in the current locale. */

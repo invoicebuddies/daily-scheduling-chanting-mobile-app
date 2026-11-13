@@ -1,7 +1,6 @@
 package com.chantingscheduler.app.ui.theme
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
@@ -164,10 +163,15 @@ private val AppShapes = Shapes(
  */
 @Composable
 private fun ColorScheme.withAnimatedColors(): ColorScheme {
+    val level = com.chantingscheduler.app.ui.motion.LocalMotion.current
+
     @Composable
     fun anim(color: Color): Color =
-        animateColorAsState(targetValue = color, animationSpec = tween(450), label = "themeColor")
-            .value
+        animateColorAsState(
+            targetValue = color,
+            animationSpec = com.chantingscheduler.app.ui.motion.MotionTokens.enterTween(level, 440),
+            label = "themeColor",
+        ).value
 
     return copy(
         primary = anim(primary),
