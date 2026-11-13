@@ -78,6 +78,7 @@ The app ships with built-in bell sounds, so it can ring before you've picked any
 - Light, dark, or follow-the-system theme
 - Calm onboarding you can replay any time
 - Home-screen widget with the next session and a play/stop button; Quick Settings tile for "chant now"
+- Choose your motion level (Calm / Minimal / Off) and your scene — a meditating monk, a lotus on still water, a temple at dawn, or soft abstract light
 - Backup & restore of schedules, journal notes, and history as a JSON file
 - English, 简体中文, Bahasa Melayu, ไทย, မြန်မာဘာသာ, සිංහල — see [TRANSLATIONS.md](TRANSLATIONS.md)
 - "Reduce motion" option for calmer screens

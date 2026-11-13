@@ -33,6 +33,15 @@ class VersionComparatorTest {
     }
 
     @Test
+    fun `v1_4_2 update chain`() {
+        // Users on 1.4 or a future 1.4.1 must both see v1.4.2 as newer.
+        assertTrue(VersionComparator.isNewer("v1.4.2", "1.4"))
+        assertTrue(VersionComparator.isNewer("v1.4.2", "1.4.1"))
+        assertFalse(VersionComparator.isNewer("v1.4.2", "1.4.2"))
+        assertFalse(VersionComparator.isNewer("v1.4", "1.4.2"))
+    }
+
+    @Test
     fun `v prefix handled`() {
         assertTrue(VersionComparator.isNewer("v2.0", "1.9"))
     }
