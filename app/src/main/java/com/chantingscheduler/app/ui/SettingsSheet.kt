@@ -285,37 +285,10 @@ fun SettingsSheet(
                 ) { DarkThemePreview() }
             }
 
-            // Reduced motion: stops breathing/pulsing ambient loops (the system
-            // animator scale being 0 forces the same behavior app-wide).
-            val motionStore = remember { com.chantingscheduler.app.data.MotionStore.get(context) }
-            var reduceMotion by remember { mutableStateOf(motionStore.reduceMotion.value) }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 14.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        stringResource(R.string.reduce_motion),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        stringResource(R.string.reduce_motion_body),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Switch(
-                    checked = reduceMotion,
-                    onCheckedChange = {
-                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        motionStore.setReduceMotion(it)
-                        reduceMotion = it
-                    },
-                )
-            }
+            // Motion level (Calm/Minimal/Off) and scene artwork, with live
+            // previews. Absorbs the old "Reduce motion" toggle: legacy values
+            // migrate to the Minimal level on first read.
+            MotionScenerySection()
 
             Spacer(Modifier.height(24.dp))
             SectionOverline(stringResource(R.string.location_section))

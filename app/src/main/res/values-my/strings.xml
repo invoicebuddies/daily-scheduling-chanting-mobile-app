@@ -282,6 +282,29 @@
     <string name="feedback_no_email_body">သင်၏စာသားကိုကူးပြီး %1$s သို့ အချိန်တိုင်ပို့ပါ။</string>
     <string name="feedback_copy">ကလစ်ဘုတ်သို့ကူးရန်</string>
 
+    <!-- Motion & scenery -->
+    <string name="motion_section">ရွေ့လျားမှုနှင့် ရှုခင်းများ</string>
+    <string name="motion_level_title">ရွေ့လျားမှု အဆင့်ပြား</string>
+    <string name="motion_calm">တည်ငြိမ်</string>
+    <string name="motion_minimal">အနည်းဆုံး</string>
+    <string name="motion_off">ပိတ်ပါ</string>
+    <string name="motion_calm_body">နူးညံ့သောသက်သက်လှုပ်ရှားမှုနှင့် လှပသောပြောင်းလဲမှုများ။</string>
+    <string name="motion_minimal_body">ရိုးရှင်းသောမှိန်တောင်းများသာ၊ အပူပိုင်းရွေ့လျားမှုမရှိပါ။</string>
+    <string name="motion_off_body">ရွေ့လျားမှုမရှိပါ၊ ပန်းချီများတည်ငြိမ်နေပါသည်။</string>
+    <string name="motion_system_forced_off">သင်၏ဖုန်းတွင် \"remove animations\" ဆက်တင်ဖွင့်ထားပါသည်။ သင်ပြောင်းလဲသည်အထိ ရွေ့လျားမှုများပိတ်ထားပါမည်။</string>
+    <string name="scene_title">ရှုခင်း</string>
+    <string name="scene_monk">ရဟန်း</string>
+    <string name="scene_lotus">ပဒုမ္မာကြာ</string>
+    <string name="scene_temple">ဘုရားကျောင်းနေထွက်ချိန်</string>
+    <string name="scene_abstract">ယုတ္တိအလင်း</string>
+    <string name="scene_desc_monk">တစ်ယောက်တစ်ယောက်ဗုန်း နေတဲ့ရဟန်း</string>
+    <string name="scene_desc_lotus">ရေပြင်ငြိမ်မှာ ပွင့်လင်းတိုးနေတဲ့ပဒုမ္မာကြာပန်း</string>
+    <string name="scene_desc_temple">နေထွက်ချိန် ကုန်းတန်းများပေါ်၌ ဘုရားကျောင်းတည်ဆောက်ပုံအရိပ်</string>
+    <string name="scene_desc_abstract">နူးညံ့တဲ့အလင်းဝိုင်းများ ဖြည်းညင်းစွာရွေ့လျားသွားခြင်း</string>
+
+    <string name="state_selected">ရွေးချယ်ပြီး</string>
+    <string name="state_not_selected">မရွေးရသေး</string>
+
     <!-- Widget / tile -->
     <string name="widget_description">နောက်ထပ်ပရိတ်အချိန်နဲ့ ဖွင့်/ရပ်ခလုပ်</string>
     <string name="widget_no_session">လာမယ့်ပရိတ်မရှိပါ</string>

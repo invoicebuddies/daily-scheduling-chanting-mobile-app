@@ -1,23 +1,22 @@
 package com.chantingscheduler.app.ui
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
+import com.chantingscheduler.app.ui.motion.MotionTokens
+import com.chantingscheduler.app.ui.motion.trackAmbient
 
 private val RobeSaffron = Color(0xFFE8963C)
 private val RobeDark = Color(0xFFC97B2A)
@@ -33,27 +32,37 @@ private val ArcAmber = Color(0xFFFFD9A0)
  */
 @Composable
 fun MonkArt(modifier: Modifier = Modifier, animate: Boolean = true) {
-    val transition = rememberInfiniteTransition(label = "monk")
-    val breath by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2600, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "monkBreath",
-    )
-    val pulse by transition.animateFloat(
-        initialValue = 0.25f,
-        targetValue = 0.95f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1800, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "monkPulse",
-    )
-    val b = if (animate) breath else 0.5f
-    val arcAlpha = if (animate) pulse else 0.6f
+    val breath: Float
+    val pulse: Float
+    if (animate) {
+        val transition = rememberInfiniteTransition(label = "monk")
+        val b by transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = MotionTokens.ambientTween(MotionTokens.BreathCycleMs),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "monkBreath",
+        )
+        val p by transition.animateFloat(
+            initialValue = 0.25f,
+            targetValue = 0.95f,
+            animationSpec = infiniteRepeatable(
+                animation = MotionTokens.ambientTween(MotionTokens.AmbientPulseMs),
+                repeatMode = RepeatMode.Reverse,
+            ),
+            label = "monkPulse",
+        )
+        breath = b
+        pulse = p
+    } else {
+        breath = 0.5f
+        pulse = 0.6f
+    }
+    trackAmbient(animate, label = "monk")
+    val b = breath
+    val arcAlpha = pulse
 
     Canvas(modifier) {
         val w = size.width

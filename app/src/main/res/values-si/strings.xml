@@ -282,6 +282,29 @@
     <string name="feedback_no_email_body">ඔබේ පණිවිඩය පිටපත් කර, කැමති ආකාරයකින් %1$s වෙත යවන්න.</string>
     <string name="feedback_copy">පසුරුපුවරුවට පිටපත් කරන්න</string>
 
+    <!-- Motion & scenery -->
+    <string name="motion_section">චලනය සහ දර්ශන</string>
+    <string name="motion_level_title">චලන මට්ටම</string>
+    <string name="motion_calm">සන්සුන්</string>
+    <string name="motion_minimal">අවම</string>
+    <string name="motion_off">අක්‍රිය</string>
+    <string name="motion_calm_body">මෘදු හුස්ම ගැනීම සහ මසුරු සංක්‍රමණ.</string>
+    <string name="motion_minimal_body">සරල මැඳපෙනීම් පමණි, පරිසර චලන නොමැත.</string>
+    <string name="motion_off_body">චලන නොමැත; කලාකෘති ස්ථාවරයි.</string>
+    <string name="motion_system_forced_off">ඔබේ දුරකථනයේ \"remove animations\" සැකසුම ඔබා ඇත. ඔබ එය වෙනස් කරන තෙක් චලන අක්‍රිය වේ.</string>
+    <string name="scene_title">දර්ශනය</string>
+    <string name="scene_monk">භික්ෂුව</string>
+    <string name="scene_lotus">නෙළුම් මල</string>
+    <string name="scene_temple">විහාරයේ අලුයම</string>
+    <string name="scene_abstract">මෘදු ආලෝකය</string>
+    <string name="scene_desc_monk">භාවනාවේ යෙදුණු තරුණ භික්ෂුවක්</string>
+    <string name="scene_desc_lotus">නිශ්චල ජලය මත මෘදුව විවෘත වන නෙළුම් මලක්</string>
+    <string name="scene_desc_temple">අලුයම් වේලාවෙන් කඳු අතර විහාර සිලුවේට් එකක්</string>
+    <string name="scene_desc_abstract">හෙමින් ගලායන මෘදු ආලෝක වෘත්ත</string>
+
+    <string name="state_selected">තෝරා ඇත</string>
+    <string name="state_not_selected">තෝරා නැත</string>
+
     <!-- Widget / tile -->
     <string name="widget_description">මීළඟ සැසිය සහ වාදන/නවතන බොත්තම</string>
     <string name="widget_no_session">ඉදිරි සැසි නැත</string>

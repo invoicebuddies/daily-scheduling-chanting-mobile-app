@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -145,6 +146,25 @@ class MainActivity : ComponentActivity() {
         val onboardingSeen by viewModel.onboardingSeen.collectAsStateWithLifecycle()
         val missedChantCard by viewModel.missedChantCard.collectAsStateWithLifecycle()
 
+        // Effective motion level: the user's choice, capped by the system
+        // animator scale (0 = "remove animations" forces Off). Provided once
+        // for the whole tree via LocalMotion.
+        val motionStore = remember { com.chantingscheduler.app.data.MotionStore.get(activity) }
+        val storedMotionLevel by motionStore.motionLevel.collectAsStateWithLifecycle()
+        val animatorScale = remember {
+            runCatching {
+                Settings.Global.getFloat(
+                    activity.contentResolver,
+                    Settings.Global.ANIMATOR_DURATION_SCALE,
+                    1f,
+                )
+            }.getOrDefault(1f)
+        }
+        val motionLevel = com.chantingscheduler.app.ui.motion.MotionPolicy.effectiveLevel(
+            com.chantingscheduler.app.ui.motion.MotionPolicy.levelFromStored(storedMotionLevel),
+            animatorScale,
+        )
+
         val scope = rememberCoroutineScope()
         var backupMessage by remember { mutableStateOf<String?>(null) }
         val exportLauncher = rememberLauncherForActivityResult(
@@ -229,6 +249,10 @@ class MainActivity : ComponentActivity() {
             )
         }
 
+        CompositionLocalProvider(
+            com.chantingscheduler.app.ui.motion.LocalMotion provides motionLevel,
+            com.chantingscheduler.app.ui.motion.LocalAmbientPaused provides showSettings,
+        ) {
         AnimatedContent(
             targetState = screen,
             transitionSpec = {
@@ -395,6 +419,7 @@ class MainActivity : ComponentActivity() {
                 viewModel.markOnboardingSeen()
                 replayOnboarding = false
             })
+        }
         }
     }
 

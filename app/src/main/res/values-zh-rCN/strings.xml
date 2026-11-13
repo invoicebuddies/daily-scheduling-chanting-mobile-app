@@ -282,6 +282,29 @@
     <string name="feedback_no_email_body">请复制您的留言，并通过任何方式发送至 %1$s。</string>
     <string name="feedback_copy">复制到剪贴板</string>
 
+    <!-- Motion & scenery -->
+    <string name="motion_section">动画与景色</string>
+    <string name="motion_level_title">动画级别</string>
+    <string name="motion_calm">舒缓</string>
+    <string name="motion_minimal">简约</string>
+    <string name="motion_off">关闭</string>
+    <string name="motion_calm_body">柔和的呼吸动画与平滑过渡。</string>
+    <string name="motion_minimal_body">仅使用简单的淡入淡出，无环境动画。</string>
+    <string name="motion_off_body">无动画；插画保持静止。</string>
+    <string name="motion_system_forced_off">您手机的“移除动画”设置已开启。在更改该设置之前，动画将保持关闭。</string>
+    <string name="scene_title">景色</string>
+    <string name="scene_monk">小僧</string>
+    <string name="scene_lotus">莲花</string>
+    <string name="scene_temple">寺院黎明</string>
+    <string name="scene_abstract">抽象之光</string>
+    <string name="scene_desc_monk">一位正在冥想的小僧人</string>
+    <string name="scene_desc_lotus">一朵莲花在平静的水面上缓缓绽放</string>
+    <string name="scene_desc_temple">黎明时分山丘间的寺院剪影</string>
+    <string name="scene_desc_abstract">柔和的光圈缓缓飘动</string>
+
+    <string name="state_selected">已选中</string>
+    <string name="state_not_selected">未选中</string>
+
     <!-- Widget / tile -->
     <string name="widget_description">显示下一节念诵并可直接播放/停止</string>
     <string name="widget_no_session">暂无即将开始的念诵</string>

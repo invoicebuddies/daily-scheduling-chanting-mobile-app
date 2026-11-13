@@ -282,6 +282,29 @@
     <string name="feedback_no_email_body">Copy your message and send it to %1$s any way you like.</string>
     <string name="feedback_copy">Copy to clipboard</string>
 
+    <!-- Motion & scenery -->
+    <string name="motion_section">Motion &amp; scenery</string>
+    <string name="motion_level_title">Motion level</string>
+    <string name="motion_calm">Calm</string>
+    <string name="motion_minimal">Minimal</string>
+    <string name="motion_off">Off</string>
+    <string name="motion_calm_body">Gentle breathing and smooth transitions.</string>
+    <string name="motion_minimal_body">Simple fades only, no ambient motion.</string>
+    <string name="motion_off_body">No animation; artwork stays still.</string>
+    <string name="motion_system_forced_off">Your phone\'s \"remove animations\" setting is on. Animation stays off until you change it.</string>
+    <string name="scene_title">Scene</string>
+    <string name="scene_monk">Monk</string>
+    <string name="scene_lotus">Lotus</string>
+    <string name="scene_temple">Temple dawn</string>
+    <string name="scene_abstract">Abstract light</string>
+    <string name="scene_desc_monk">A young monk sitting in meditation</string>
+    <string name="scene_desc_lotus">A lotus flower opening gently on still water</string>
+    <string name="scene_desc_temple">A temple silhouette among hills at dawn</string>
+    <string name="scene_desc_abstract">Soft circles of light drifting</string>
+
+    <string name="state_selected">Selected</string>
+    <string name="state_not_selected">Not selected</string>
+
     <!-- Widget / tile -->
     <string name="widget_description">Next chanting session with a play/stop toggle</string>
     <string name="widget_no_session">No upcoming session</string>

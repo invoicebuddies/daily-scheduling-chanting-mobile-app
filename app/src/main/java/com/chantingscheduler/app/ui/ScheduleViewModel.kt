@@ -93,35 +93,43 @@ class ScheduleViewModel @Inject constructor(
     val missedChantCard: StateFlow<MissedChantCard?> = _missedChantCard
 
     init {
+        // Collect, don't one-shot read: rearmAll in the Application runs
+        // detection asynchronously at process start, so the pending set may
+        // fill a moment after this ViewModel is created. Collecting the flow
+        // shows the card on the first app open after a miss.
         viewModelScope.launch {
-            val store = AlarmLedgerStore.get(appContext)
-            val missed = store.missedChants()
-            if (missed.isEmpty()) return@launch
-            val labels = repository.getEnabled()
-                .associate { it.schedule.id to it.schedule.label }
-            // Misses whose schedule vanished (deleted, or disabled since)
-            // get no card; if nothing remains the pending list is stale too.
-            val visible = missed.filter { it.scheduleId in labels }
-            if (visible.isEmpty()) {
-                store.clearMissed()
-                return@launch
-            }
-            _missedChantCard.value = if (visible.size == 1) {
-                val entry = visible.first()
-                val zone = java.time.ZoneId.systemDefault()
-                val zdt = java.time.Instant.ofEpochMilli(entry.expectedAtMs).atZone(zone)
-                MissedChantCard(
-                    time = android.text.format.DateFormat.getTimeFormat(appContext)
-                        .format(java.util.Date(entry.expectedAtMs)),
-                    weekday = zdt.dayOfWeek.getDisplayName(
-                        java.time.format.TextStyle.SHORT,
-                        java.util.Locale.getDefault(),
-                    ),
-                    label = labels[entry.scheduleId].orEmpty(),
-                    count = 1,
-                )
-            } else {
-                MissedChantCard(time = "", weekday = "", label = "", count = visible.size)
+            AlarmLedgerStore.get(appContext).missed.collect { missed ->
+                if (missed.isEmpty()) {
+                    if (_missedChantCard.value != null) _missedChantCard.value = null
+                    return@collect
+                }
+                val labels = repository.getEnabled()
+                    .associate { it.schedule.id to it.schedule.label }
+                // Misses whose schedule vanished (deleted, or disabled since)
+                // get no card; if nothing remains the pending list is stale.
+                val visible = missed.filter { it.scheduleId in labels }
+                if (visible.isEmpty()) {
+                    AlarmLedgerStore.get(appContext).clearMissed()
+                    _missedChantCard.value = null
+                    return@collect
+                }
+                _missedChantCard.value = if (visible.size == 1) {
+                    val entry = visible.first()
+                    val zone = java.time.ZoneId.systemDefault()
+                    val zdt = java.time.Instant.ofEpochMilli(entry.expectedAtMs).atZone(zone)
+                    MissedChantCard(
+                        time = android.text.format.DateFormat.getTimeFormat(appContext)
+                            .format(java.util.Date(entry.expectedAtMs)),
+                        weekday = zdt.dayOfWeek.getDisplayName(
+                            java.time.format.TextStyle.SHORT,
+                            java.util.Locale.getDefault(),
+                        ),
+                        label = labels[entry.scheduleId].orEmpty(),
+                        count = 1,
+                    )
+                } else {
+                    MissedChantCard(time = "", weekday = "", label = "", count = visible.size)
+                }
             }
         }
     }

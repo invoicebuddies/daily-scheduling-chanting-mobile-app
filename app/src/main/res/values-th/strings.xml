@@ -282,6 +282,29 @@
     <string name="feedback_no_email_body">คัดลอกข้อความของคุณและส่งไปที่ %1$s ด้วยวิธีใดก็ได้</string>
     <string name="feedback_copy">คัดลอกไปยังคลิปบอร์ด</string>
 
+    <!-- Motion & scenery -->
+    <string name="motion_section">การเคลื่อนไหวและฉาก</string>
+    <string name="motion_level_title">ระดับการเคลื่อนไหว</string>
+    <string name="motion_calm">สงบ</string>
+    <string name="motion_minimal">น้อยที่สุด</string>
+    <string name="motion_off">ปิด</string>
+    <string name="motion_calm_body">การหายใจอย่างนุ่มนวลและการเปลี่ยนผ่านที่ลื่นไหล</string>
+    <string name="motion_minimal_body">เพียงการเฟดแบบเรียบง่าย ไม่มีภาพเคลื่อนไหวรอบตัว</string>
+    <string name="motion_off_body">ไม่มีภาพเคลื่อนไหว ภาพอยู่นิ่ง</string>
+    <string name="motion_system_forced_off">การตั้งค่า \"ปิดภาพเคลื่อนไหว\" ของโทรศัพท์เปิดอยู่ ภาพเคลื่อนไหวจะปิดจนกว่าคุณจะเปลี่ยนการตั้งค่า</string>
+    <string name="scene_title">ฉาก</string>
+    <string name="scene_monk">พระสงฆ์</string>
+    <string name="scene_lotus">ดอกบัว</string>
+    <string name="scene_temple">วัดยามรุ่งอรุณ</string>
+    <string name="scene_abstract">แสงนามธรรม</string>
+    <string name="scene_desc_monk">พระสงฆ์รูปหนึ่งนั่งสมาธิ</string>
+    <string name="scene_desc_lotus">ดอกบัวค่อยๆ บานบนผิวน้ำที่นิ่งสงบ</string>
+    <string name="scene_desc_temple">เงาวัดท่ามกลางเนินเขายามรุ่งอรุณ</string>
+    <string name="scene_desc_abstract">วงแสงอ่อนๆ ลอยไหลช้าๆ</string>
+
+    <string name="state_selected">เลือกแล้ว</string>
+    <string name="state_not_selected">ยังไม่ได้เลือก</string>
+
     <!-- Widget / tile -->
     <string name="widget_description">การสวดครั้งถัดไปพร้อมปุ่มเล่น/หยุด</string>
     <string name="widget_no_session">ไม่มีการสวดที่จะมาถึง</string>

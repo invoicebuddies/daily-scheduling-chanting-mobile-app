@@ -2,6 +2,9 @@ package com.chantingscheduler.app.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * Honest record of what the alarm system promised vs what it delivered.
@@ -60,21 +63,32 @@ class AlarmLedgerStore private constructor(context: Context) {
             .apply()
     }
 
-    // region Reported misses (pending their one-time card on the list screen)
+    // Reported misses (pending card), stored as "id:expectedAt" strings.
+    private val _missed = MutableStateFlow(readMissed())
+
+    /** Pending misses, always current — collectors see them the moment
+     * detection lands, without waiting for the next app open. */
+    val missed: StateFlow<Set<MissedChant>> = _missed.asStateFlow()
 
     /** Adds misses to the pending list (idempotent per schedule+expectedAt). */
     fun addMissed(misses: List<MissedChant>) {
         if (misses.isEmpty()) return
-        val current = missedChants().toMutableSet()
+        val current = _missed.value.toMutableSet()
         current.addAll(misses)
-        prefs.edit().putStringSet(
-            KEY_MISSED,
-            current.map { "${it.scheduleId}$MISSED_SEPARATOR${it.expectedAtMs}" }.toSet(),
-        ).apply()
+        _missed.value = current
+        persistMissed(current)
     }
 
-    /** Misses awaiting their one-time card; survives until the user dismisses. */
-    fun missedChants(): Set<MissedChant> =
+    /** The misses awaiting their one-time card; survives until dismissed. */
+    fun missedChants(): Set<MissedChant> = _missed.value
+
+    /** The user saw the card (or the schedules are gone): nothing pending. */
+    fun clearMissed() {
+        _missed.value = emptySet()
+        prefs.edit().remove(KEY_MISSED).apply()
+    }
+
+    private fun readMissed(): Set<MissedChant> =
         prefs.getStringSet(KEY_MISSED, emptySet()).orEmpty().mapNotNull { encoded ->
             val parts = encoded.split(MISSED_SEPARATOR)
             val id = parts.getOrNull(0)?.toLongOrNull()
@@ -82,9 +96,11 @@ class AlarmLedgerStore private constructor(context: Context) {
             if (id != null && at != null) MissedChant(id, at) else null
         }.toSet()
 
-    /** The user saw the card (or the schedules are gone): nothing pending. */
-    fun clearMissed() {
-        prefs.edit().remove(KEY_MISSED).apply()
+    private fun persistMissed(misses: Set<MissedChant>) {
+        prefs.edit().putStringSet(
+            KEY_MISSED,
+            misses.map { "${it.scheduleId}$MISSED_SEPARATOR${it.expectedAtMs}" }.toSet(),
+        ).apply()
     }
 
     // endregion

@@ -282,6 +282,29 @@
     <string name="feedback_no_email_body">Salin mesej anda dan hantarkannya kepada %1$s dengan cara apa sahaja.</string>
     <string name="feedback_copy">Salin ke papan keratan</string>
 
+    <!-- Motion & scenery -->
+    <string name="motion_section">Gerakan &amp; pemandangan</string>
+    <string name="motion_level_title">Tahap gerakan</string>
+    <string name="motion_calm">Tenang</string>
+    <string name="motion_minimal">Minimum</string>
+    <string name="motion_off">Mati</string>
+    <string name="motion_calm_body">Pernafasan lembut dan peralihan licin.</string>
+    <string name="motion_minimal_body">Lenyap perlahan sahaja, tiada gerakan ambien.</string>
+    <string name="motion_off_body">Tiada animasi; seni kekal statik.</string>
+    <string name="motion_system_forced_off">Tetapan \"buang animasi\" telefon anda aktif. Animasi kekal mati sehingga anda menukarnya.</string>
+    <string name="scene_title">Pemandangan</string>
+    <string name="scene_monk">Biksu</string>
+    <string name="scene_lotus">Teratai</string>
+    <string name="scene_temple">Fajar kuil</string>
+    <string name="scene_abstract">Cahaya abstrak</string>
+    <string name="scene_desc_monk">Seorang biksu muda sedang bermeditasi</string>
+    <string name="scene_desc_lotus">Bunga teratai terbuka lembut di atas air yang tenang</string>
+    <string name="scene_desc_temple">Latar kuil di antara bukit pada waktu fajar</string>
+    <string name="scene_desc_abstract">Lingkaran cahaya lembut yang hanyut perlahan</string>
+
+    <string name="state_selected">Dipilih</string>
+    <string name="state_not_selected">Tidak dipilih</string>
+
     <!-- Widget / tile -->
     <string name="widget_description">Sesi lantunan seterusnya dengan butang main/berhenti</string>
     <string name="widget_no_session">Tiada sesi akan datang</string>
