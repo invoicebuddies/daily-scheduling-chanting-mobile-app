@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -169,9 +169,13 @@ fun SceneArt(
         MonkArt(modifier.then(semantics), animate = animate)
         return
     }
+    // Lotus petals keep their own hue (a soft pink) so they read on any
+    // backdrop; everything else tints from the phase palette.
+    val petal = if (isDarkThemeActive()) Color(0xFFF2B8CC) else Color(0xFFE79FBE)
+    val petalDeep = if (isDarkThemeActive()) Color(0xFFE79FBE) else Color(0xFFD983A8)
     Canvas(modifier.then(semantics)) {
         when (scene) {
-            ArtScene.LOTUS -> drawLotus(lotus, palette, breath, drift)
+            ArtScene.LOTUS -> drawLotus(lotus, palette, petal, petalDeep, breath, drift)
             ArtScene.TEMPLE -> drawTemple(temple, palette, phase, breath, drift)
             ArtScene.ABSTRACT -> drawOrbs(palette, breath, drift)
             ArtScene.MONK -> Unit
@@ -231,13 +235,15 @@ private class LotusPaths {
 private fun DrawScope.drawLotus(
     paths: LotusPaths,
     palette: ScenePalette,
+    petal: Color,
+    petalDeep: Color,
     breath: Float,
     drift: Float,
 ) {
     val ink = palette.ink
     // Water band.
     drawRect(
-        palette.soft.copy(alpha = 0.22f),
+        palette.soft.copy(alpha = 0.30f),
         topLeft = Offset(0f, 0.72f * size.height),
         size = Size(size.width, size.height * 0.28f),
     )
@@ -261,17 +267,16 @@ private fun DrawScope.drawLotus(
         topLeft = Offset(size.width * 0.42f, size.height * 0.70f),
         size = Size(size.width * 0.16f, size.height * 0.03f),
     )
-    withTransform({
-        scale(size.width, size.height)
-        val openness = 1f + (breath - 0.5f) * 0.10f
-        scale(openness, openness, pivot = Offset(0.5f, 0.66f))
-    }) {
+    // Unit-space paths: origin-pivot scale maps 0..1 onto the canvas. The
+    // vertical scale is the breath: petals close slightly on the inhale.
+    val open = 1f - (breath - 0.5f) * 0.08f
+    scale(size.width, size.height * open, pivot = Offset.Zero) {
         drawPath(paths.leaf, ink.copy(alpha = 0.5f))
-        drawPath(paths.petalLeft, palette.soft)
-        drawPath(paths.petalRight, palette.soft)
-        drawPath(paths.petal, palette.accent)
+        drawPath(paths.petalLeft, petalDeep)
+        drawPath(paths.petalRight, petalDeep)
+        drawPath(paths.petal, petal)
         // Bud heart.
-        drawCircle(palette.accent, radius = 0.016f, center = Offset(0.5f, 0.62f))
+        drawCircle(petalDeep, radius = 0.016f, center = Offset(0.5f, 0.62f))
     }
 }
 
@@ -351,7 +356,7 @@ private fun DrawScope.drawTemple(
             drawCircle(star, radius = size.width * 0.006f, center = Offset(p.x * size.width, p.y * size.height))
         }
     }
-    withTransform({ scale(size.width, size.height) }) {
+    scale(size.width, size.height, pivot = Offset.Zero) {
         drawPath(paths.hillsFar, palette.ink.copy(alpha = 0.55f))
         drawPath(paths.stupa, palette.ink)
         drawPath(paths.hillsNear, palette.ink.copy(alpha = 0.85f))
