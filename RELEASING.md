@@ -10,20 +10,41 @@ safety nets that keep a broken release from shipping.
 1. **Bump the version** in `app/build.gradle.kts`:
    `versionCode = N+1`, `versionName = "X.Y"` (or `"X.Y.Z"`).
 2. **Commit** the version bump (plus any last changes) to `main`.
-3. **Tag** exactly `vX.Y` matching `versionName` — the workflow fails otherwise:
+3. **Verify (mandatory — no record, no release):**
+   1. Build the release APK (`./gradlew test lintDebug assembleRelease`).
+   2. Run `scripts/verify-release.sh app/build/outputs/release-named/ChantingBuddy-vX.Y-universal.apk vX.Y` —
+      it verifies the cert, installs on the connected emulator, measures
+      gfxinfo (Janky %, 90th percentile, total frames), and pre-fills
+      `docs/verification/vX.Y.md` (sections A + B).
+      Always **cold-boot the emulator first** — an emulator up for hours
+      accumulates surfaceflinger work and measures falsely janky.
+   3. Complete the manual regression rows R1–R16 and fill section E
+      ("Not tested") in the verification record. Every row must be ✅.
+   4. Produce the screenshot matrix in `docs/screenshots/vX.Y.Z/`
+      (16 scene shots `scene-<scene>-<day|night>-<light|dark>.png`,
+      6 locale shots, `settings-motion-section.png`). On a rooted emulator,
+      force day/night with `adb shell date` and themes with
+      `adb shell cmd uimode night yes|no`.
+   5. Commit `docs/verification/vX.Y.Z.md` and the screenshots.
+   The first step of the Release workflow (`scripts/check-verification.sh`)
+   **refuses to build without a complete record** — any unchecked box,
+   TODO, non-yes sign-off, over-budget jank number, or missing screenshot
+   fails the job with "Release blocked: verification record incomplete".
+4. **Tag** exactly `vX.Y` matching `versionName` — the workflow fails otherwise:
    `git tag -a vX.Y -m "Chanting Buddy vX.Y"`.
-4. **Push the tag**: `git push origin vX.Y`. This fires the Release workflow.
-5. **Wait for the Release workflow** to go green
-   (Actions → Release). It runs tests, builds, and verifies signatures.
-6. **Spot-verify one APK** from the draft: download it and run
+5. **Push the tag**: `git push origin vX.Y`. This fires the Release workflow.
+6. **Wait for the Release workflow** to go green
+   (Actions → Release). The verification gate runs first, then tests,
+   builds, and signature verification.
+7. **Spot-verify one APK** from the draft: download it and run
    `apksigner verify --print-certs <apk>`; the SHA-256 must be
    `e11a9c95ae12f5932295e68986389be64793e2a9719dccce1a77e8e36dcc23ab`
    (also enforced automatically against `EXPECTED_CERT_SHA256`).
-7. **Install it over the previous version** on a phone or emulator
+8. **Install it over the previous version** on a phone or emulator
    (`adb install -r`): the upgrade must succeed and existing schedules/history
    must still be there.
-8. **Publish the draft** on the GitHub releases page (edit the generated notes
-   first — see previous releases for the style).
+9. **Publish the draft** on the GitHub releases page (edit the generated notes
+   first — see previous releases for the style; link the verification record).
 
 ## Safety nets (enforced by `.github/workflows/release.yml`)
 
