@@ -432,7 +432,18 @@ private fun MissedChantBanner(
     // Enter slides down; dismiss slides back up and only then unloads.
     val level = LocalMotion.current
     val visibility = remember { MutableTransitionState(false) }
+    // The dismiss callback may only fire after the card was actually shown:
+    // a fresh transition state is already "idle and not current", so gating
+    // on that alone would dismiss the card in its very first frame.
+    val becameVisible = remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visibility.targetState = true }
+    LaunchedEffect(visibility.isIdle, visibility.currentState) {
+        if (visibility.isIdle && visibility.currentState) {
+            becameVisible.value = true
+        } else if (becameVisible.value && visibility.isIdle && !visibility.currentState) {
+            onDismiss()
+        }
+    }
     AnimatedVisibility(
         visibleState = visibility,
         enter = slideInVertically(MotionTokens.enterTween(level, MotionTokens.DurationMedium)) { -it / 2 } +
@@ -445,9 +456,6 @@ private fun MissedChantBanner(
             onFixReliability = onFixReliability,
             onDismiss = { visibility.targetState = false },
         )
-    }
-    if (visibility.isIdle && !visibility.currentState) {
-        LaunchedEffect(Unit) { onDismiss() }
     }
 }
 
