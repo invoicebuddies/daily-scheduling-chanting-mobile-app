@@ -96,4 +96,14 @@ object PlaybackState {
         _state.value = NowPlaying()
         _endedSession.value = null
     }
+
+    /**
+     * Service teardown reset. Unlike [clear] it keeps a just-published
+     * [EndedSession]: onDestroy races the async publish in logSession, and
+     * wiping here would swallow the ringing page's complete state. A new
+     * session's [update] still supersedes it.
+     */
+    fun clearPlaying() {
+        _state.value = NowPlaying()
+    }
 }

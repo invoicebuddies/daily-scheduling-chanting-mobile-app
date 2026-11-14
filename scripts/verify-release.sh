@@ -68,6 +68,14 @@ echo ">> installed"
 
 "$ADB" shell am start -n "$PKG/.MainActivity" >/dev/null 2>&1 || true
 sleep 5
+# Settle first-run dialogs (no-ops when absent): notifications allow,
+# onboarding Skip, exact-alarm Later. Coordinates are layout-stable.
+"$ADB" shell input tap 540 1313 >/dev/null 2>&1 || true   # Allow notifications
+sleep 1
+"$ADB" shell input tap 983 213 >/dev/null 2>&1 || true    # Skip onboarding
+sleep 2
+"$ADB" shell input tap 505 1396 >/dev/null 2>&1 || true   # Later (exact alarms)
+sleep 1
 
 # -- 3. Smoothness (Calm assumed: default level) --------------------------------
 # Warm up first: shader compilation and first composition dominate any reset

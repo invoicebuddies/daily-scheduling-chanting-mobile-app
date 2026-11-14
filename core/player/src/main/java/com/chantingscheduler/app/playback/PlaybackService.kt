@@ -946,7 +946,11 @@ class PlaybackService : MediaSessionService() {
         }
         mediaSession = null
         player = null
-        PlaybackState.clear()
+        // clearPlaying, not clear: a session that just self-ended has its
+        // EndedSession published asynchronously from logSession, and wiping it
+        // here would swallow the ringing page's complete state (the page then
+        // sat stuck on a live timer). See PlaybackState.clearPlaying.
+        PlaybackState.clearPlaying()
         super.onDestroy()
         runCatching {
             NotificationManagerCompat.from(this).cancel(NOTIFICATION_ID)
