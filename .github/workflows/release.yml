@@ -44,6 +44,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Verification record gate
+        # No record, no release: the tag must ship with a complete
+        # docs/verification/vX.Y.Z.md and the full screenshot matrix.
+        run: bash scripts/check-verification.sh "$GITHUB_REF_NAME"
+
       - name: Verify tag matches versionName
         run: |
           # Tags ending in -test exercise the pipeline without a version bump;
@@ -111,11 +116,6 @@ jobs:
             exit 1
           fi
           echo "Keystore certificate verified: $actual"
-
-      - name: Verification record gate
-        # No record, no release: the tag must ship with a complete
-        # docs/verification/vX.Y.Z.md and the full screenshot matrix.
-        run: bash scripts/check-verification.sh "$GITHUB_REF_NAME"
 
       - name: Test and build release APKs
         run: ./gradlew test assembleRelease
