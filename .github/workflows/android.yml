@@ -23,6 +23,16 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Motion-token discipline (no stray animation specs)
+        # Every animation must use ui/motion/ tokens. Fail the build if a
+        # tween()/spring() literal appears outside ui/motion/.
+        run: |
+          if grep -RnE 'tween\(|spring\(' app/src/main/java core --include='*.kt' | grep -v 'ui/motion/'; then
+            echo "::error::tween()/spring() literal found outside ui/motion/ — use MotionTokens instead."
+            exit 1
+          fi
+          echo "motion-token check passed"
+
       - name: Run tests, lint, and debug build
         run: ./gradlew test lintDebug assembleDebug
 

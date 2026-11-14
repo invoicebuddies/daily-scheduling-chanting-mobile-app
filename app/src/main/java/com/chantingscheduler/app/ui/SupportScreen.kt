@@ -480,7 +480,7 @@ private fun CoffeeIconWithSteam() {
     var wispVisible by remember { mutableStateOf(level == MotionLevel.CALM) }
     if (level == MotionLevel.CALM) {
         LaunchedEffect(Unit) {
-            steam.animateTo(1f, tween(2400, easing = MotionTokens.EaseInOutSine))
+            steam.animateTo(1f, MotionTokens.ambientTween(MotionTokens.SteamWispMs))
             wispVisible = false
         }
     }

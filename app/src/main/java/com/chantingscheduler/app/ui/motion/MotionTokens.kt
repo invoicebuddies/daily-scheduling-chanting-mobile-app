@@ -66,6 +66,9 @@ object MotionTokens {
     /** Ringing-page breath cycle (one full inhale+exhale). */
     const val BreathCycleMs = 5500
 
+    /** One-time steam wisp on the Support page coffee icon (never loops). */
+    const val SteamWispMs = 2400
+
     /** Ambient loop lengths (breath, light drift, pulses). */
     const val AmbientDriftMs = 7000
     const val AmbientPulseMs = 4000
