@@ -40,22 +40,22 @@ Every row must be ✅. Any ❌ blocks the release until fixed and re-passed.
 
 | # | Check | How | Result | Evidence |
 |---|---|---|---|---|
-| R1 | Alarm fires 2 min ahead, locked screen | `dumpsys alarm` shows `Alarm clock:` + `window=0`; FGS starts; audio `usage=USAGE_ALARM` | | |
-| R2 | Ringing page full-screen on lock | screenshot | | |
-| R3 | Timer pill: playlist elapsed / auto-stop countdown / routine "Step x of n" | three screenshots | | |
-| R4 | "Session complete" → note saved → auto-closes after 60 s | screenshot + note visible in Stats history | | |
-| R5 | Snooze arms +10 min | `dumpsys alarm` + `snooze_<id>` pref | | |
-| R6 | Routine with silence-first step completes, no "missed chant" | log | | |
-| R7 | Per-schedule volume 25% vs 100% | `dumpsys audio` stream volume / player volume log | | |
-| R8 | Missed-chant card on **first** open after force-stop | screenshot | | |
-| R9 | Phone call mid-gap → silent until hang-up, then resumes | `adb emu gsm call/cancel`, focus log | | |
-| R10 | Built-in sound plays on a fresh install with no files picked | log | | |
-| R11 | Backup export → wipe → import restores schedules + notes | screenshot | | |
-| R12 | Widget play/stop and QS tile toggle | screenshot/log | | |
-| R13 | Support: Ko-fi opens browser; feedback opens email with exact subject; no-email fallback copies | screenshots | | |
-| R14 | Update card appears for an older `versionName` build | screenshot | | |
-| R15 | Install-over: previous Latest release → this release keeps schedules, history, notes, settings | screenshot before/after | | |
-| R16 | Motion: Calm/Minimal/Off + system "remove animations" forces Off; ambient stops in background and at Off | `MotionOffTest` result + log | | |
+| R1 | Alarm fires 2 min ahead, locked screen | `dumpsys alarm` shows `Alarm clock:` + `window=0`; FGS starts; audio `usage=USAGE_ALARM` | - [ ] | - [ ] |
+| R2 | Ringing page full-screen on lock | screenshot | - [ ] | - [ ] |
+| R3 | Timer pill: playlist elapsed / auto-stop countdown / routine "Step x of n" | three screenshots | - [ ] | - [ ] |
+| R4 | "Session complete" → note saved → auto-closes after 60 s | screenshot + note visible in Stats history | - [ ] | - [ ] |
+| R5 | Snooze arms +10 min | `dumpsys alarm` + `snooze_<id>` pref | - [ ] | - [ ] |
+| R6 | Routine with silence-first step completes, no "missed chant" | log | - [ ] | - [ ] |
+| R7 | Per-schedule volume 25% vs 100% | `dumpsys audio` stream volume / player volume log | - [ ] | - [ ] |
+| R8 | Missed-chant card on **first** open after force-stop | screenshot | - [ ] | - [ ] |
+| R9 | Phone call mid-gap → silent until hang-up, then resumes | `adb emu gsm call/cancel`, focus log | - [ ] | - [ ] |
+| R10 | Built-in sound plays on a fresh install with no files picked | log | - [ ] | - [ ] |
+| R11 | Backup export → wipe → import restores schedules + notes | screenshot | - [ ] | - [ ] |
+| R12 | Widget play/stop and QS tile toggle | screenshot/log | - [ ] | - [ ] |
+| R13 | Support: Ko-fi opens browser; feedback opens email with exact subject; no-email fallback copies | screenshots | - [ ] | - [ ] |
+| R14 | Update card appears for an older `versionName` build | screenshot | - [ ] | - [ ] |
+| R15 | Install-over: previous Latest release → this release keeps schedules, history, notes, settings | screenshot before/after | - [ ] | - [ ] |
+| R16 | Motion: Calm/Minimal/Off + system "remove animations" forces Off; ambient stops in background and at Off | `MotionOffTest` result + log | - [ ] | - [ ] |
 
 ## D. Screenshots
 
