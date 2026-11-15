@@ -1,0 +1,10 @@
+Send button -> Gmail launched via ACTION_SENDTO mailto: intent:
+  ACTIVITY com.google.android.gm/.welcome.WelcomeTourActivity pid=16425 (started by the feedback Send handoff)
+
+Before the manifest <queries> fix, resolveActivity returned null on API 30+
+and the copy fallback always showed. After the fix, the system resolves:
+  cmd package resolve-activity -a SENDTO -d mailto: -> com.google.android.gm/.ComposeActivityGmailExternal
+
+Compose window with prefilled To/subject requires a Google account; not
+signed in on the emulator. To/subject/body construction is covered by
+FeedbackComposerTest (constant subject, topics, diagnostics, no URIs).

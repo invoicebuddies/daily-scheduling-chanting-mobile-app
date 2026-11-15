@@ -1,0 +1,5 @@
+call placed during 60s gap:
+11-15 03:04:05:174 focus owner: com.chantingscheduler.app code: -2 event: handleLoss (LOSS_TRANSIENT)
+gap ended mid-call: no audio started; app focus state loss: LOSS_TRANSIENT
+hang-up:
+11-15 03:05:43:536 focus owner: com.chantingscheduler.app code: 1 event: handleGain -> track 2 resumes

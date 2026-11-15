@@ -1,0 +1,5 @@
+QS tile (ChantTileService) toggles sessions:
+  click-tile #1 -> PlaybackService running
+  (session ended naturally: single bell, ~10s)
+  click-tile #2 -> new session started
+  click-tile #3 -> stopped again (count 0)
