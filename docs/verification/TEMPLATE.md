@@ -25,11 +25,11 @@
 
 Budget: **Janky frames < 5% latest API, < 10% lowest API.**
 
-| Run | Total frames | Janky frames % | 90th percentile (ms) | Result |
-|---|---|---|---|---|
-| List scroll 10 s, Calm, latest API | | | | ✅ / ❌ |
-| List scroll 10 s, Calm, lowest API | | | | ✅ / ❌ |
-| Ringing page breathing 10 s, Calm | | | | ✅ / ❌ |
+| Run | Total frames | Janky frames | Janky frames % | 90th percentile (ms) | Result |
+|---|---|---|---|---|---|
+| List scroll 10 s, Calm, latest API | | | | | ✅ / ❌ |
+| List scroll 10 s, Calm, lowest API | | | | | ✅ / ❌ |
+| Ringing page breathing 10 s, Calm | | | | | ✅ / ❌ |
 
 **Evidence:** `scripts/verify-release.sh` output for each run (paste the
 parsed lines).
