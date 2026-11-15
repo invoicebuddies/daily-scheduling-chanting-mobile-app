@@ -12,6 +12,16 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
+    <!-- The feedback form checks whether an email app can take its mailto
+         handoff before showing the copy fallback; without this, package
+         visibility (API 30+) makes resolveActivity always return null. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
+        </intent>
+    </queries>
+
     <application
         android:name=".ChantingApp"
         android:allowBackup="true"
